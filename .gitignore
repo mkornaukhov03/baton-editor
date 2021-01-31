@@ -30,3 +30,13 @@
 *.exe
 *.out
 *.app
+
+# CLion specific
+.idea/
+cmake-build-debug/
+
+# Build files
+build/*
+
+# Doesn't ignore keep files
+!.keep
