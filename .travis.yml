@@ -16,7 +16,10 @@ install:
     - pip install cpplint
 script:
     - cpplint --recursive .
-    - cd build 
-    - cmake ..
-    - make
+    - cd build/release 
+    - cmake -DCMAKE_BUILD_TYPE=Release ../..
+    - make -j4
+    - cd ../debug
+    - cmake -DCMAKE_BUILD_TYPE=Debug ../..
+    - make -j4
 

@@ -36,7 +36,8 @@
 cmake-build-debug/
 
 # Build files
-build/*
+build/release/*
+build/debug/*
 
 # Doesn't ignore keep files
 !.keep
