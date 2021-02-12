@@ -11,6 +11,7 @@
 
 class LSPHandler : public QObject {
   Q_OBJECT
+
  public:
   LSPHandler(LSPHandler &&) = delete;
   LSPHandler(LSPHandler &) = delete;

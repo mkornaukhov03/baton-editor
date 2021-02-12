@@ -16,7 +16,7 @@ install:
     - sudo apt-get install -qq cmake qt5-default
     - pip install cpplint
 script:
-    - cpplint --recursive --root="DnD/include" --filter=-legal/copyright,-readability/todo,-whitespace/line_length,-runtime/threadsafe_fn,-build/header_guard,-build/include_subdir,-whitespace/comments,-whitespace/indent,-readability/alt_tokens . --exclude=third_party/*
+    - cpplint --recursive . --filter=-legal/copyright,-readability/todo,-whitespace/line_length,-runtime/threadsafe_fn,-build/header_guard,-build/include_subdir,-whitespace/comments,-whitespace/indent,-readability/alt_tokens  --exclude=third_party/hlohmann/*
     - cd build/release 
     - cmake -DCMAKE_BUILD_TYPE=Release ../..
     - make -j4
