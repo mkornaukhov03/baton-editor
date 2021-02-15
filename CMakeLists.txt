@@ -19,3 +19,5 @@ add_executable(baton ${HEADERS} ${SOURCES})
 target_link_libraries(baton
         Qt5::Core
         Qt5::Widgets)
+target_include_directories(baton PUBLIC ./include/autocomplete)
+target_include_directories(baton PUBLIC ./third_party)
