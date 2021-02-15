@@ -2,7 +2,6 @@
 #define BATON_INTERFACE_H
 
 #include <QObject>
-//#include <QStringList>
 #include <QTimer>
 #include <string>
 #include <vector>
@@ -22,14 +21,15 @@ class LSPHandler : public QObject {
   ~LSPHandler() final;
 
  signals:
-  void completion(std::vector<string>);
-  void diagnostic(std::vector<string>);
+  void completion(const std::vector<std::string> &);
+  void diagnostic(cosnt std::vector<std::string> &);
 
  public slots:
-  void OnNotify(QString method, QJsonObject param);
-  void OnResponse(QJsonObject id, QJsonObject response);
-  void OnRequest(QString method, QJsonObject param, QJsonObject id);
-  void OnError(QJsonObject id, QJsonObject error);
+  void OnNotify(const QString &method, const QJsonObject &param);
+  void OnResponse(const QJsonObject &id, const QJsonObject &response);
+  void OnRequest(const QString &method, , const QJsonObject &param,
+                 const QJsonObject &id);
+  void OnError(const QJsonObject &id, const QJsonObject &error);
   void OnServerError(QProcess::ProcessError error);
   void OnServerFinished(int exitCode, QProcess::ExitStatus status);
 
@@ -37,10 +37,6 @@ class LSPHandler : public QObject {
   void requestDiagonistics();
 
  private:
-  // LSPClient * lsp_;
-  // QPlainTextEdit * code_;
-  // QTimer timer_completion_, timer_diagnonstic;
-
   void set_connections();
 };
 
