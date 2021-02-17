@@ -33,6 +33,7 @@ using string = std::string_view;
 template <class T>
 using optional = std::optional<T>;
 using uinteger = uint32_t;
+using DocumentUri = string;
 
 // Implementation according to https://tools.ietf.org/html/rfc3986#section-2
 class URIForFile {
@@ -100,7 +101,6 @@ class URIForFile {
   bool is_absolute_{};
   std::string file_name_;
 };
-using DocumentUri = string;
 
 }  // namespace lsp
 
@@ -108,7 +108,7 @@ namespace nlohmann {
 template <typename T>
 struct adl_serializer<lsp::optional<T>> {
   static void to_json(json& j, const lsp::optional<T>& opt) {
-    if (opt.has()) {
+    if (opt) {
       j = opt.value();
     } else {
       j = nullptr;
