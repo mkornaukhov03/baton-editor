@@ -31,14 +31,12 @@ enum class ErrorCode {
   RequestCancelled = -32800,
   ContentModified = -32801,
 };
-enum class TraceLevel
-{
+enum class TraceLevel {
   Off = 0,
   Messages = 1,
   Verbose = 2,
 };
-enum class TextDocumentSyncKind
-{
+enum class TextDocumentSyncKind {
   /// Documents should not be synced at all.
   None = 0,
 
@@ -49,8 +47,7 @@ enum class TextDocumentSyncKind
   /// only incremental updates to the document are send.
   Incremental = 2,
 };
-enum class CompletionItemKind
-{
+enum class CompletionItemKind {
   Missing = 0,
   Text = 1,
   Method = 2,
@@ -78,8 +75,7 @@ enum class CompletionItemKind
   Operator = 24,
   TypeParameter = 25,
 };
-enum class SymbolKind
-{
+enum class SymbolKind {
   File = 1,
   Module = 2,
   Namespace = 3,
@@ -107,8 +103,7 @@ enum class SymbolKind
   Operator = 25,
   TypeParameter = 26
 };
-enum class OffsetEncoding
-{
+enum class OffsetEncoding {
   // Any string is legal on the wire. Unrecognized encodings parse as this.
   UnsupportedEncoding,
   // Length counts code units of UTF-16 encoded text. (Standard LSP behavior).
@@ -118,25 +113,17 @@ enum class OffsetEncoding
   // Length counts codepoints in unicode text. (Clangd extension).
   UTF32,
 };
-enum class MarkupKind
-{
+enum class MarkupKind {
   PlainText,
   Markdown,
 };
-enum class ResourceOperationKind
-{
-  Create,
-  Rename,
-  Delete
-};
-enum class FailureHandlingKind
-{
+enum class ResourceOperationKind { Create, Rename, Delete };
+enum class FailureHandlingKind {
   Abort,
   Transactional,
   Undo,
   TextOnlyTransactional
 };
-
 
 template <class T>
 using optional = std::optional<T>;
@@ -146,7 +133,7 @@ using TextType = std::string_view;
 class URIForFile {
   // Implementation according to https://tools.ietf.org/html/rfc3986#section-2
  public:
-  URIForFile(const std::string& filename, bool is_absolute)
+  URIForFile(const std::string &filename, bool is_absolute)
       : is_absolute_(is_absolute), file_name_(Encode(filename)) {
     if (is_absolute_) {
       file_name_ = "file://" + file_name_;
@@ -158,14 +145,14 @@ class URIForFile {
 
   [[nodiscard]] bool is_absolute() const { return is_absolute_; }
 
-  friend bool operator==(const URIForFile& lhs, const URIForFile& rhs) {
+  friend bool operator==(const URIForFile &lhs, const URIForFile &rhs) {
     return lhs.file_name_ == rhs.file_name_;
   }
-  friend bool operator!=(const URIForFile& lhs, const URIForFile& rhs) {
+  friend bool operator!=(const URIForFile &lhs, const URIForFile &rhs) {
     return lhs.file_name_ != rhs.file_name_;
   }
 
-  void set_filename(const std::string& filename, bool is_absolute) {
+  void set_filename(const std::string &filename, bool is_absolute) {
     is_absolute_ = is_absolute;
     file_name_ = Encode(filename);
     if (is_absolute_) {
@@ -175,7 +162,7 @@ class URIForFile {
     }
   }
 
-  void set_from_encoded(const std::string& filename) {
+  void set_from_encoded(const std::string &filename) {
     is_absolute_ = filename.find("file:///") != std::string::npos;
     file_name_ = filename;
   }
@@ -222,36 +209,33 @@ struct LSPError {
   ErrorCode error_code_{};
 };
 
-
-
 struct TextDocumentIdentifier {
   DocumentUri uri;
 };
 
 struct VersionedTextDocumentIdentifier : TextDocumentIdentifier {
-  uinteger version {};
+  uinteger version{};
 };
 
 struct Position {
   // zero-based
-  uinteger line {};
-  uinteger character {};
+  uinteger line{};
+  uinteger character{};
 
-  friend bool operator==(const Position &lhs, const Position &rhs)
-  {
-    return std::tie(lhs.line, lhs.character) == std::tie(rhs.line, rhs.character);
+  friend bool operator==(const Position &lhs, const Position &rhs) {
+    return std::tie(lhs.line, lhs.character) ==
+           std::tie(rhs.line, rhs.character);
   }
-  friend bool operator!=(const Position &lhs, const Position &rhs)
-  {
+  friend bool operator!=(const Position &lhs, const Position &rhs) {
     return !(lhs == rhs);
   }
-  friend bool operator<(const Position &lhs, const Position &rhs)
-  {
-    return std::tie(lhs.line, lhs.character) < std::tie(rhs.line, rhs.character);
+  friend bool operator<(const Position &lhs, const Position &rhs) {
+    return std::tie(lhs.line, lhs.character) <
+           std::tie(rhs.line, rhs.character);
   }
-  friend bool operator<=(const Position &lhs, const Position &rhs)
-  {
-    return std::tie(lhs.line, lhs.character) <= std::tie(rhs.line, rhs.character);
+  friend bool operator<=(const Position &lhs, const Position &rhs) {
+    return std::tie(lhs.line, lhs.character) <=
+           std::tie(rhs.line, rhs.character);
   }
 };
 
@@ -260,46 +244,36 @@ struct Range {
   Position start;
   Position end;
 
-  friend bool operator==(const Range &lhs, const Range &rhs)
-  {
+  friend bool operator==(const Range &lhs, const Range &rhs) {
     return std::tie(lhs.start, lhs.end) == std::tie(rhs.start, rhs.end);
   }
-  friend bool operator!=(const Range &lhs, const Range &rhs)
-  {
+  friend bool operator!=(const Range &lhs, const Range &rhs) {
     return !(lhs == rhs);
   }
-  friend bool operator<(const Range &lhs, const Range &rhs)
-  {
+  friend bool operator<(const Range &lhs, const Range &rhs) {
     return std::tie(lhs.start, lhs.end) < std::tie(rhs.start, rhs.end);
   }
-  [[nodiscard]] bool contains(Position Pos) const
-  {
+  [[nodiscard]] bool contains(Position Pos) const {
     return start <= Pos && Pos < end;
   }
-  [[nodiscard]] bool contains(Range Rng) const
-  {
+  [[nodiscard]] bool contains(Range Rng) const {
     return start <= Rng.start && Rng.end <= end;
   }
-  
 };
 
 struct Location {
   DocumentUri uri;
   Range range;
 
-  friend bool operator==(const Location &LHS, const Location &RHS)
-  {
+  friend bool operator==(const Location &LHS, const Location &RHS) {
     return LHS.uri == RHS.uri && LHS.range == RHS.range;
   }
-  friend bool operator!=(const Location &LHS, const Location &RHS)
-  {
+  friend bool operator!=(const Location &LHS, const Location &RHS) {
     return !(LHS == RHS);
   }
-  friend bool operator<(const Location &LHS, const Location &RHS)
-  {
+  friend bool operator<(const Location &LHS, const Location &RHS) {
     return std::tie(LHS.uri, LHS.range) < std::tie(RHS.uri, RHS.range);
   }
-
 };
 
 }  // namespace lsp
@@ -307,14 +281,14 @@ struct Location {
 namespace nlohmann {
 template <typename T>
 struct adl_serializer<lsp::optional<T>> {
-  static void to_json(json& j, const lsp::optional<T>& opt) {
+  static void to_json(json &j, const lsp::optional<T> &opt) {
     if (opt) {
       j = opt.value();
     } else {
       j = nullptr;
     }
   }
-  static void from_json(const json& j, lsp::optional<T>& opt) {
+  static void from_json(const json &j, lsp::optional<T> &opt) {
     if (j.is_null()) {
       opt = lsp::optional<T>();
     } else {
@@ -324,8 +298,8 @@ struct adl_serializer<lsp::optional<T>> {
 };
 template <>
 struct adl_serializer<lsp::URIForFile> {
-  static void to_json(json& j, const lsp::URIForFile& uri) { j = uri.str(); }
-  static void from_json(const json& j, lsp::URIForFile& uri) {
+  static void to_json(json &j, const lsp::URIForFile &uri) { j = uri.str(); }
+  static void from_json(const json &j, lsp::URIForFile &uri) {
     uri.set_from_encoded(j.get<std::string>());
   }
 };
