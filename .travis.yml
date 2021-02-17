@@ -16,7 +16,10 @@ install:
     - sudo apt-get install -qq cmake qt5-default
     - pip install cpplint
 script:
-    - cpplint --filter=-legal/copyright,-readability/todo,-whitespace/line_length,-runtime/threadsafe_fn,-build/header_guard,-build/include_subdir,-whitespace/comments,-whitespace/indent,-readability/alt_tokens --recursive --exclude=third_party/nlohmann/* .
+    - cpplint --filter=-legal/copyright,-readability/todo,-whitespace/line_length, \
+     -runtime/threadsafe_fn,-build/header_guard,-build/include_subdir,-whitespace/comments,\
+     -whitespace/indent,-readability/alt_tokens --recursive
+     --exclude=third_party/nlohmann/* --exclude=include/autocomplete/json_serializers.h .
     - cd build/release 
     - cmake -DCMAKE_BUILD_TYPE=Release ../..
     - make -j4
