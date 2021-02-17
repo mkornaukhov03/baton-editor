@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <optional>
 #include <string>
+#include <string_view>
 
 #include "nlohmann/json.hpp"
 
@@ -28,7 +29,7 @@ enum class ErrorCode {
   RequestCancelled = -32800,
   ContentModified = -32801,
 };
-using string = std::string;
+using string = std::string_view;
 
 template <class T>
 using optional = std::optional<T>;
@@ -38,29 +39,29 @@ using uinteger = uint32_t;
 // Implementation according to https://tools.ietf.org/html/rfc3986#section-2
 class FileUri {
  public:
-  FileUri(bool is_relative, const std::string& filename)
-      : is_relative_(is_relative), file_name_(Encode(filename)) {
-    if (is_relative) {
+  FileUri(bool is_absolute, const std::string& filename)
+      : is_absolute_(is_absolute), file_name_(Encode(filename)) {
+    if (is_absolute_) {
       file_name_ = "file://" + file_name_;
     } else {
       file_name_ = "file:///" + file_name_;
     }
   }
-  [[nodiscard]] const string& str() const { return file_name_; }
+  [[nodiscard]] string str() const { return file_name_; }
 
   [[nodiscard]] bool absolute() const { return is_absolute_; }
 
-  friend bool operator==(const FileUri& oth) {
-    return file_name_ == oth.file_name_;
+  friend bool operator==(const FileUri& lhs, const FileUri& rhs) {
+    return lhs.file_name_ == rhs.file_name_;
   }
-  friend bool operator!=(const FileUri& oth) {
-    return file_name_ != oth.file_name_;
+  friend bool operator!=(const FileUri& lhs, const FileUri& rhs) {
+    return lhs.file_name_ != rhs.file_name_;
   }
 
-  void set_filename(bool is_relative, const std::string& filename) {
-    is_relative_ = is_relative;
+  void set_filename(bool is_absolute, const std::string& filename) {
+    is_absolute_ = is_absolute;
     file_name_ = Encode(filename);
-    if (is_relative) {
+    if (is_absolute_) {
       file_name_ = "file://" + file_name_;
     } else {
       file_name_ = "file:///" + file_name_;
@@ -68,11 +69,11 @@ class FileUri {
   }
 
  private:
-  static string Encode(const std::string& str) {
+  static std::string Encode(string str) {
     // must not be invoked at same filename twice or more times
     // because % symbol will encoded as %25 etc.
 
-    static auto uint8_t to_hex = [](uint8_t ch) {
+    static auto to_hex = [](uint8_t ch) -> uint8_t {
       if (ch > 9) {
         return ch + 65;  // 65 - ASCII code for 'A'
       }
@@ -80,8 +81,8 @@ class FileUri {
     };
     // in https://github.com/cpeditor is "._-*/:"
     static std::string unreserved_special = "._~-/";
-    string response;
-    for (uint8_t& ch : str) {
+    std::string response;
+    for (uint8_t ch : str) {
       if (ch == '\\') {  // for Windows
         ch = '/';
       }
@@ -91,8 +92,8 @@ class FileUri {
         response.push_back(ch);
       } else {
         response.push_back('%');
-        response.push_back(to_hex(ch >> 4));               // first 4 bits
-        response.push_back(to_hex(ch & ((1 << 4) - 1)))[]  // last 4 bits
+        response.push_back(to_hex(ch >> 4));              // first 4 bits
+        response.push_back(to_hex(ch & ((1 << 4) - 1)));  // last 4 bits
       }
     }
 
@@ -102,7 +103,6 @@ class FileUri {
   std::string file_name_;
 };
 using DocumentUri = string;
-// usage like DocumentUri cur_uri = FileUri.str()
 
 }  // namespace lsp
 
