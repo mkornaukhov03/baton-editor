@@ -12,8 +12,8 @@
 
 namespace lsp {
 // Implementation of basic Language Server Protocol types
-using json = nlohmann::json;
 
+using json = nlohmann::json;
 enum class ErrorCode {
   // Defined by JSON RPC.
   ParseError = -32700,
@@ -30,16 +30,14 @@ enum class ErrorCode {
   ContentModified = -32801,
 };
 using string = std::string_view;
-
 template <class T>
 using optional = std::optional<T>;
-
 using uinteger = uint32_t;
 
 // Implementation according to https://tools.ietf.org/html/rfc3986#section-2
-class FileUri {
+class URIForFile {
  public:
-  FileUri(bool is_absolute, const std::string& filename)
+  URIForFile(bool is_absolute, const std::string& filename)
       : is_absolute_(is_absolute), file_name_(Encode(filename)) {
     if (is_absolute_) {
       file_name_ = "file://" + file_name_;
@@ -51,10 +49,10 @@ class FileUri {
 
   [[nodiscard]] bool absolute() const { return is_absolute_; }
 
-  friend bool operator==(const FileUri& lhs, const FileUri& rhs) {
+  friend bool operator==(const URIForFile& lhs, const URIForFile& rhs) {
     return lhs.file_name_ == rhs.file_name_;
   }
-  friend bool operator!=(const FileUri& lhs, const FileUri& rhs) {
+  friend bool operator!=(const URIForFile& lhs, const URIForFile& rhs) {
     return lhs.file_name_ != rhs.file_name_;
   }
 
@@ -105,5 +103,25 @@ class FileUri {
 using DocumentUri = string;
 
 }  // namespace lsp
+
+namespace nlohmann {
+template <typename T>
+struct adl_serializer<lsp::optional<T>> {
+  static void to_json(json& j, const lsp::optional<T>& opt) {
+    if (opt.has()) {
+      j = opt.value();
+    } else {
+      j = nullptr;
+    }
+  }
+  static void from_json(const json& j, lsp::optional<T>& opt) {
+    if (j.is_null()) {
+      opt = lsp::optional<T>();
+    } else {
+      opt = lsp::optional<T>(j.get<T>());
+    }
+  }
+};
+}  // namespace nlohmann
 
 #endif  // BATON_LSP_BASIC_H
