@@ -124,6 +124,18 @@ enum class FailureHandlingKind {
   Undo,
   TextOnlyTransactional
 };
+enum class MessageType {
+  Error = 1,
+  Warning = 2,
+  Info = 3,
+  Log = 4,
+};
+enum class FileChangeType { Created = 1, Changed = 2, Deleted = 3 };
+enum class FoldingRangeKind {
+  Comment,
+  Imports,
+  Region,
+};
 
 template <class T>
 using optional = std::optional<T>;
@@ -276,8 +288,191 @@ struct Location {
   }
 };
 
+struct TextEdit {
+  Range range;
+  std::string newText;
+};
+
+struct TextDocumentItem {
+  DocumentUri uri;
+  std::string_view languageId;
+  uinteger version{};
+  std::string_view text;
+};
+struct ClientCapabilities {
+  /// The supported set of SymbolKinds for workspace/symbol.
+  /// workspace.symbol.symbolKind.valueSet
+  std::vector<SymbolKind> WorkspaceSymbolKinds;
+  /// Whether the client accepts diagnostics with codeActions attached inline.
+  /// textDocument.publishDiagnostics.codeActionsInline.
+  bool DiagnosticFixes = true;
+
+  /// Whether the client accepts diagnostics with related locations.
+  /// textDocument.publishDiagnostics.relatedInformation.
+  bool DiagnosticRelatedInformation = true;
+
+  /// Whether the client accepts diagnostics with category attached to it
+  /// using the "category" extension.
+  /// textDocument.publishDiagnostics.categorySupport
+  bool DiagnosticCategory = true;
+
+  /// Client supports snippets as insert text.
+  /// textDocument.completion.completionItem.snippetSupport
+  bool CompletionSnippets = true;
+
+  bool CompletionDeprecated = true;
+
+  /// Client supports completions with additionalTextEdit near the cursor.
+  /// This is a clangd extension. (LSP says this is for unrelated text only).
+  /// textDocument.completion.editsNearCursor
+  bool CompletionFixes = true;
+
+  /// Client supports hierarchical document symbols.
+  bool HierarchicalDocumentSymbol = true;
+
+  /// Client supports processing label offsets instead of a simple label string.
+  bool OffsetsInSignatureHelp = true;
+
+  /// The supported set of CompletionItemKinds for textDocument/completion.
+  /// textDocument.completion.completionItemKind.valueSet
+  std::vector<CompletionItemKind> CompletionItemKinds;
+
+  /// Client supports CodeAction return value for textDocument/codeAction.
+  /// textDocument.codeAction.codeActionLiteralSupport.
+  bool CodeActionStructure = true;
+  /// Supported encodings for LSP character offsets. (clangd extension).
+  std::vector<OffsetEncoding> offsetEncoding = {OffsetEncoding::UTF8};
+  /// The content format that should be used for Hover requests.
+  std::vector<MarkupKind> HoverContentFormat = {MarkupKind::PlainText};
+
+  bool ApplyEdit = false;
+  bool DocumentChanges = false;
+  ClientCapabilities() {
+    for (int i = 1; i <= 26; ++i) {
+      WorkspaceSymbolKinds.push_back((SymbolKind)i);
+    }
+    for (int i = 0; i <= 25; ++i) {
+      CompletionItemKinds.push_back((CompletionItemKind)i);
+    }
+  }
+};
+struct ClangdCompileCommand {
+  TextType workingDirectory;
+  std::vector<TextType> compilationCommand;
+};
+struct ConfigurationSettings {
+  std::map<std::string, ClangdCompileCommand>
+      compilationDatabaseChanges;  // maybe hash map
+};
+struct InitializationOptions {
+  // What we can change throught the didChangeConfiguration request, we can
+  // also set through the initialize request (initializationOptions field).
+  ConfigurationSettings configSettings;
+
+  optional<TextType> compilationDatabasePath;
+  // Additional flags to be included in the "fallback command" used when
+  // the compilation database doesn't describe an opened file.
+  // The command used will be approximately `clang $FILE $fallbackFlags`.
+  std::vector<TextType> fallbackFlags;
+
+  /// Clients supports show file status for textDocument/clangd.fileStatus.
+  bool clangdFileStatus = false;
+};
+struct InitializeParams {
+  unsigned processId = 0;
+  ClientCapabilities capabilities;
+  optional<DocumentUri> rootUri;
+  optional<TextType> rootPath;
+  InitializationOptions initializationOptions;
+};
+struct ShowMessageParams {
+  /// The message type.
+  MessageType type = MessageType::Info;
+  /// The actual message.
+  std::string message;
+};
+struct Registration {
+  TextType id;
+  TextType method;
+};
+struct RegistrationParams {
+  std::vector<Registration> registrations;
+};
+struct UnregistrationParams {
+  std::vector<Registration> unregisterations;
+};
+struct DidOpenTextDocumentParams {
+  /// The document that was opened.
+  TextDocumentItem textDocument;
+};
+struct DidCloseTextDocumentParams {
+  /// The document that was closed.
+  TextDocumentIdentifier textDocument;
+};
+struct TextDocumentContentChangeEvent {
+  /// The range of the document that changed.
+  optional<Range> range;
+
+  /// The length of the range that got replaced.
+  optional<int> rangeLength;
+  /// The new text of the range/document.
+  std::string text;
+};
+struct DidChangeTextDocumentParams {
+  TextDocumentIdentifier textDocument;
+  std::vector<TextDocumentContentChangeEvent> contentChanges;
+  optional<bool> wantDiagnostics;
+};
+struct FileEvent {
+  URIForFile uri;
+  FileChangeType type = FileChangeType::Created;
+};
+struct DidChangeWatchedFilesParams {
+  std::vector<FileEvent> changes;
+};
+struct DidChangeConfigurationParams {
+  ConfigurationSettings settings;
+};
+struct DocumentRangeFormattingParams {
+  TextDocumentIdentifier textDocument;
+  Range range;
+};
+struct DocumentOnTypeFormattingParams {
+  TextDocumentIdentifier textDocument;
+  Position position;
+  TextType ch;
+};
+struct FoldingRangeParams {
+  TextDocumentIdentifier textDocument;
+};
+struct FoldingRange {
+  // zero-based
+  uinteger startLine;
+  uinteger startCharacter;
+  uinteger endLine;
+  uinteger endCharacter;
+
+  FoldingRangeKind kind;
+};
+struct SelectionRangeParams {
+  TextDocumentIdentifier textDocument;
+  std::vector<Position> positions;
+};
+struct SelectionRange {
+  Range range;
+  std::unique_ptr<SelectionRange> parent;
+};
+struct DocumentFormattingParams {
+  TextDocumentIdentifier textDocument;
+};
+struct DocumentSymbolParams {
+  TextDocumentIdentifier textDocument;
+};
+struct DiagnosticRelatedInformation {
+  Location location;
+  std::string message;
+};
+
 }  // namespace lsp
-
-
 
 #endif  // BATON_LSP_BASIC_H
