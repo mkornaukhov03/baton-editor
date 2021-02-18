@@ -14,7 +14,7 @@ file(GLOB_RECURSE SOURCES "src/*.cc" )
 find_package(Qt5Core CONFIG REQUIRED)
 find_package(Qt5Widgets CONFIG REQUIRED)
 
-add_executable(baton "include/interface/*" ${SOURCES})
+add_executable(baton include/interface/directory_tree.h include/interface/mainwindow.h src/directory_tree.cc src/main.cc src/mainwindow.cc src/mainwindow.ui src/directory_tree.ui)
 
 target_link_libraries(baton
         Qt5::Core

@@ -14,8 +14,6 @@ Directory_tree::Directory_tree(QWidget *parent)
   tree.setAnimated(false);
   tree.setIndentation(20);
   tree.setSortingEnabled(true);
-  const QSize availableSize = tree.screen()->availableGeometry().size();
-  tree.resize(availableSize);
   QScroller::grabGesture(&tree, QScroller::TouchGesture);
   ui->treeView->setModel(model);
 }
