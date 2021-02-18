@@ -1,6 +1,6 @@
 language: cpp
 
-dist: bionic
+dist: focal
 
 cache:
     - pip
