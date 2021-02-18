@@ -20,4 +20,17 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
 
-int main() { return 0; }
+#include <QApplication>
+#include <QDesktopWidget>
+#include <QStyle>
+
+#include "../include/editor/editor.h"
+
+int main(int argv, char **args) {
+  QApplication app(argv, args);
+  Editor EditWindow;
+  EditWindow.resize(750, 750);
+  EditWindow.setWindowTitle(QObject::tr("Code Editor"));
+  EditWindow.show();
+  return app.exec();
+}
