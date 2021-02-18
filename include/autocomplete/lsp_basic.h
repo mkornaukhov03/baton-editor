@@ -136,6 +136,18 @@ enum class FoldingRangeKind {
   Imports,
   Region,
 };
+enum class CompletionTriggerKind {
+  Invoked = 1,
+  TriggerCharacter = 2,
+  TriggerTriggerForIncompleteCompletions = 3
+};
+enum class InsertTextFormat {
+  Missing = 0,
+  PlainText = 1,
+  Snippet = 2,
+};
+enum class DocumentHighlightKind { Text = 1, Read = 2, Write = 3 };
+enum class TypeHierarchyDirection { Children = 0, Parents = 1, Both = 2 };
 
 template <class T>
 using optional = std::optional<T>;
@@ -414,7 +426,7 @@ struct TextDocumentContentChangeEvent {
   optional<Range> range;
 
   /// The length of the range that got replaced.
-  optional<int> rangeLength;
+  optional<uinteger> rangeLength;
   /// The new text of the range/document.
   std::string text;
 };
@@ -472,7 +484,188 @@ struct DiagnosticRelatedInformation {
   Location location;
   std::string message;
 };
+struct CodeAction;
+struct Diagnostic {
+  Range range;
+  uinteger severity = 0;
 
+  std::string code;
+
+  std::string source;
+  std::string message;
+  optional<std::vector<DiagnosticRelatedInformation>> relatedInformation;
+
+  optional<std::string> category;
+
+  // clagd extension
+  optional<std::vector<CodeAction>> codeActions;
+};
+struct PublishDiagnosticsParams {
+  std::string uri;
+  std::vector<Diagnostic> diagnostics;
+};
+struct CodeActionContext {
+  std::vector<Diagnostic> diagnostics;
+};
+struct CodeActionParams {
+  TextDocumentIdentifier textDocument;
+
+  Range range;
+
+  CodeActionContext context;
+};
+struct WorkspaceEdit {
+  optional<std::map<std::string, std::vector<TextEdit>>> changes;
+};
+struct TweakArgs {
+  std::string file;
+  Range selection;
+  std::string tweakID;
+};
+struct ExecuteCommandParams {
+  std::string command;
+  optional<WorkspaceEdit> workspaceEdit;
+  optional<TweakArgs> tweakArgs;
+};
+struct LspCommand
+    : public ExecuteCommandParams  // Command according to protocol
+{
+  std::string title;
+};
+struct CodeAction {
+  // A short, human-readable, title for this code action.
+  std::string title;
+
+  // The kind of the code action.
+  // Used to filter code actions.
+  optional<std::string> kind;
+  // The diagnostics that this code action resolves.
+  optional<std::vector<Diagnostic>> diagnostics;
+
+  // The workspace edit this code action performs.
+  optional<WorkspaceEdit> edit;
+
+  // A command this code action executes. If a code action provides an edit
+  // and a command, first the edit is executed and then the command.
+  optional<LspCommand> command;
+};
+struct SymbolInformation {
+  std::string name;
+  SymbolKind kind = SymbolKind::Class;
+  Location location;
+  std::string containerName;
+};
+struct SymbolDetails {
+  // clang tools feature
+  TextType name;
+  TextType containerName;
+  TextType USR;
+  optional<TextType> ID;
+};
+struct WorkspaceSymbolParams {
+  TextType query;
+};
+struct ApplyWorkspaceEditParams {
+  WorkspaceEdit edit;
+};
+struct TextDocumentPositionParams {
+  TextDocumentIdentifier textDocument;
+  Position position;
+};
+struct CompletionContext {
+  CompletionTriggerKind triggerKind = CompletionTriggerKind::Invoked;
+  optional<TextType> triggerCharacter;
+};
+struct CompletionParams : TextDocumentPositionParams {
+  optional<CompletionContext> context;
+};
+struct MarkupContent {
+  MarkupKind kind = MarkupKind::PlainText;
+  std::string value;
+};
+struct Hover {
+  MarkupContent contents;
+  optional<Range> range;
+};
+struct CompletionItem {
+  // what to paste
+  std::string label;
+
+  CompletionItemKind kind = CompletionItemKind::Missing;
+
+  std::string detail;
+
+  std::string documentation;
+
+  // A string that should be used when comparing this item with other items.
+  // When `falsy` the label is used.
+  std::string sortText;
+
+  // A string that should be used when filtering a set of completion items.
+  std::string filterText;
+
+  // A string that should be inserted to a document when selecting this
+  std::string insertText;
+
+  // The format of the insert text. The format applies to both the `insertText`
+  // property and the `newText` property of a provided `textEdit`.
+  InsertTextFormat insertTextFormat = InsertTextFormat::Missing;
+
+  // An edit which is applied to a document when selecting this completion.
+  // When an edit is provided `insertText` is ignored.
+  TextEdit textEdit;
+
+  std::vector<TextEdit> additionalTextEdits;
+
+  // Indicates if this item is deprecated.
+  bool deprecated = false;
+};
+struct CompletionList {
+  bool isIncomplete = false;
+  std::vector<CompletionItem> items;
+};
+struct ParameterInformation {
+  std::string labelString;
+  optional<std::pair<unsigned, unsigned>> labelOffsets;  // clang specific
+  std::string documentation;
+};
+struct SignatureInformation {
+  std::string label;
+  std::string documentation;
+  std::vector<ParameterInformation> parameters;
+};
+struct SignatureHelp {
+  std::vector<SignatureInformation> signatures;
+  uinteger activeSignature = 0;
+  uinteger activeParameter = 0;
+  Position argListStart;  // clangd specific
+};
+struct RenameParams {
+  TextDocumentIdentifier textDocument;
+  Position position;
+  std::string newName;
+};
+struct TypeHierarchyParams : public TextDocumentPositionParams {
+  uinteger resolve = 0;
+  TypeHierarchyDirection direction = TypeHierarchyDirection::Parents;
+};
+struct TypeHierarchyItem {
+  std::string name;
+
+  optional<std::string> detail;
+  SymbolKind kind;
+  bool deprecated;
+  DocumentUri uri;
+  Range range;
+  Range selectionRange;
+  optional<std::vector<TypeHierarchyItem>> parents;
+
+  optional<std::vector<TypeHierarchyItem>> children;
+};
+struct FileStatus {
+  DocumentUri uri;
+  TextType state;
+};
 }  // namespace lsp
 
 #endif  // BATON_LSP_BASIC_H
