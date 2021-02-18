@@ -4,10 +4,13 @@
 #include <algorithm>
 #include <cctype>
 #include <cstdint>
+#include <map>
+#include <memory>
 #include <optional>
 #include <string>
 #include <string_view>
 #include <utility>
+#include <vector>
 
 #include "nlohmann/json.hpp"
 
@@ -37,14 +40,14 @@ enum class TraceLevel {
   Verbose = 2,
 };
 enum class TextDocumentSyncKind {
-  /// Documents should not be synced at all.
+  // Documents should not be synced at all.
   None = 0,
 
-  /// Documents are synced by always sending the full content of the document.
+  // Documents are synced by always sending the full content of the document.
   Full = 1,
 
-  /// Documents are synced by sending the full content on open.  After that
-  /// only incremental updates to the document are send.
+  // Documents are synced by sending the full content on open.  After that
+  // only incremental updates to the document are send.
   Incremental = 2,
 };
 enum class CompletionItemKind {
@@ -162,7 +165,7 @@ class URIForFile {
     if (is_absolute_) {
       file_name_ = "file://" + file_name_;
     } else {
-      file_name_ = "file:///" + file_name_;
+      file_name_ = "file://" + file_name_;
     }
   }
   [[nodiscard]] std::string_view str() const { return file_name_; }
@@ -182,12 +185,12 @@ class URIForFile {
     if (is_absolute_) {
       file_name_ = "file://" + file_name_;
     } else {
-      file_name_ = "file:///" + file_name_;
+      file_name_ = "file://" + file_name_;
     }
   }
 
   void set_from_encoded(const std::string &filename) {
-    is_absolute_ = filename.find("file:///") != std::string::npos;
+    is_absolute_ = filename.find("file://") != std::string::npos;
     file_name_ = filename;
   }
 
@@ -312,49 +315,49 @@ struct TextDocumentItem {
   std::string_view text;
 };
 struct ClientCapabilities {
-  /// The supported set of SymbolKinds for workspace/symbol.
-  /// workspace.symbol.symbolKind.valueSet
+  // The supported set of SymbolKinds for workspace/symbol.
+  // workspace.symbol.symbolKind.valueSet
   std::vector<SymbolKind> WorkspaceSymbolKinds;
-  /// Whether the client accepts diagnostics with codeActions attached inline.
-  /// textDocument.publishDiagnostics.codeActionsInline.
+  // Whether the client accepts diagnostics with codeActions attached inline.
+  // textDocument.publishDiagnostics.codeActionsInline.
   bool DiagnosticFixes = true;
 
-  /// Whether the client accepts diagnostics with related locations.
-  /// textDocument.publishDiagnostics.relatedInformation.
+  // Whether the client accepts diagnostics with related locations.
+  // textDocument.publishDiagnostics.relatedInformation.
   bool DiagnosticRelatedInformation = true;
 
-  /// Whether the client accepts diagnostics with category attached to it
-  /// using the "category" extension.
-  /// textDocument.publishDiagnostics.categorySupport
+  // Whether the client accepts diagnostics with category attached to it
+  // using the "category" extension.
+  // textDocument.publishDiagnostics.categorySupport
   bool DiagnosticCategory = true;
 
-  /// Client supports snippets as insert text.
-  /// textDocument.completion.completionItem.snippetSupport
+  // Client supports snippets as insert text.
+  // textDocument.completion.completionItem.snippetSupport
   bool CompletionSnippets = true;
 
   bool CompletionDeprecated = true;
 
-  /// Client supports completions with additionalTextEdit near the cursor.
-  /// This is a clangd extension. (LSP says this is for unrelated text only).
-  /// textDocument.completion.editsNearCursor
+  // Client supports completions with additionalTextEdit near the cursor.
+  // This is a clangd extension. (LSP says this is for unrelated text only).
+  // textDocument.completion.editsNearCursor
   bool CompletionFixes = true;
 
-  /// Client supports hierarchical document symbols.
+  // Client supports hierarchical document symbols.
   bool HierarchicalDocumentSymbol = true;
 
-  /// Client supports processing label offsets instead of a simple label string.
+  // Client supports processing label offsets instead of a simple label string.
   bool OffsetsInSignatureHelp = true;
 
-  /// The supported set of CompletionItemKinds for textDocument/completion.
-  /// textDocument.completion.completionItemKind.valueSet
+  // The supported set of CompletionItemKinds for textDocument/completion.
+  // textDocument.completion.completionItemKind.valueSet
   std::vector<CompletionItemKind> CompletionItemKinds;
 
-  /// Client supports CodeAction return value for textDocument/codeAction.
-  /// textDocument.codeAction.codeActionLiteralSupport.
+  // Client supports CodeAction return value for textDocument/codeAction.
+  // textDocument.codeAction.codeActionLiteralSupport.
   bool CodeActionStructure = true;
-  /// Supported encodings for LSP character offsets. (clangd extension).
+  // Supported encodings for LSP character offsets. (clangd extension).
   std::vector<OffsetEncoding> offsetEncoding = {OffsetEncoding::UTF8};
-  /// The content format that should be used for Hover requests.
+  // The content format that should be used for Hover requests.
   std::vector<MarkupKind> HoverContentFormat = {MarkupKind::PlainText};
 
   bool ApplyEdit = false;
@@ -387,7 +390,7 @@ struct InitializationOptions {
   // The command used will be approximately `clang $FILE $fallbackFlags`.
   std::vector<TextType> fallbackFlags;
 
-  /// Clients supports show file status for textDocument/clangd.fileStatus.
+  // Clients supports show file status for textDocument/clangd.fileStatus.
   bool clangdFileStatus = false;
 };
 struct InitializeParams {
@@ -398,9 +401,9 @@ struct InitializeParams {
   InitializationOptions initializationOptions;
 };
 struct ShowMessageParams {
-  /// The message type.
+  // The message type.
   MessageType type = MessageType::Info;
-  /// The actual message.
+  // The actual message.
   std::string message;
 };
 struct Registration {
@@ -414,20 +417,20 @@ struct UnregistrationParams {
   std::vector<Registration> unregisterations;
 };
 struct DidOpenTextDocumentParams {
-  /// The document that was opened.
+  // The document that was opened.
   TextDocumentItem textDocument;
 };
 struct DidCloseTextDocumentParams {
-  /// The document that was closed.
+  // The document that was closed.
   TextDocumentIdentifier textDocument;
 };
 struct TextDocumentContentChangeEvent {
-  /// The range of the document that changed.
+  // The range of the document that changed.
   optional<Range> range;
 
-  /// The length of the range that got replaced.
+  // The length of the range that got replaced.
   optional<uinteger> rangeLength;
-  /// The new text of the range/document.
+  // The new text of the range/document.
   std::string text;
 };
 struct DidChangeTextDocumentParams {
@@ -527,9 +530,8 @@ struct ExecuteCommandParams {
   optional<WorkspaceEdit> workspaceEdit;
   optional<TweakArgs> tweakArgs;
 };
-struct LspCommand
-    : public ExecuteCommandParams  // Command according to protocol
-{
+struct LspCommand  // Command according to protocol
+    : public ExecuteCommandParams {
   std::string title;
 };
 struct CodeAction {

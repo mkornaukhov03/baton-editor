@@ -16,7 +16,7 @@ file(GLOB_RECURSE SOURCES "src/*.cc" )
 find_package(Qt5Core CONFIG REQUIRED)
 find_package(Qt5Widgets CONFIG REQUIRED)
 
-add_executable(baton ${SOURCES})
+add_executable(baton ${HEADERS} ${SOURCES})
 
 target_link_libraries(baton
         Qt5::Core
