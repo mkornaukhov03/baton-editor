@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 
 project(baton)
 
+set(CMAKE_AUTOMOC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS "-Wall -Wextra")
 
@@ -14,7 +15,7 @@ file(GLOB_RECURSE SOURCES "src/*.cc" )
 find_package(Qt5Core CONFIG REQUIRED)
 find_package(Qt5Widgets CONFIG REQUIRED)
 
-add_executable(baton ${HEADERS} ${SOURCES})
+add_executable(baton "include/editor/editor.h" ${SOURCES})
 
 target_link_libraries(baton
         Qt5::Core
