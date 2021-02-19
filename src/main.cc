@@ -32,18 +32,7 @@ SOFTWARE.
 int main(int argv, char **args) {
   QApplication app(argv, args);
 
-  QCoreApplication::setOrganizationName("QtProject");
-  QCoreApplication::setApplicationName("Application Example");
-  QCoreApplication::setApplicationVersion(QT_VERSION_STR);
-  QCommandLineParser parser;
-  parser.setApplicationDescription(QCoreApplication::applicationName());
-  parser.addHelpOption();
-  parser.addVersionOption();
-  parser.addPositionalArgument("file", "The file to open.");
-  parser.process(app);
   MainWindow mainwindow;
-  if (!parser.positionalArguments().isEmpty())
-    mainwindow.loadFile(parser.positionalArguments().first());
   mainwindow.show();
   return app.exec();
 }

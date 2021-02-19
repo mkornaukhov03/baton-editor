@@ -16,8 +16,6 @@ MainWindow::MainWindow(QWidget *parent)
   textEdit->setGeometry(280, 20, 1000, 700);
   createActions();
 
-  readSettings();
-
   connect(textEdit->document(), &QTextDocument::contentsChanged, this,
           &MainWindow::documentWasModified);
 
@@ -26,7 +24,6 @@ MainWindow::MainWindow(QWidget *parent)
 
 void MainWindow::closeEvent(QCloseEvent *event) {
   if (maybeSave()) {
-    writeSettings();
     event->accept();
   } else {
     event->ignore();
@@ -91,27 +88,6 @@ void MainWindow::createActions() {
 void MainWindow::createStatusBar() { statusBar()->showMessage(tr("Ready")); }
 
 MainWindow::~MainWindow() { delete ui; }
-
-void MainWindow::readSettings() {
-  QSettings settings(QCoreApplication::organizationName(),
-                     QCoreApplication::applicationName());
-  const QByteArray geometry =
-      settings.value("geometry", QByteArray()).toByteArray();
-  if (geometry.isEmpty()) {
-    const QRect availableGeometry = screen()->availableGeometry();
-    resize(availableGeometry.width() / 3, availableGeometry.height() / 2);
-    move((availableGeometry.width() - width()) / 2,
-         (availableGeometry.height() - height()) / 2);
-  } else {
-    restoreGeometry(geometry);
-  }
-}
-
-void MainWindow::writeSettings() {
-  QSettings settings(QCoreApplication::organizationName(),
-                     QCoreApplication::applicationName());
-  settings.setValue("geometry", saveGeometry());
-}
 
 bool MainWindow::maybeSave() {
   if (!textEdit->document()->isModified()) return true;
