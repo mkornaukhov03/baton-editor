@@ -9,13 +9,15 @@ set(CMAKE_CXX_FLAGS "-Wall -Wextra")
 set(CMAKE_CXX_FLAGS_DEBUG_INIT "-g -fsanitize=address -fsanitize=undefined")
 set(CMAKE_CXX_FLAGS_RELEASE_INIT "-O2")
 
+include_directories(include/)
+
 file(GLOB_RECURSE HEADERS "include/*.h" "third_party/*.hpp")
 file(GLOB_RECURSE SOURCES "src/*.cc" )
 
 find_package(Qt5Core CONFIG REQUIRED)
 find_package(Qt5Widgets CONFIG REQUIRED)
 
-add_executable(baton "include/editor/editor.h" ${SOURCES})
+add_executable(baton "include/editor.h" "include/directory_tree.h" "include/mainwindow.h" ${SOURCES})
 
 target_link_libraries(baton
         Qt5::Core

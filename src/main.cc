@@ -21,16 +21,29 @@ SOFTWARE.
  */
 
 #include <QApplication>
+#include <QCommandLineOption>
+#include <QCommandLineParser>
 #include <QDesktopWidget>
 #include <QStyle>
 
-#include "../include/editor/editor.h"
+#include "editor.h"
+#include "mainwindow.h"
 
 int main(int argv, char **args) {
   QApplication app(argv, args);
-  Editor EditWindow;
-  EditWindow.resize(750, 750);
-  EditWindow.setWindowTitle(QObject::tr("Code Editor"));
-  EditWindow.show();
+
+  QCoreApplication::setOrganizationName("QtProject");
+  QCoreApplication::setApplicationName("Application Example");
+  QCoreApplication::setApplicationVersion(QT_VERSION_STR);
+  QCommandLineParser parser;
+  parser.setApplicationDescription(QCoreApplication::applicationName());
+  parser.addHelpOption();
+  parser.addVersionOption();
+  parser.addPositionalArgument("file", "The file to open.");
+  parser.process(app);
+  MainWindow mainwindow;
+  if (!parser.positionalArguments().isEmpty())
+    mainwindow.loadFile(parser.positionalArguments().first());
+  mainwindow.show();
   return app.exec();
 }

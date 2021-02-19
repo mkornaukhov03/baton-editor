@@ -1,4 +1,4 @@
-#include "../include/editor/editor.h"
+#include "editor.h"
 
 #include <QPainter>
 #include <QTextBlock>
