@@ -28,11 +28,10 @@ class LSPHandler : public QObject {
  public slots:
   void OnNotify(const QString &, const QJsonObject &){};
   void OnResponse(const QJsonObject &, const QJsonObject &){};
-  void OnRequest(const QString &, const QJsonObject &,
-                 const QJsonObject &){};
+  void OnRequest(const QString &, const QJsonObject &, const QJsonObject &){};
   void OnError(const QJsonObject &, const QJsonObject &){};
-  void OnServerError(QProcess::ProcessError ){};
-  void OnServerFinished(int , QProcess::ExitStatus){};
+  void OnServerError(QProcess::ProcessError){};
+  void OnServerFinished(int, QProcess::ExitStatus){};
 
   void textChanged(){};
   void requestDiagonistics(){};
