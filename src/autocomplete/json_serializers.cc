@@ -1,11 +1,12 @@
-#ifndef BATON_JSON_SERIALIZERS_H
-#define BATON_JSON_SERIALIZERS_H
-
-#include <string>
 #include <memory>
+#include <string>
+
+#include "enums.h"
+#include "lsp_basic.h"
 
 namespace nlohmann {
 using namespace lsp;
+// Serializing enums from enums.h to json using built-in nlohmann macro
 
 NLOHMANN_JSON_SERIALIZE_ENUM(OffsetEncoding,
                              {
@@ -35,7 +36,9 @@ NLOHMANN_JSON_SERIALIZE_ENUM(FoldingRangeKind,
                               {FoldingRangeKind::Imports, "imports"},
                               {FoldingRangeKind::Region, "region"}})
 
-// optional serializer
+// Use common approach to serialize user-defined structures:
+// specialization of nlohmann::adl_serizalizer
+
 template <typename T>
 struct adl_serializer<lsp::optional<T>> {
   static void to_json(json &j, const lsp::optional<T> &opt) {
@@ -53,7 +56,6 @@ struct adl_serializer<lsp::optional<T>> {
     }
   }
 };
-// URIForFile serializer
 template <>
 struct adl_serializer<lsp::URIForFile> {
   static void to_json(json &j, const lsp::URIForFile &uri) { j = uri.str(); }
@@ -61,7 +63,7 @@ struct adl_serializer<lsp::URIForFile> {
     uri.set_from_encoded(j.get<std::string>());
   }
 };
-// TextDocumentIdentifier serializer
+
 template <>
 struct adl_serializer<TextDocumentIdentifier> {
   static void to_json(json &j, const TextDocumentIdentifier &value) {
@@ -70,7 +72,6 @@ struct adl_serializer<TextDocumentIdentifier> {
   static void from_json(const json &, TextDocumentIdentifier &) {}
 };
 
-// VersionedTextDocumentIdentifier serializer
 template <>
 struct adl_serializer<VersionedTextDocumentIdentifier> {
   static void to_json(json &j, const VersionedTextDocumentIdentifier &value) {
@@ -79,7 +80,6 @@ struct adl_serializer<VersionedTextDocumentIdentifier> {
   static void from_json(const json &, VersionedTextDocumentIdentifier &) {}
 };
 
-// Position serializer
 template <>
 struct adl_serializer<Position> {
   static void to_json(json &j, const Position &value) {
@@ -91,7 +91,6 @@ struct adl_serializer<Position> {
   }
 };
 
-// Range serializer
 template <>
 struct adl_serializer<Range> {
   static void to_json(json &j, const Range &value) {
@@ -104,7 +103,6 @@ struct adl_serializer<Range> {
   }
 };
 
-// Location serializer
 template <>
 struct adl_serializer<Location> {
   static void to_json(json &j, const Location &value) {
@@ -116,7 +114,6 @@ struct adl_serializer<Location> {
   }
 };
 
-// TextEdit serializer
 template <>
 struct adl_serializer<TextEdit> {
   static void to_json(json &j, const TextEdit &value) {
@@ -128,7 +125,6 @@ struct adl_serializer<TextEdit> {
   }
 };
 
-// TextDocumentItem
 template <>
 struct adl_serializer<TextDocumentItem> {
   static void to_json(json &j, const TextDocumentItem &value) {
@@ -140,7 +136,6 @@ struct adl_serializer<TextDocumentItem> {
   static void from_json(const json &, TextDocumentItem &) {}
 };
 
-// ClientCapabilities serializer
 template <>
 struct adl_serializer<ClientCapabilities> {
   static void to_json(json &j, const ClientCapabilities &value) {
@@ -177,7 +172,6 @@ struct adl_serializer<ClientCapabilities> {
   static void from_json(const json &, ClientCapabilities &) {}
 };
 
-// ClangdCompileCommand serializer
 template <>
 struct adl_serializer<ClangdCompileCommand> {
   static void to_json(json &j, const ClangdCompileCommand &value) {
@@ -716,4 +710,3 @@ struct adl_serializer<TypeHierarchyParams> {
 
 }  // namespace nlohmann
 
-#endif  // BATON_JSON_SERIALIZERS_H
