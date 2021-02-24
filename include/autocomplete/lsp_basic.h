@@ -23,7 +23,7 @@ using uinteger = uint32_t;
 using DocumentUri = std::string_view;
 using TextType = std::string_view;
 
-// Implementation of types, specified by LSP and LLVM to connect to communicate
+// Implementation of types, specified by LSP and LLVM to connect and communicate
 // with clangd c++ language server
 
 class URIForFile {
