@@ -40,19 +40,19 @@ NLOHMANN_JSON_SERIALIZE_ENUM(FoldingRangeKind,
 // specialization of nlohmann::adl_serizalizer
 
 template <typename T>
-struct adl_serializer<lsp::optional<T>> {
-  static void to_json(json &j, const lsp::optional<T> &opt) {
+struct adl_serializer<std::optional<T>> {
+  static void to_json(json &j, const std::optional<T> &opt) {
     if (opt) {
       j = opt.value();
     } else {
       j = nullptr;
     }
   }
-  static void from_json(const json &j, lsp::optional<T> &opt) {
+  static void from_json(const json &j, std::optional<T> &opt) {
     if (j.is_null()) {
-      opt = lsp::optional<T>();
+      opt = std::optional<T>();
     } else {
-      opt = lsp::optional<T>(j.get<T>());
+      opt = std::optional<T>(j.get<T>());
     }
   }
 };
@@ -108,6 +108,7 @@ struct adl_serializer<Location> {
   static void to_json(json &j, const Location &value) {
     j = {{"uri", value.uri}, {"range", value.range}};
   }
+
   static void from_json(const json &j, Location &value) {
     if (j.contains("uri")) j.at("uri").get_to(value.uri);
     if (j.contains("range")) j.at("range").get_to(value.range);
@@ -709,4 +710,3 @@ struct adl_serializer<TypeHierarchyParams> {
 };
 
 }  // namespace nlohmann
-

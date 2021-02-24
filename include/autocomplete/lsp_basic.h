@@ -12,33 +12,27 @@
 #include <utility>
 #include <vector>
 
-#include "nlohmann/json.hpp"
 #include "enums.h"
+#include "nlohmann/json.hpp"
 
 namespace lsp {
-// Implementation of basic Language Server Protocol types
 
 using json = nlohmann::json;
 
-template <class T>
-using optional = std::optional<T>;
 using uinteger = uint32_t;
 using DocumentUri = std::string_view;
 using TextType = std::string_view;
+
+// Implementation of types, specified by LSP and LLVM to connect to communicate
+// with clangd c++ language server
+
 class URIForFile {
-  // Implementation according to https://tools.ietf.org/html/rfc3986#section-2
  public:
-  URIForFile(const std::string &filename, bool is_absolute)
-      : is_absolute_(is_absolute), file_name_(Encode(filename)) {
-    if (is_absolute_) {
-      file_name_ = "file://" + file_name_;
-    } else {
-      file_name_ = "file://" + file_name_;
-    }
+  explicit URIForFile(const std::string &filename)
+      : file_name_(Encode(filename)) {
+    file_name_ = "file:///" + file_name_;
   }
   [[nodiscard]] std::string_view str() const { return file_name_; }
-
-  [[nodiscard]] bool is_absolute() const { return is_absolute_; }
 
   friend bool operator==(const URIForFile &lhs, const URIForFile &rhs) {
     return lhs.file_name_ == rhs.file_name_;
@@ -47,20 +41,11 @@ class URIForFile {
     return lhs.file_name_ != rhs.file_name_;
   }
 
-  void set_filename(const std::string &filename, bool is_absolute) {
-    is_absolute_ = is_absolute;
-    file_name_ = Encode(filename);
-    if (is_absolute_) {
-      file_name_ = "file://" + file_name_;
-    } else {
-      file_name_ = "file://" + file_name_;
-    }
+  void set_filename(const std::string &filename) {
+    file_name_ = "file:///" + Encode(filename);
   }
 
-  void set_from_encoded(const std::string &filename) {
-    is_absolute_ = filename.find("file://") != std::string::npos;
-    file_name_ = filename;
-  }
+  void set_from_encoded(const std::string &filename) { file_name_ = filename; }
 
  private:
   static std::string Encode(std::string_view str) {
@@ -69,9 +54,9 @@ class URIForFile {
 
     static auto to_hex = [](uint8_t ch) -> uint8_t {
       if (ch > 9) {
-        return ch + 65;  // 65 - ASCII code for 'A'
+        return ch + 'A';
       }
-      return ch + 48;  // 48 - ASCII code for '0'
+      return ch + '0';
     };
     static std::string unreserved_special = "._~-";
     std::string response;
@@ -81,7 +66,6 @@ class URIForFile {
       }
       if (std::isalnum(ch) ||
           unreserved_special.find(ch) != std::string::npos) {
-        // what if 'ma//in.cpp' ???
         response.push_back(ch);
       } else {
         response.push_back('%');
@@ -92,13 +76,11 @@ class URIForFile {
 
     return response;
   }
-  bool is_absolute_{};
   std::string file_name_;
 };
 
 struct LSPError {
-  LSPError(std::string msg, ErrorCode code)
-      : message_(std::move(msg)), error_code_(code) {}
+  LSPError(std::string msg, ErrorCode code);
 
   std::string message_;
   ErrorCode error_code_{};
@@ -117,21 +99,10 @@ struct Position {
   uinteger line{};
   uinteger character{};
 
-  friend bool operator==(const Position &lhs, const Position &rhs) {
-    return std::tie(lhs.line, lhs.character) ==
-           std::tie(rhs.line, rhs.character);
-  }
-  friend bool operator!=(const Position &lhs, const Position &rhs) {
-    return !(lhs == rhs);
-  }
-  friend bool operator<(const Position &lhs, const Position &rhs) {
-    return std::tie(lhs.line, lhs.character) <
-           std::tie(rhs.line, rhs.character);
-  }
-  friend bool operator<=(const Position &lhs, const Position &rhs) {
-    return std::tie(lhs.line, lhs.character) <=
-           std::tie(rhs.line, rhs.character);
-  }
+  bool operator==(const Position &oth) const;
+  bool operator!=(const Position &oth) const;
+  bool operator<(const Position &oth) const;
+  bool operator<=(const Position &oth) const;
 };
 
 struct Range {
@@ -139,36 +110,20 @@ struct Range {
   Position start;
   Position end;
 
-  friend bool operator==(const Range &lhs, const Range &rhs) {
-    return std::tie(lhs.start, lhs.end) == std::tie(rhs.start, rhs.end);
-  }
-  friend bool operator!=(const Range &lhs, const Range &rhs) {
-    return !(lhs == rhs);
-  }
-  friend bool operator<(const Range &lhs, const Range &rhs) {
-    return std::tie(lhs.start, lhs.end) < std::tie(rhs.start, rhs.end);
-  }
-  [[nodiscard]] bool contains(Position Pos) const {
-    return start <= Pos && Pos < end;
-  }
-  [[nodiscard]] bool contains(Range Rng) const {
-    return start <= Rng.start && Rng.end <= end;
-  }
+  bool operator==(const Range &oth) const;
+  bool operator!=(const Range &oth) const;
+  bool operator<(const Range &oth) const;
+  [[nodiscard]] bool contains(const Position &Pos) const;
+  [[nodiscard]] bool contains(const Range &Rng) const;
 };
 
 struct Location {
   DocumentUri uri;
   Range range;
 
-  friend bool operator==(const Location &LHS, const Location &RHS) {
-    return LHS.uri == RHS.uri && LHS.range == RHS.range;
-  }
-  friend bool operator!=(const Location &LHS, const Location &RHS) {
-    return !(LHS == RHS);
-  }
-  friend bool operator<(const Location &LHS, const Location &RHS) {
-    return std::tie(LHS.uri, LHS.range) < std::tie(RHS.uri, RHS.range);
-  }
+  bool operator==(const Location &oth) const;
+  bool operator!=(const Location &oth) const;
+  bool operator<(const Location &oth) const;
 };
 
 struct TextEdit {
@@ -183,49 +138,27 @@ struct TextDocumentItem {
   std::string_view text;
 };
 struct ClientCapabilities {
-  // The supported set of SymbolKinds for workspace/symbol.
-  // workspace.symbol.symbolKind.valueSet
   std::vector<SymbolKind> WorkspaceSymbolKinds;
-  // Whether the client accepts diagnostics with codeActions attached inline.
-  // textDocument.publishDiagnostics.codeActionsInline.
   bool DiagnosticFixes = true;
 
-  // Whether the client accepts diagnostics with related locations.
-  // textDocument.publishDiagnostics.relatedInformation.
   bool DiagnosticRelatedInformation = true;
 
-  // Whether the client accepts diagnostics with category attached to it
-  // using the "category" extension.
-  // textDocument.publishDiagnostics.categorySupport
   bool DiagnosticCategory = true;
 
-  // Client supports snippets as insert text.
-  // textDocument.completion.completionItem.snippetSupport
   bool CompletionSnippets = true;
 
   bool CompletionDeprecated = true;
 
-  // Client supports completions with additionalTextEdit near the cursor.
-  // This is a clangd extension. (LSP says this is for unrelated text only).
-  // textDocument.completion.editsNearCursor
   bool CompletionFixes = true;
 
-  // Client supports hierarchical document symbols.
   bool HierarchicalDocumentSymbol = true;
 
-  // Client supports processing label offsets instead of a simple label string.
   bool OffsetsInSignatureHelp = true;
 
-  // The supported set of CompletionItemKinds for textDocument/completion.
-  // textDocument.completion.completionItemKind.valueSet
   std::vector<CompletionItemKind> CompletionItemKinds;
 
-  // Client supports CodeAction return value for textDocument/codeAction.
-  // textDocument.codeAction.codeActionLiteralSupport.
   bool CodeActionStructure = true;
-  // Supported encodings for LSP character offsets. (clangd extension).
   std::vector<OffsetEncoding> offsetEncoding = {OffsetEncoding::UTF8};
-  // The content format that should be used for Hover requests.
   std::vector<MarkupKind> HoverContentFormat = {MarkupKind::PlainText};
 
   bool ApplyEdit = false;
@@ -248,11 +181,9 @@ struct ConfigurationSettings {
       compilationDatabaseChanges;  // maybe hash map
 };
 struct InitializationOptions {
-  // What we can change throught the didChangeConfiguration request, we can
-  // also set through the initialize request (initializationOptions field).
   ConfigurationSettings configSettings;
 
-  optional<TextType> compilationDatabasePath;
+  std::optional<TextType> compilationDatabasePath;
   // Additional flags to be included in the "fallback command" used when
   // the compilation database doesn't describe an opened file.
   // The command used will be approximately `clang $FILE $fallbackFlags`.
@@ -264,8 +195,8 @@ struct InitializationOptions {
 struct InitializeParams {
   unsigned processId = 0;
   ClientCapabilities capabilities;
-  optional<DocumentUri> rootUri;
-  optional<TextType> rootPath;
+  std::optional<DocumentUri> rootUri;
+  std::optional<TextType> rootPath;
   InitializationOptions initializationOptions;
 };
 struct ShowMessageParams {
@@ -294,17 +225,17 @@ struct DidCloseTextDocumentParams {
 };
 struct TextDocumentContentChangeEvent {
   // The range of the document that changed.
-  optional<Range> range;
+  std::optional<Range> range;
 
   // The length of the range that got replaced.
-  optional<uinteger> rangeLength;
+  std::optional<uinteger> rangeLength;
   // The new text of the range/document.
   std::string text;
 };
 struct DidChangeTextDocumentParams {
   TextDocumentIdentifier textDocument;
   std::vector<TextDocumentContentChangeEvent> contentChanges;
-  optional<bool> wantDiagnostics;
+  std::optional<bool> wantDiagnostics;
 };
 struct FileEvent {
   URIForFile uri;
@@ -364,12 +295,12 @@ struct Diagnostic {
 
   std::string source;
   std::string message;
-  optional<std::vector<DiagnosticRelatedInformation>> relatedInformation;
+  std::optional<std::vector<DiagnosticRelatedInformation>> relatedInformation;
 
-  optional<std::string> category;
+  std::optional<std::string> category;
 
   // clagd extension
-  optional<std::vector<CodeAction>> codeActions;
+  std::optional<std::vector<CodeAction>> codeActions;
 };
 struct PublishDiagnosticsParams {
   std::string uri;
@@ -386,7 +317,7 @@ struct CodeActionParams {
   CodeActionContext context;
 };
 struct WorkspaceEdit {
-  optional<std::map<std::string, std::vector<TextEdit>>> changes;
+  std::optional<std::map<std::string, std::vector<TextEdit>>> changes;
 };
 struct TweakArgs {
   std::string file;
@@ -395,8 +326,8 @@ struct TweakArgs {
 };
 struct ExecuteCommandParams {
   std::string command;
-  optional<WorkspaceEdit> workspaceEdit;
-  optional<TweakArgs> tweakArgs;
+  std::optional<WorkspaceEdit> workspaceEdit;
+  std::optional<TweakArgs> tweakArgs;
 };
 struct LspCommand  // Command according to protocol
     : public ExecuteCommandParams {
@@ -408,16 +339,16 @@ struct CodeAction {
 
   // The kind of the code action.
   // Used to filter code actions.
-  optional<std::string> kind;
+  std::optional<std::string> kind;
   // The diagnostics that this code action resolves.
-  optional<std::vector<Diagnostic>> diagnostics;
+  std::optional<std::vector<Diagnostic>> diagnostics;
 
   // The workspace edit this code action performs.
-  optional<WorkspaceEdit> edit;
+  std::optional<WorkspaceEdit> edit;
 
   // A command this code action executes. If a code action provides an edit
   // and a command, first the edit is executed and then the command.
-  optional<LspCommand> command;
+  std::optional<LspCommand> command;
 };
 struct SymbolInformation {
   std::string name;
@@ -430,7 +361,7 @@ struct SymbolDetails {
   TextType name;
   TextType containerName;
   TextType USR;
-  optional<TextType> ID;
+  std::optional<TextType> ID;
 };
 struct WorkspaceSymbolParams {
   TextType query;
@@ -444,10 +375,10 @@ struct TextDocumentPositionParams {
 };
 struct CompletionContext {
   CompletionTriggerKind triggerKind = CompletionTriggerKind::Invoked;
-  optional<TextType> triggerCharacter;
+  std::optional<TextType> triggerCharacter;
 };
 struct CompletionParams : TextDocumentPositionParams {
-  optional<CompletionContext> context;
+  std::optional<CompletionContext> context;
 };
 struct MarkupContent {
   MarkupKind kind = MarkupKind::PlainText;
@@ -455,10 +386,9 @@ struct MarkupContent {
 };
 struct Hover {
   MarkupContent contents;
-  optional<Range> range;
+  std::optional<Range> range;
 };
 struct CompletionItem {
-  // what to paste
   std::string label;
 
   CompletionItemKind kind = CompletionItemKind::Missing;
@@ -467,27 +397,17 @@ struct CompletionItem {
 
   std::string documentation;
 
-  // A string that should be used when comparing this item with other items.
-  // When `falsy` the label is used.
   std::string sortText;
 
-  // A string that should be used when filtering a set of completion items.
   std::string filterText;
 
-  // A string that should be inserted to a document when selecting this
   std::string insertText;
 
-  // The format of the insert text. The format applies to both the `insertText`
-  // property and the `newText` property of a provided `textEdit`.
   InsertTextFormat insertTextFormat = InsertTextFormat::Missing;
-
-  // An edit which is applied to a document when selecting this completion.
-  // When an edit is provided `insertText` is ignored.
   TextEdit textEdit;
 
   std::vector<TextEdit> additionalTextEdits;
 
-  // Indicates if this item is deprecated.
   bool deprecated = false;
 };
 struct CompletionList {
@@ -496,7 +416,7 @@ struct CompletionList {
 };
 struct ParameterInformation {
   std::string labelString;
-  optional<std::pair<unsigned, unsigned>> labelOffsets;  // clang specific
+  std::optional<std::pair<unsigned, unsigned>> labelOffsets;  // clang specific
   std::string documentation;
 };
 struct SignatureInformation {
@@ -522,15 +442,15 @@ struct TypeHierarchyParams : public TextDocumentPositionParams {
 struct TypeHierarchyItem {
   std::string name;
 
-  optional<std::string> detail;
+  std::optional<std::string> detail;
   SymbolKind kind;
   bool deprecated;
   DocumentUri uri;
   Range range;
   Range selectionRange;
-  optional<std::vector<TypeHierarchyItem>> parents;
+  std::optional<std::vector<TypeHierarchyItem>> parents;
 
-  optional<std::vector<TypeHierarchyItem>> children;
+  std::optional<std::vector<TypeHierarchyItem>> children;
 };
 struct FileStatus {
   DocumentUri uri;
