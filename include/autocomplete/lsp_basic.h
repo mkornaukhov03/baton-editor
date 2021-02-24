@@ -28,54 +28,20 @@ using TextType = std::string_view;
 
 class URIForFile {
  public:
-  explicit URIForFile(const std::string &filename)
-      : file_name_(Encode(filename)) {
-    file_name_ = "file:///" + file_name_;
-  }
-  [[nodiscard]] std::string_view str() const { return file_name_; }
+  explicit URIForFile(const std::string &filename);
+  [[nodiscard]] std::string_view str() const;
 
-  friend bool operator==(const URIForFile &lhs, const URIForFile &rhs) {
-    return lhs.file_name_ == rhs.file_name_;
-  }
-  friend bool operator!=(const URIForFile &lhs, const URIForFile &rhs) {
-    return lhs.file_name_ != rhs.file_name_;
-  }
+  bool operator==(const URIForFile &oth) const;
+  bool operator!=(const URIForFile &oth) const;
 
-  void set_filename(const std::string &filename) {
-    file_name_ = "file:///" + Encode(filename);
-  }
+  void set_filename(const std::string &filename);
 
-  void set_from_encoded(const std::string &filename) { file_name_ = filename; }
+  void set_from_encoded(const std::string &filename);
 
  private:
-  static std::string Encode(std::string_view str) {
-    // must not be invoked at same filename twice or more times
-    // because % symbol will encoded as %25 etc.
-
-    static auto to_hex = [](uint8_t ch) -> uint8_t {
-      if (ch > 9) {
-        return ch + 'A';
-      }
-      return ch + '0';
-    };
-    static std::string unreserved_special = "._~-";
-    std::string response;
-    for (uint8_t ch : str) {
-      if (ch == '\\') {  // for Windows
-        ch = '/';
-      }
-      if (std::isalnum(ch) ||
-          unreserved_special.find(ch) != std::string::npos) {
-        response.push_back(ch);
-      } else {
-        response.push_back('%');
-        response.push_back(to_hex(ch >> 4));              // first 4 bits
-        response.push_back(to_hex(ch & ((1 << 4) - 1)));  // last 4 bits
-      }
-    }
-
-    return response;
-  }
+  // must not be invoked at same filename twice or more times
+  // because % symbol will encoded as %25 etc.
+  static std::string Encode(std::string_view str);
   std::string file_name_;
 };
 
