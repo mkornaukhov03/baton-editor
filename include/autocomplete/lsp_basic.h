@@ -163,33 +163,21 @@ struct ClientCapabilities {
 
   bool ApplyEdit = false;
   bool DocumentChanges = false;
-  ClientCapabilities() {
-    for (int i = 1; i <= 26; ++i) {
-      WorkspaceSymbolKinds.push_back((SymbolKind)i);
-    }
-    for (int i = 0; i <= 25; ++i) {
-      CompletionItemKinds.push_back((CompletionItemKind)i);
-    }
-  }
+  ClientCapabilities();
 };
 struct ClangdCompileCommand {
   TextType workingDirectory;
   std::vector<TextType> compilationCommand;
 };
 struct ConfigurationSettings {
-  std::map<std::string, ClangdCompileCommand>
-      compilationDatabaseChanges;  // maybe hash map
+  std::map<std::string, ClangdCompileCommand> compilationDatabaseChanges;
 };
 struct InitializationOptions {
   ConfigurationSettings configSettings;
 
   std::optional<TextType> compilationDatabasePath;
-  // Additional flags to be included in the "fallback command" used when
-  // the compilation database doesn't describe an opened file.
-  // The command used will be approximately `clang $FILE $fallbackFlags`.
   std::vector<TextType> fallbackFlags;
 
-  // Clients supports show file status for textDocument/clangd.fileStatus.
   bool clangdFileStatus = false;
 };
 struct InitializeParams {
@@ -200,9 +188,7 @@ struct InitializeParams {
   InitializationOptions initializationOptions;
 };
 struct ShowMessageParams {
-  // The message type.
   MessageType type = MessageType::Info;
-  // The actual message.
   std::string message;
 };
 struct Registration {
@@ -216,20 +202,15 @@ struct UnregistrationParams {
   std::vector<Registration> unregisterations;
 };
 struct DidOpenTextDocumentParams {
-  // The document that was opened.
   TextDocumentItem textDocument;
 };
 struct DidCloseTextDocumentParams {
-  // The document that was closed.
   TextDocumentIdentifier textDocument;
 };
 struct TextDocumentContentChangeEvent {
-  // The range of the document that changed.
   std::optional<Range> range;
 
-  // The length of the range that got replaced.
   std::optional<uinteger> rangeLength;
-  // The new text of the range/document.
   std::string text;
 };
 struct DidChangeTextDocumentParams {
@@ -311,9 +292,7 @@ struct CodeActionContext {
 };
 struct CodeActionParams {
   TextDocumentIdentifier textDocument;
-
   Range range;
-
   CodeActionContext context;
 };
 struct WorkspaceEdit {
@@ -329,25 +308,16 @@ struct ExecuteCommandParams {
   std::optional<WorkspaceEdit> workspaceEdit;
   std::optional<TweakArgs> tweakArgs;
 };
-struct LspCommand  // Command according to protocol
-    : public ExecuteCommandParams {
+struct LspCommand : public ExecuteCommandParams {
   std::string title;
 };
 struct CodeAction {
-  // A short, human-readable, title for this code action.
   std::string title;
 
-  // The kind of the code action.
-  // Used to filter code actions.
   std::optional<std::string> kind;
-  // The diagnostics that this code action resolves.
   std::optional<std::vector<Diagnostic>> diagnostics;
 
-  // The workspace edit this code action performs.
   std::optional<WorkspaceEdit> edit;
-
-  // A command this code action executes. If a code action provides an edit
-  // and a command, first the edit is executed and then the command.
   std::optional<LspCommand> command;
 };
 struct SymbolInformation {
@@ -357,7 +327,6 @@ struct SymbolInformation {
   std::string containerName;
 };
 struct SymbolDetails {
-  // clang tools feature
   TextType name;
   TextType containerName;
   TextType USR;
@@ -416,7 +385,7 @@ struct CompletionList {
 };
 struct ParameterInformation {
   std::string labelString;
-  std::optional<std::pair<unsigned, unsigned>> labelOffsets;  // clang specific
+  std::optional<std::pair<unsigned, unsigned>> labelOffsets;  // clangd specific
   std::string documentation;
 };
 struct SignatureInformation {
