@@ -1,6 +1,6 @@
 language: cpp
 
-dist: bionic
+dist: focal 
 
 cache:
     - pip
@@ -19,7 +19,7 @@ script:
     - cpplint --filter=-legal/copyright,-readability/todo,-whitespace/line_length, \
      -runtime/threadsafe_fn,-build/header_guard,-build/include_subdir,-whitespace/comments,\
      -whitespace/indent,-readability/alt_tokens --recursive \
-     --exclude=third_party/nlohmann/* --exclude=include/autocomplete/json_serializers.h  .
+     --exclude=third_party/nlohmann/*  .
     - cd build/release 
     - cmake -DCMAKE_BUILD_TYPE=Release ../..
     - make -j4

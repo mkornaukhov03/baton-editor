@@ -16,10 +16,11 @@ file(GLOB_RECURSE SOURCES "src/*.cc"  "src/autocomplete/*.cc")
 find_package(Qt5Core CONFIG REQUIRED)
 find_package(Qt5Widgets CONFIG REQUIRED)
 
-add_executable(baton ${HEADERS} ${SOURCES})
+add_executable(baton ${SOURCES})
 
 target_link_libraries(baton
         Qt5::Core
         Qt5::Widgets)
 target_include_directories(baton PUBLIC ./include/autocomplete)
+target_include_directories(baton PUBLIC ./include)
 target_include_directories(baton PUBLIC ./third_party)

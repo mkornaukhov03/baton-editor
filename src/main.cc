@@ -20,4 +20,5 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
 #include "lsp_basic.h"
+#include "enums.h"
 int main() { return 0; }
