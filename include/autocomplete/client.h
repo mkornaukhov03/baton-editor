@@ -28,24 +28,24 @@ class Client : public QObject {
 
   // common(more highly abstract than general notificator) notification messages
   // specified by LSP-protocol to comm
-  void Exit();
-  void Initialized();
-  void DidOpen(DocumentUri uri, std::string_view code, std::string_view lang);
-  void DidClose(DocumentUri uri);
+  void Exit(){};
+  void Initialized(){};
+  void DidOpen(DocumentUri uri, std::string_view code, std::string_view lang){};
+  void DidClose(DocumentUri uri){};
   void DidChange(DocumentUri uri,
                  const std::vector<TextDocumentContentChangeEvent> &changes,
-                 std::optional<bool> wantDiagnostics = false);
+                 std::optional<bool> wantDiagnostics = false){};
 
   // general notificator and requester
-  void SendNotification(std::string_view method, json json_doc);
-  RequestType SendRequest(std::string_view method, json json_doc);
+  void SendNotification(std::string_view method, json json_doc){};
+  RequestType SendRequest(std::string_view method, json json_doc){};
 
  private:
   std::unique_ptr<QProcess> process_;
   std::vector<std::string> send_to_server_buffer_;
   bool has_initialized_ = false;
 
-  void WriteToServer();
+  void WriteToServer(std::string);
   void NotifyImpl();
   void RequestImpl(std::string_view method, json params, RequestType type);
 };
