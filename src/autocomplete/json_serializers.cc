@@ -3,27 +3,9 @@
 
 #include "enums.h"
 #include "lsp_basic.h"
+#include "json_serializers.h"
 
-namespace nlohmann {
-template <typename T>
-struct adl_serializer<std::optional<T>> {
-  static void to_json(json &j, const std::optional<T> &opt) {
-    if (opt == std::nullopt) {
-      j = nullptr;
-    } else {
-      j = *opt;
-    }
-  }
-
-  static void from_json(const json &j, std::optional<T> &opt) {
-    if (j.is_null()) {
-      opt = std::nullopt;
-    } else {
-      opt = j.get<T>();
-    }
-  }
-};
-}  // namespace nlohmann
+ // namespace nlohmann
 namespace lsp {
 
 // Serializing enums from enums.h to json using built-in nlohmann macro
@@ -56,26 +38,6 @@ NLOHMANN_JSON_SERIALIZE_ENUM(FoldingRangeKind,
                               {FoldingRangeKind::Imports, "imports"},
                               {FoldingRangeKind::Region, "region"}})
 
-// Use common approach to serialize user-defined structures:
-// specialization of nlohmann::adl_serizalizer
-
-// template <typename T>
-// struct nlohmann::adl_serializer<std::optional<T>> {
-//    void to_json(json &j, const std::optional<T> &opt) {
-//     if (opt) {
-//       j = opt.value();
-//     } else {
-//       j = nullptr;
-//     }
-//   }
-//    void from_json(const json &j, std::optional<T> &opt) {
-//     if (j.is_null()) {
-//       opt = std::optional<T>();
-//     } else {
-//       opt = std::optional<T>(j.get<T>());
-//     }
-//   }
-// };
 void to_json(json &j, const lsp::URIForFile &uri) { j = uri.str(); }
 void from_json(const json &j, lsp::URIForFile &uri) {
   uri.set_from_encoded(j.get<std::string>());

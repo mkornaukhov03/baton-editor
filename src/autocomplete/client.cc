@@ -1,4 +1,5 @@
 #include "client.h"
+#include "json_serializers.h"
 
 #include <memory>
 
@@ -26,8 +27,8 @@ void Client::DidOpen(DocumentUri uri, std::string_view code) {
   params.textDocument.text = code;
   params.textDocument.languageId = "cpp";
   json json_doc;
-  //   nlohmann::to_json(json_doc, params);
-  //   SendNotification("textDocument/didOpen", json_doc);
+  nlohmann::to_json(json_doc, params);
+  SendNotification("textDocument/didOpen", json_doc);
 }
 
 // general notificator and requester

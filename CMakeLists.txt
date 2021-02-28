@@ -23,7 +23,8 @@ include_directories("include/"
 set(HEADERS "include/autocomplete/enums.h"
             "include/autocomplete/interface.h"
             "include/autocomplete/lsp_basic.h"
-            "include/autocomplete/client.h")
+            "include/autocomplete/client.h"
+            "include/autocomplete/json_serializers.h")
 
 # Add your source files here
 set(SOURCES "src/main.cc"
