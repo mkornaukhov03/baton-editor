@@ -26,15 +26,30 @@ class Client : public QObject {
   Client &operator=(const Client &) = delete;
   ~Client() final;
 
+  // request messages to send to server specified by lsp protocol
+
+  RequestType Initialize(DocumentUri root = {});
+  RequestType Shutdown();
+
+  RequestType RangeFormatting(DocumentUri uri, Range range);
+  RequestType FoldingRange(DocumentUri uri);
+  RequestType SelectionRange(DocumentUri uri, std::vector<Position> positions);
+
+  RequestType Formatting(DocumentUri uri);
+  RequestType CodeAction(DocumentUri uri, Range range,
+                         CodeActionContext context);
+  RequestType Completion(DocumentUri uri, Position position,
+                         CompletionContext context = {});
+
   // common(more highly abstract than general notificator) notification messages
   // specified by LSP-protocol to comm
   void Exit();
   void Initialized();
   void DidOpen(DocumentUri uri, std::string_view code);
-  void DidClose(DocumentUri uri){};
+  void DidClose(DocumentUri uri);
   void DidChange(DocumentUri uri,
-                 const std::vector<TextDocumentContentChangeEvent> &changes,
-                 std::optional<bool> wantDiagnostics = false){};
+                 std::vector<TextDocumentContentChangeEvent> changes,
+                 bool wantDiagnostics = false);
 
   // general notificator and requester
   void SendNotification(std::string_view method, json json_doc);
@@ -43,7 +58,7 @@ class Client : public QObject {
  private:
   std::unique_ptr<QProcess> process_;
   std::vector<std::string> send_to_server_buffer_;
-  bool has_initialized_ = false;
+  bool is_initialized_ = false;
 
   void WriteToServer(std::string);
   void NotifyImpl(std::string_view, json params);

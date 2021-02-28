@@ -1,7 +1,11 @@
 #include "client.h"
-#include "json_serializers.h"
 
+#include <QCoreApplication>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <memory>
+
+#include "json_serializers.h"
 
 namespace lsp {
 Client::Client(const QString &path, const QStringList &args)
@@ -15,6 +19,57 @@ Client::~Client() {
   }
 }
 
+// common request messages
+
+Client::RequestType Client::Initialize(DocumentUri root) {
+  if (is_initialized_) {
+    return "[Already initialized!]\n";
+  }
+
+  is_initialized_ = true;
+  InitializeParams params;
+  params.processId = static_cast<uinteger>(QCoreApplication::applicationPid());
+  params.rootUri = root;
+  return SendRequest("initialize", params);
+}
+
+Client::RequestType Client::Shutdown() {
+  is_initialized_ = false;
+  return SendRequest("shutdown", {});
+}
+
+Client::RequestType Client::RangeFormatting(DocumentUri uri, Range range) {
+  return SendRequest("textDocument/RangeFormatting",
+                     DocumentRangeFormattingParams{uri, range});
+}
+
+Client::RequestType Client::FoldingRange(DocumentUri uri) {
+  return SendRequest("textDocument/foldingRange", FoldingRangeParams{uri});
+}
+
+Client::RequestType Client::SelectionRange(DocumentUri uri,
+                                           std::vector<Position> positions) {
+  return SendRequest("textDocument/selectionRange",
+                     SelectionRangeParams{uri, std::move(positions)});
+}
+
+Client::RequestType Client::Formatting(DocumentUri uri) {
+  return SendRequest("textDocument/formatting", DocumentFormattingParams{uri});
+}
+
+Client::RequestType Client::CodeAction(DocumentUri uri, Range range,
+                                       CodeActionContext context) {
+  return SendRequest("textDocument/codeAction",
+                     CodeActionParams{uri, range, std::move(context)});
+}
+
+Client::RequestType Client::Completion(DocumentUri uri, Position position,
+                                       CompletionContext context) {
+  //                            CompletionParams params;
+  return SendRequest("textDocument/completion",
+                     CompletionParams{uri, position, context});
+}
+
 // common notification messages
 
 void Client::Exit() { SendNotification("exit", {}); }
@@ -22,13 +77,20 @@ void Client::Exit() { SendNotification("exit", {}); }
 void Client::Initialized() { SendNotification("initialized", {}); }
 
 void Client::DidOpen(DocumentUri uri, std::string_view code) {
-  DidOpenTextDocumentParams params;
-  params.textDocument.uri = uri;
-  params.textDocument.text = code;
-  params.textDocument.languageId = "cpp";
-  json json_doc;
-  nlohmann::to_json(json_doc, params);
-  SendNotification("textDocument/didOpen", json_doc);
+  SendNotification("textDocument/didOpen",
+                   DidOpenTextDocumentParams{uri, code, 0, "cpp"});
+}
+
+void Client::DidClose(DocumentUri uri) {
+  SendNotification("testDocument/didClose", DidCloseTextDocumentParams{uri});
+}
+
+void Client::DidChange(DocumentUri uri,
+                       std::vector<TextDocumentContentChangeEvent> changes,
+                       bool wantDiagnostics) {
+  SendNotification(
+      "textDocument/didChange",
+      DidChangeTextDocumentParams{uri, std::move(changes), wantDiagnostics});
 }
 
 // general notificator and requester

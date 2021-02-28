@@ -19,7 +19,7 @@ namespace lsp {
 
 using json = nlohmann::json;
 
-using uinteger = uint32_t;
+using uinteger = uint64_t;
 using DocumentUri = std::string_view;
 using TextType = std::string_view;
 
