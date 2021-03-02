@@ -509,6 +509,7 @@ void to_json(json &j, const RenameParams &value) {
        {"newName", value.newName}};
 }
 void from_json(const json &, RenameParams &) {}
+
 void to_json(json &j, const TypeHierarchyParams &value) {
   j = {{"resolve", value.resolve},
        {"direction", value.direction},
@@ -516,5 +517,15 @@ void to_json(json &j, const TypeHierarchyParams &value) {
        {"position", value.position}};
 }
 void from_json(const json &, TypeHierarchyParams &) {}
+
+QT_BEGIN_NAMESPACE
+void to_json(nlohmann::json &j, const QByteArray &qba) {
+  j = nlohmann::json{qba.toStdString()};
+}
+
+void from_json(const nlohmann::json &j, QByteArray &qba) {
+  qba = QByteArray::fromStdString(j.get<std::string>());
+}
+QT_END_NAMESPACE
 
 }  // namespace lsp

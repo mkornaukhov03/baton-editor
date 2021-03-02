@@ -42,7 +42,7 @@ class Client : public QObject {
                          CompletionContext context = {});
 
   // common(more highly abstract than general notificator) notification messages
-  // specified by LSP-protocol to comm
+  // specified by LSP-protocol
   void Exit();
   void Initialized();
   void DidOpen(DocumentUri uri, std::string_view code);
@@ -54,6 +54,21 @@ class Client : public QObject {
   // general notificator and requester
   void SendNotification(std::string_view method, json json_doc);
   RequestType SendRequest(std::string_view method, json json_doc);
+
+ signals:
+  void OnNotify(const std::string &method, json params);
+  void OnResponse(json id, json params);
+  void OnRequest(const std::string &method, json params, json id);
+  void OnError(json id, json error);
+  void OnServerError(QProcess::ProcessError error);
+  void OnServerFinished(int exitCode, QProcess::ExitStatus status);
+  void NewStderr(const std::string &content);
+
+ private slots:
+  void OnClientReadyReadStdout();
+  void OnClientReadyReadStderr(){};
+  void OnClientError(QProcess::ProcessError error){};
+  void OnClientFinished(int exitCode, QProcess::ExitStatus status){};
 
  private:
   std::unique_ptr<QProcess> process_;

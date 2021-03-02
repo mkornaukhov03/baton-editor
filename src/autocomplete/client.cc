@@ -1,11 +1,18 @@
 #include "client.h"
 
+#include <QByteArray>
 #include <QCoreApplication>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <cstring>
 #include <memory>
 
+// for debug
+#include <cassert>
+#include <iostream>
+
 #include "json_serializers.h"
+#include "nlohmann/json.hpp"
 
 namespace lsp {
 Client::Client(const QString &path, const QStringList &args)
@@ -16,6 +23,74 @@ Client::Client(const QString &path, const QStringList &args)
 Client::~Client() {
   if (process_) {
     process_->kill();
+  }
+}
+
+// private slots
+void Client::OnClientReadyReadStdout() {
+  // FIXME should create new thread and use waitForReadyRead
+  QByteArray buffer = process_->readAllStandardOutput();
+  int msg_start =
+      buffer.indexOf("\r\n\r\n") + static_cast<int>(std::strlen("\r\n\r\n"));
+  int len_start = buffer.indexOf("Content-Length: ") +
+                  static_cast<int>(std::strlen("Content-Length: "));
+  int len_end = buffer.indexOf("\r\n");
+  assert(buffer.indexOf("\r\n\r\n") != -1 &&
+         "Server answer does not requre protocol");
+  assert(buffer.indexOf("Content-Length: ") != -1 &&
+         "Server answer does not requre protocol");
+  bool ok = false;
+  int content_length = buffer.mid(len_start, len_end - len_start).toInt(&ok);
+  assert(ok && "Server answer does not requre protocol");
+
+  QByteArray payload = buffer.mid(msg_start);
+  assert(payload.size() != content_length && "Not full message!");
+
+  /*
+    if (obj.contains("id"))
+    {
+        if (obj.contains("method"))
+        {
+            emit onRequest(obj["method"].toString(), obj["param"].toObject(),
+    obj["id"].toObject());
+        }
+        else if (obj.contains("result"))
+        {
+            emit onResponse(obj["id"].toObject(), obj["result"].toObject());
+        }
+        else if (obj.contains("error"))
+        {
+            emit onError(obj["id"].toObject(), obj["error"].toObject());
+        }
+    }
+    else if (obj.contains("method"))
+    {
+        // notification
+        if (obj.contains("params"))
+        {
+            emit onNotify(obj["method"].toString(), obj["params"].toObject());
+        }
+    }
+  */
+
+  nlohmann::json msg(payload);  // possibly raise an exception
+  if (msg.contains("id")) {
+    if (msg.contains("method")) {
+      std::cerr << "request with method: " << msg["method"].get<std::string>()
+                << '\n';
+      emit OnRequest(msg["method"].get<std::string>(), msg["params"],
+                     msg["id"]);
+    } else if (msg.contains("result")) {
+      std::cerr << "response with result: " << msg["result"].dump() << '\n';
+      emit OnResponse(msg["id"], msg["result"]);
+    } else if (msg.contains("error")) {
+      std::cerr << "error ocured! " << msg["error"].dump() << '\n';
+      emit OnError(msg["id"], msg["error"]);
+    }
+  } else if (msg.contains("method")) {
+    if (msg.contains("params")) {
+      emit OnNotify(msg["method"].get<std::string>(), msg["params"]);
+    }
   }
 }
 
@@ -39,8 +114,7 @@ Client::RequestType Client::Shutdown() {
 }
 
 Client::RequestType Client::RangeFormatting(DocumentUri uri, Range range) {
-  return SendRequest("textDocument/RangeFormatting",
-                     DocumentRangeFormattingParams{uri, range});
+  return SendRequest("textDocument/RangeFormatting", {uri, range});
 }
 
 Client::RequestType Client::FoldingRange(DocumentUri uri) {
@@ -50,11 +124,11 @@ Client::RequestType Client::FoldingRange(DocumentUri uri) {
 Client::RequestType Client::SelectionRange(DocumentUri uri,
                                            std::vector<Position> positions) {
   return SendRequest("textDocument/selectionRange",
-                     SelectionRangeParams{uri, std::move(positions)});
+                     {uri, std::move(positions)});
 }
 
 Client::RequestType Client::Formatting(DocumentUri uri) {
-  return SendRequest("textDocument/formatting", DocumentFormattingParams{uri});
+  return SendRequest("textDocument/formatting", {uri});
 }
 
 Client::RequestType Client::CodeAction(DocumentUri uri, Range range,
@@ -66,8 +140,7 @@ Client::RequestType Client::CodeAction(DocumentUri uri, Range range,
 Client::RequestType Client::Completion(DocumentUri uri, Position position,
                                        CompletionContext context) {
   //                            CompletionParams params;
-  return SendRequest("textDocument/completion",
-                     CompletionParams{uri, position, context});
+  return SendRequest("textDocument/completion", {uri, position, context});
 }
 
 // common notification messages
@@ -77,8 +150,7 @@ void Client::Exit() { SendNotification("exit", {}); }
 void Client::Initialized() { SendNotification("initialized", {}); }
 
 void Client::DidOpen(DocumentUri uri, std::string_view code) {
-  SendNotification("textDocument/didOpen",
-                   DidOpenTextDocumentParams{uri, code, 0, "cpp"});
+  SendNotification("textDocument/didOpen", {uri, code, 0, "cpp"});
 }
 
 void Client::DidClose(DocumentUri uri) {
@@ -88,9 +160,8 @@ void Client::DidClose(DocumentUri uri) {
 void Client::DidChange(DocumentUri uri,
                        std::vector<TextDocumentContentChangeEvent> changes,
                        bool wantDiagnostics) {
-  SendNotification(
-      "textDocument/didChange",
-      DidChangeTextDocumentParams{uri, std::move(changes), wantDiagnostics});
+  SendNotification("textDocument/didChange",
+                   {uri, std::move(changes), wantDiagnostics});
 }
 
 // general notificator and requester
