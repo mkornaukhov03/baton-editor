@@ -46,32 +46,7 @@ void Client::OnClientReadyReadStdout() {
   QByteArray payload = buffer.mid(msg_start);
   assert(payload.size() != content_length && "Not full message!");
 
-  /*
-    if (obj.contains("id"))
-    {
-        if (obj.contains("method"))
-        {
-            emit onRequest(obj["method"].toString(), obj["param"].toObject(),
-    obj["id"].toObject());
-        }
-        else if (obj.contains("result"))
-        {
-            emit onResponse(obj["id"].toObject(), obj["result"].toObject());
-        }
-        else if (obj.contains("error"))
-        {
-            emit onError(obj["id"].toObject(), obj["error"].toObject());
-        }
-    }
-    else if (obj.contains("method"))
-    {
-        // notification
-        if (obj.contains("params"))
-        {
-            emit onNotify(obj["method"].toString(), obj["params"].toObject());
-        }
-    }
-  */
+
 
   nlohmann::json msg(payload);  // possibly raise an exception
   if (msg.contains("id")) {
