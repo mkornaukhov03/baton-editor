@@ -1,13 +1,13 @@
 #ifndef BATON_INTERFACE_H
 #define BATON_INTERFACE_H
 
-#include <QProcess>
 #include <QObject>
+#include <QProcess>
 #include <QTimer>
 #include <string>
 #include <vector>
 
-//  1) Need a RO access to file + position of cursor
+// class to parse from json to C++/Qt containers
 
 class LSPHandler : public QObject {
   Q_OBJECT
@@ -19,26 +19,25 @@ class LSPHandler : public QObject {
   LSPHandler &operator=(LSPHandler &&) = delete;
   LSPHandler &operator=(LSPHandler &) = delete;
 
-  ~LSPHandler() final;
+  ~LSPHandler() final = default;
 
  signals:
   void completion(const std::vector<std::string> &);
   void diagnostic(const std::vector<std::string> &);
 
  public slots:
-  void OnNotify(const QString &method, const QJsonObject &param);
-  void OnResponse(const QJsonObject &id, const QJsonObject &response);
-  void OnRequest(const QString &method, const QJsonObject &param,
-                 const QJsonObject &id);
-  void OnError(const QJsonObject &id, const QJsonObject &error);
-  void OnServerError(QProcess::ProcessError error);
-  void OnServerFinished(int exitCode, QProcess::ExitStatus status);
+  void OnNotify(const QString &, const QJsonObject &){};
+  void OnResponse(const QJsonObject &, const QJsonObject &){};
+  void OnRequest(const QString &, const QJsonObject &, const QJsonObject &){};
+  void OnError(const QJsonObject &, const QJsonObject &){};
+  void OnServerError(QProcess::ProcessError){};
+  void OnServerFinished(int, QProcess::ExitStatus){};
 
-  void textChanged();
-  void requestDiagonistics();
+  void textChanged(){};
+  void requestDiagonistics(){};
 
  private:
-  void set_connections();
+  void set_connections(){};
 };
 
 #endif

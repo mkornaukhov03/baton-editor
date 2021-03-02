@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 
+#include <QComboBox>
 #include <QLayout>
 #include <QtWidgets>
 
@@ -52,6 +53,22 @@ bool MainWindow::save() {
   }
 }
 
+void MainWindow::textSize(const QString &p) {
+  qreal pointSize = p.toFloat();
+  if (p.toFloat() > 0) {
+    QTextCharFormat fmt;
+    fmt.setFontPointSize(pointSize);
+    mergeFormatOnWordOrSelection(fmt);
+  }
+}
+
+void MainWindow::mergeFormatOnWordOrSelection(const QTextCharFormat &format) {
+  QTextCursor cursor = textEdit->textCursor();
+  if (!cursor.hasSelection()) cursor.select(QTextCursor::WordUnderCursor);
+  cursor.mergeCharFormat(format);
+  textEdit->mergeCurrentCharFormat(format);
+}
+
 bool MainWindow::saveAs() {
   QFileDialog dialog(this);
   dialog.setWindowModality(Qt::WindowModal);
@@ -83,9 +100,24 @@ void MainWindow::createActions() {
       fileMenu->addAction(tr("Save &As..."), this, &MainWindow::saveAs);
   saveAsAct->setShortcuts(QKeySequence::SaveAs);
   saveAsAct->setStatusTip(tr("Save the document under a new name"));
-}
 
-void MainWindow::createStatusBar() { statusBar()->showMessage(tr("Ready")); }
+  tb = addToolBar(tr("Format Actions"));
+  tb->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
+  addToolBarBreak(Qt::TopToolBarArea);
+  addToolBar(tb);
+
+  comboSize = new QComboBox(tb);
+  comboSize->setObjectName("comboSize");
+  tb->addWidget(comboSize);
+  comboSize->setEditable(true);
+
+  const QList<int> standardSizes = QFontDatabase::standardSizes();
+  for (int size : standardSizes) comboSize->addItem(QString::number(size));
+  comboSize->setCurrentIndex(
+      standardSizes.indexOf(QApplication::font().pointSize()));
+
+  connect(comboSize, &QComboBox::textActivated, this, &MainWindow::textSize);
+}
 
 MainWindow::~MainWindow() { delete ui; }
 
@@ -168,6 +200,15 @@ void MainWindow::setCurrentFile(const QString &fileName) {
   QString shownName = curFile;
   if (curFile.isEmpty()) shownName = "untitled.txt";
   setWindowFilePath(shownName);
+}
+
+void MainWindow::currentCharFormatChanged(const QTextCharFormat &format) {
+  fontChanged(format.font());
+}
+
+void MainWindow::fontChanged(const QFont &f) {
+  comboSize->setCurrentIndex(
+      comboSize->findText(QString::number(f.pointSize())));
 }
 
 QString MainWindow::strippedName(const QString &fullFileName) {

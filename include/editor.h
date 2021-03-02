@@ -1,13 +1,20 @@
 #ifndef Editor_H
 #define Editor_H
 
+#include <QMap>
 #include <QPlainTextEdit>
+#include <QPointer>
+#include <QToolBar>
 
 QT_BEGIN_NAMESPACE
 class QPaintEvent;
 class QResizeEvent;
 class QSize;
 class QWidget;
+class QTextCharFormat;
+class QComboBox;
+class QAction;
+class QMenu;
 QT_END_NAMESPACE
 class LineNumberArea;
 

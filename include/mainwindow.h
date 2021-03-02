@@ -15,6 +15,7 @@ class QAction;
 class QMenu;
 class QPlainTextEdit;
 class QSessionManager;
+class QComboBox;
 
 class Ui_MainWindow {
  public:
@@ -60,6 +61,9 @@ class MainWindow : public QMainWindow {
   bool save();
   bool saveAs();
   void documentWasModified();
+  void textSize(const QString &p);
+  void mergeFormatOnWordOrSelection(const QTextCharFormat &format);
+  void currentCharFormatChanged(const QTextCharFormat &format);
 
  private:
   Ui::MainWindow *ui;
@@ -71,9 +75,12 @@ class MainWindow : public QMainWindow {
   bool maybeSave();
   bool saveFile(const QString &fileName);
   void setCurrentFile(const QString &fileName);
+  void fontChanged(const QFont &f);
   QString strippedName(const QString &fullFileName);
 
   Editor *textEdit;
   QString curFile;
+  QComboBox *comboSize;
+  QToolBar *tb;
 };
 #endif  // MAINWINDOW_H
