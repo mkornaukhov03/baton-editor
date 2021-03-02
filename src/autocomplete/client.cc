@@ -46,8 +46,6 @@ void Client::OnClientReadyReadStdout() {
   QByteArray payload = buffer.mid(msg_start);
   assert(payload.size() != content_length && "Not full message!");
 
-
-
   nlohmann::json msg(payload);  // possibly raise an exception
   if (msg.contains("id")) {
     if (msg.contains("method")) {
@@ -67,6 +65,19 @@ void Client::OnClientReadyReadStdout() {
       emit OnNotify(msg["method"].get<std::string>(), msg["params"]);
     }
   }
+}
+
+void Client::OnClientReadyReadStderr() {
+  std::string content = QString(process_->readAllStandardError()).toStdString();
+  if (!content.empty()) emit NewStderr(content);
+}
+
+void Client::OnClientError(QProcess::ProcessError error) {
+  emit OnServerError(error);
+}
+
+void Client::OnClientFinished(int exit_code, QProcess::ExitStatus status) {
+  emit OnServerFinished(exit_code, status);
 }
 
 // common request messages

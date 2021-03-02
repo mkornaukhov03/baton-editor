@@ -66,9 +66,9 @@ class Client : public QObject {
 
  private slots:
   void OnClientReadyReadStdout();
-  void OnClientReadyReadStderr(){};
-  void OnClientError(QProcess::ProcessError error){};
-  void OnClientFinished(int exitCode, QProcess::ExitStatus status){};
+  void OnClientReadyReadStderr();
+  void OnClientError(QProcess::ProcessError error);
+  void OnClientFinished(int exit_code, QProcess::ExitStatus status);
 
  private:
   std::unique_ptr<QProcess> process_;

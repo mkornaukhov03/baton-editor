@@ -1,11 +1,12 @@
+#include "json_serializers.h"
+
 #include <memory>
 #include <string>
 
 #include "enums.h"
 #include "lsp_basic.h"
-#include "json_serializers.h"
 
- // namespace nlohmann
+// namespace nlohmann
 namespace lsp {
 
 // Serializing enums from enums.h to json using built-in nlohmann macro
