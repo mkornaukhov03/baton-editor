@@ -11,16 +11,28 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow), textEdit(new Editor) {
   ui->setupUi(this);
   Directory_tree *directory_tree = new Directory_tree(this);
-  layout()->addWidget(directory_tree);
-  directory_tree->setGeometry(0, 20, 400, 700);
-  layout()->addWidget(textEdit);
-  textEdit->setGeometry(280, 20, 1000, 700);
+  //  layout()->addWidget(directory_tree);
+  //  directory_tree->setGeometry(0, 20, 400, 700);
+  //  layout()->addWidget(textEdit);
+  //  textEdit->setGeometry(280, 20, 1000, 700);
   createActions();
 
   connect(textEdit->document(), &QTextDocument::contentsChanged, this,
           &MainWindow::documentWasModified);
 
   setCurrentFile(QString());
+
+  createStatusBar();
+  central_widget = new QWidget();
+  grid_layout = new QGridLayout(central_widget);
+  grid_layout->addWidget(directory_tree, 0, 0, 1, 1);
+  grid_layout->addWidget(textEdit, 0, 3);
+  grid_layout->setColumnStretch(0, 1);
+  grid_layout->setColumnStretch(3, 5);
+  central_widget->setLayout(grid_layout);
+  setCentralWidget(central_widget);
+  connect(textEdit, SIGNAL(cursorPositionChanged()), this,
+          SLOT(showCursorPosition()));
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
@@ -161,6 +173,7 @@ void MainWindow::loadFile(const QString &fileName) {
   setCurrentFile(fileName);
   statusBar()->showMessage(tr("File loaded"), 2000);
 }
+void MainWindow::createStatusBar() { statusBar()->showMessage(tr("Ready")); }
 
 bool MainWindow::saveFile(const QString &fileName) {
   QString errorMessage;
@@ -213,4 +226,10 @@ void MainWindow::fontChanged(const QFont &f) {
 
 QString MainWindow::strippedName(const QString &fullFileName) {
   return QFileInfo(fullFileName).fileName();
+}
+
+void MainWindow::showCursorPosition() {
+  int line = textEdit->textCursor().blockNumber() + 1;
+  int column = textEdit->textCursor().columnNumber() + 1;
+  statusBar()->showMessage(QString("Line %1  Column %2").arg(line).arg(column));
 }

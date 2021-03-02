@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <QGridLayout>
 #include <QtCore/QVariant>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QMainWindow>
@@ -64,6 +65,7 @@ class MainWindow : public QMainWindow {
   void textSize(const QString &p);
   void mergeFormatOnWordOrSelection(const QTextCharFormat &format);
   void currentCharFormatChanged(const QTextCharFormat &format);
+  void showCursorPosition();
 
  private:
   Ui::MainWindow *ui;
@@ -82,5 +84,7 @@ class MainWindow : public QMainWindow {
   QString curFile;
   QComboBox *comboSize;
   QToolBar *tb;
+  QWidget *central_widget;
+  QGridLayout *grid_layout;
 };
 #endif  // MAINWINDOW_H
