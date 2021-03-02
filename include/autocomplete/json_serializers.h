@@ -196,8 +196,13 @@ void from_json(const json &, TypeHierarchyParams &);
 
 }  // namespace lsp
 QT_BEGIN_NAMESPACE
-void to_json(nlohmann::json &j, const QByteArray &qba);
-void from_json(const nlohmann::json &j, QByteArray &qba);
+inline void to_json(nlohmann::json &j, const QByteArray &qba) {
+  j = nlohmann::json{qba.toStdString()};
+}
+
+inline void from_json(const nlohmann::json &j, QByteArray &qba) {
+  qba = QByteArray::fromStdString(j.get<std::string>());
+}
 QT_END_NAMESPACE
 
 #endif
