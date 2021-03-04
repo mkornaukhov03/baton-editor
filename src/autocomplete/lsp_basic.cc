@@ -5,7 +5,7 @@ namespace lsp {
 
 URIForFile::URIForFile(const std::string &filename)
     : file_name_("file:///" + Encode(filename)) {}
-[[nodiscard]] std::string_view URIForFile::str() const { return file_name_; }
+[[nodiscard]] std::string URIForFile::str() const { return file_name_; }
 
 bool URIForFile::operator==(const URIForFile &oth) const {
   return file_name_ == oth.file_name_;
@@ -21,7 +21,7 @@ void URIForFile::set_from_encoded(const std::string &filename) {
   file_name_ = filename;
 }
 
-std::string URIForFile::Encode(std::string_view str) {
+std::string URIForFile::Encode(std::string str) {
   static auto to_hex = [](uint8_t ch) -> uint8_t {
     if (ch > 9) {
       return ch + 'A';

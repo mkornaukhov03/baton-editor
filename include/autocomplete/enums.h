@@ -2,7 +2,7 @@
 #define BATON_ENUMS_H
 
 // Enums with magic constants, defined by JSON RPC / LSP / Clangd
-
+namespace lsp {
 enum class ErrorCode {
   ParseError = -32700,
   InvalidRequest = -32600,
@@ -140,5 +140,5 @@ enum class FoldingRangeKind {
   Imports,
   Region,
 };
-
+}  // namespace lsp
 #endif  // BATON_ENUMS_H
