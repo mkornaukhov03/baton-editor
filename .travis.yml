@@ -1,7 +1,15 @@
 language: cpp
 
-dist: focal
-
+dist: focal 
+addons:
+    apt:
+        packages:
+            - libxkbcommon-x11-0
+            - libgl1-mesa-dev
+services: 
+    - xvfb
+env:
+    - QT_CI_PACKAGES=qt.qt5.5132.gcc_64,qt.qt5.5132.qtwebengine PATH="$TRAVIS_BUILD_DIR/Qt/5.13.2/gcc_64/bin:${PATH}"
 cache:
     - pip
 before_install:
@@ -13,14 +21,18 @@ install:
     - sudo apt-get update -qq
     - sudo apt-get install -qq cmake
     - cmake --version
-    - sudo apt-get install -qq cmake qt5-default
+    - git clone https://github.com/benlau/qtci.git
+    - source qtci/path.env
+    - install-qt 5.13.2
     - pip install cpplint
 script:
-    - cpplint --filter=-legal/copyright,-readability/todo,-whitespace/line_length,-runtime/threadsafe_fn,-build/header_guard,-build/include_subdir,-whitespace/comments,-whitespace/indent,-readability/alt_tokens --recursive --exclude=third_party/nlohmann/* .
+    - cpplint --filter=-legal/copyright,-readability/todo,-whitespace/line_length, \
+     -runtime/threadsafe_fn,-build/header_guard,-build/include_subdir,-whitespace/comments,\
+     -whitespace/indent,-readability/alt_tokens --recursive \
+     --exclude=third_party/nlohmann/*  .
     - cd build/release 
     - cmake -DCMAKE_BUILD_TYPE=Release ../..
     - make -j4
     - cd ../debug
     - cmake -DCMAKE_BUILD_TYPE=Debug ../..
     - make -j4
-
