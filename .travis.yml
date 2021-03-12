@@ -20,7 +20,7 @@ before_install:
 install:
     - sudo apt-get install -qq cmake
     - cmake --version
-    - sudo apt-get -y install qt515base
+    - sudo apt-get -y install qt515d
     - pip install cpplint
 script:
     - cpplint --filter=-legal/copyright,-readability/todo,-whitespace/line_length, \
