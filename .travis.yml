@@ -20,9 +20,10 @@ before_install:
 install:
     - sudo apt-get install -qq cmake
     - cmake --version
-    - sudo apt-get -y install qt515d
+    - sudo apt-get -y install qt515base
     - pip install cpplint
 script:
+    - source /opt/qt515/bin/qt515-env.sh
     - cpplint --filter=-legal/copyright,-readability/todo,-whitespace/line_length, \
      -runtime/threadsafe_fn,-build/header_guard,-build/include_subdir,-whitespace/comments,\
      -whitespace/indent,-readability/alt_tokens --recursive \
