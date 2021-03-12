@@ -26,18 +26,18 @@ class LSPHandler : public QObject {
   void diagnostic(const std::vector<std::string> &);
 
  public slots:
-  void OnNotify(const QString &, const QJsonObject &){}
-  void OnResponse(const QJsonObject &, const QJsonObject &){}
-  void OnRequest(const QString &, const QJsonObject &, const QJsonObject &){}
-  void OnError(const QJsonObject &, const QJsonObject &){}
-  void OnServerError(QProcess::ProcessError){}
-  void OnServerFinished(int, QProcess::ExitStatus){}
+  void OnNotify(const QString &, const QJsonObject &) {}
+  void OnResponse(const QJsonObject &, const QJsonObject &) {}
+  void OnRequest(const QString &, const QJsonObject &, const QJsonObject &) {}
+  void OnError(const QJsonObject &, const QJsonObject &) {}
+  void OnServerError(QProcess::ProcessError) {}
+  void OnServerFinished(int, QProcess::ExitStatus) {}
 
-  void textChanged(){}
-  void requestDiagonistics(){}
+  void textChanged() {}
+  void requestDiagonistics() {}
 
  private:
-  void set_connections(){}
+  void set_connections() {}
 };
 
 #endif
