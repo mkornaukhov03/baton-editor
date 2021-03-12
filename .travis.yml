@@ -8,28 +8,25 @@ addons:
             - libgl1-mesa-dev
 services: 
     - xvfb
-env:
-    - QT_CI_PACKAGES=qt.qt5.5132.gcc_64,qt.qt5.5132.qtwebengine PATH="$TRAVIS_BUILD_DIR/Qt/5.13.2/gcc_64/bin:${PATH}"
 cache:
     - pip
 before_install:
     - git config remote.origin.fetch +refs/heads/*:refs/remotes/origin/*
     - git fetch origin master
-install:
     - sudo bash -c 'echo "deb http://us.archive.ubuntu.com/ubuntu/ bionic-updates universe" >> /etc/apt/sources.list'
     - sudo bash -c 'echo "deb-src http://us.archive.ubuntu.com/ubuntu/ bionic-updates universe" >> /etc/apt/sources.list'
+    - sudo add-apt-repository --yes ppa:beineri/opt-qt-5.15.2-focal
     - sudo apt-get update -qq
+install:
     - sudo apt-get install -qq cmake
     - cmake --version
-    - git clone https://github.com/benlau/qtci.git
-    - source qtci/path.env
-    - travis_wait 40 install-qt 5.13.2
+    - sudo apt-get -y install qt515base
     - pip install cpplint
 script:
-    - cpplint --filter=-legal/copyright,-readability/todo,-whitespace/line_length, \
+    - source /opt/qt515/bin/qt515-env.sh
+    - cpplint --filter=-legal/copyright,-readability/todo,-whitespace/line_length,\
      -runtime/threadsafe_fn,-build/header_guard,-build/include_subdir,-whitespace/comments,\
-     -whitespace/indent,-readability/alt_tokens --recursive \
-     --exclude=third_party/nlohmann/*  .
+     -whitespace/indent,-readability/alt_tokens --recursive --exclude=./third_party/nlohmann/*  .
     - cd build/release 
     - cmake -DCMAKE_BUILD_TYPE=Release ../..
     - make -j4
