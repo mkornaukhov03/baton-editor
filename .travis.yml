@@ -23,9 +23,9 @@ install:
     - cmake --version
     - git clone https://github.com/benlau/qtci.git
     - source qtci/path.env
-    - install-qt 5.12.4
     - pip install cpplint
 script:
+    - install-qt 5.12.4
     - cpplint --filter=-legal/copyright,-readability/todo,-whitespace/line_length, \
      -runtime/threadsafe_fn,-build/header_guard,-build/include_subdir,-whitespace/comments,\
      -whitespace/indent,-readability/alt_tokens --recursive \
