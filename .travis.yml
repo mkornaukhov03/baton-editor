@@ -9,7 +9,8 @@ addons:
 services: 
     - xvfb
 env:
-    - QT_CI_PACKAGES=qt.qt5.5132.gcc_64,qt.qt5.5132.qtwebengine PATH="$TRAVIS_BUILD_DIR/Qt/5.13.2/gcc_64/bin:${PATH}"
+    - QT_CI_PACKAGES=qt.qt5.5132.gcc_64,qt.qt5.5132.qtscript PATH="$TRAVIS_BUILD_DIR/Qt/5.13.2/gcc_64/bin:${PATH}"
+
 cache:
     - pip
 before_install:
@@ -23,7 +24,7 @@ install:
     - cmake --version
     - git clone https://github.com/benlau/qtci.git
     - source qtci/path.env
-    - travis_wait 40 install-qt 5.13.2
+    - install-qt 5.13.2
     - pip install cpplint
 script:
     - cpplint --filter=-legal/copyright,-readability/todo,-whitespace/line_length, \
