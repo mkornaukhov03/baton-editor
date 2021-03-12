@@ -24,7 +24,7 @@ install:
     - pip install cpplint
 script:
     - source /opt/qt515/bin/qt515-env.sh
-    - cpplint --filter=-legal/copyright,-readability/todo,-whitespace/line_length, \
+    - cpplint --filter=-legal/copyright,-readability/todo,-whitespace/line_length,\
      -runtime/threadsafe_fn,-build/header_guard,-build/include_subdir,-whitespace/comments,\
      -whitespace/indent,-readability/alt_tokens --recursive \
      --exclude=third_party/nlohmann/*  .
