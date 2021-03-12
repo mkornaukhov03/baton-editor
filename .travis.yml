@@ -23,7 +23,7 @@ install:
     - cmake --version
     - git clone https://github.com/benlau/qtci.git
     - source qtci/path.env
-    - travis_wait 40 mvn install-qt 5.13.2
+    - travis_wait 40 install-qt 5.13.2
     - pip install cpplint
 script:
     - cpplint --filter=-legal/copyright,-readability/todo,-whitespace/line_length, \
