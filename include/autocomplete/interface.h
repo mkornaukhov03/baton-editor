@@ -6,8 +6,10 @@
 #include <QTimer>
 #include <string>
 #include <vector>
-
+#include "client.h"
 // class to parse from json to C++/Qt containers
+
+namespace lsp {
 
 class LSPHandler : public QObject {
   Q_OBJECT
@@ -19,6 +21,8 @@ class LSPHandler : public QObject {
   LSPHandler &operator=(LSPHandler &&) = delete;
   LSPHandler &operator=(LSPHandler &) = delete;
 
+  LSPHandler(const std::string& root, const std::string& file_name);
+
   ~LSPHandler() final = default;
 
  signals:
@@ -26,18 +30,24 @@ class LSPHandler : public QObject {
   void diagnostic(const std::vector<std::string> &);
 
  public slots:
-  void OnNotify(const QString &, const QJsonObject &){};
-  void OnResponse(const QJsonObject &, const QJsonObject &){};
-  void OnRequest(const QString &, const QJsonObject &, const QJsonObject &){};
-  void OnError(const QJsonObject &, const QJsonObject &){};
-  void OnServerError(QProcess::ProcessError){};
-  void OnServerFinished(int, QProcess::ExitStatus){};
+  // from LSP client, connected inside
+  void GetNotify(const std::string &, json) { }
+  void GetResponse(json, json) { }
+  void GetRequest(const std::string &, json, json) { }
+  void GetError(json, json) { }
+  void GetServerError(QProcess::ProcessError) { }
+  void GetServerFinished(int, QProcess::ExitStatus) { }
+  void GetStderrOutput(const std::string &) { }
 
-  void textChanged(){};
-  void requestDiagonistics(){};
+  // from user
+  void textChanged() { }
+  void requestDiagonistics() { }
 
  private:
-  void set_connections(){};
+  std::string root_uri_;
+  std::string file_uri_;
+  Client client_;
+  void set_connections();
 };
-
+}// namespace lsp
 #endif

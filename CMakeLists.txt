@@ -22,12 +22,16 @@ include_directories("include/"
 # Add your header files here
 set(HEADERS "include/autocomplete/enums.h"
             "include/autocomplete/interface.h"
-            "include/autocomplete/lsp_basic.h")
+            "include/autocomplete/lsp_basic.h"
+            "include/autocomplete/client.h"
+            "include/autocomplete/json_serializers.h")
 
 # Add your source files here
 set(SOURCES "src/main.cc"
             "src/autocomplete/json_serializers.cc"
-            "src/autocomplete/lsp_basic.cc")
+            "src/autocomplete/lsp_basic.cc"
+            "src/autocomplete/client.cc"
+            "src/autocomplete/interface.cc")
 
 find_package(Qt5Core CONFIG REQUIRED)
 find_package(Qt5Widgets CONFIG REQUIRED)
