@@ -30,7 +30,8 @@ set(HEADERS "include/autocomplete/enums.h"
 set(SOURCES "src/main.cc"
             "src/autocomplete/json_serializers.cc"
             "src/autocomplete/lsp_basic.cc"
-            "src/autocomplete/client.cc")
+            "src/autocomplete/client.cc"
+            "src/autocomplete/interface.cc")
 
 find_package(Qt5Core CONFIG REQUIRED)
 find_package(Qt5Widgets CONFIG REQUIRED)

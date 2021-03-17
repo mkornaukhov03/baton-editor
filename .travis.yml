@@ -1,29 +1,35 @@
 language: cpp
 
 dist: focal 
-
+addons:
+    apt:
+        packages:
+            - libxkbcommon-x11-0
+            - libgl1-mesa-dev
+services: 
+    - xvfb
 cache:
     - pip
 before_install:
     - git config remote.origin.fetch +refs/heads/*:refs/remotes/origin/*
     - git fetch origin master
-install:
     - sudo bash -c 'echo "deb http://us.archive.ubuntu.com/ubuntu/ bionic-updates universe" >> /etc/apt/sources.list'
     - sudo bash -c 'echo "deb-src http://us.archive.ubuntu.com/ubuntu/ bionic-updates universe" >> /etc/apt/sources.list'
+    - sudo add-apt-repository --yes ppa:beineri/opt-qt-5.15.2-focal
     - sudo apt-get update -qq
+install:
     - sudo apt-get install -qq cmake
     - cmake --version
-    - sudo apt-get install -qq cmake qt5-default
+    - sudo apt-get -y install qt515base
     - pip install cpplint
 script:
-    - cpplint --filter=-legal/copyright,-readability/todo,-whitespace/line_length, \
+    - source /opt/qt515/bin/qt515-env.sh
+    - cpplint --filter=-legal/copyright,-readability/todo,-whitespace/line_length,\
      -runtime/threadsafe_fn,-build/header_guard,-build/include_subdir,-whitespace/comments,\
-     -whitespace/indent,-readability/alt_tokens --recursive \
-     --exclude=third_party/nlohmann/*  .
+     -whitespace/indent,-readability/alt_tokens --recursive --exclude=./third_party/nlohmann/*  .
     - cd build/release 
     - cmake -DCMAKE_BUILD_TYPE=Release ../..
     - make -j4
     - cd ../debug
     - cmake -DCMAKE_BUILD_TYPE=Debug ../..
     - make -j4
-

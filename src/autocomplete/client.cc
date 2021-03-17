@@ -69,9 +69,7 @@ void Client::OnClientReadyReadStdout() {
   assert(payload.size() == content_length && "Not full message!");
   //   try {
   json msg(msg2.toJson().toStdString());  // possibly raise an exception
-  auto rpc =
-      json::parse(json::parse(msg.dump())
-                      .get<std::string>());  //["jsonrpc"].get<std::string>();
+  auto rpc = json::parse(json::parse(msg.dump()).get<std::string>());
   std::cerr << rpc << '\n';
   msg = rpc;
   if (msg.contains("id")) {
