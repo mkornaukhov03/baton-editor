@@ -9,7 +9,7 @@ template <typename T>
 struct adl_serializer<std::optional<T>> {
     static void to_json(json &j, const std::optional<T> &opt) {
         if (opt == std::nullopt) {
-            j = nullptr;
+            j = "";
         } else {
             j = *opt;
         }

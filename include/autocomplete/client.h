@@ -50,7 +50,7 @@ public:
     void DidClose(DocumentUri uri);
     void DidChange(DocumentUri uri,
                    std::vector<TextDocumentContentChangeEvent> changes,
-                   bool wantDiagnostics = false);
+                   bool wantDiagnostics = true);
 
     void LogInfo();
     // general notificator and requester

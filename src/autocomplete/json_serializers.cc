@@ -184,10 +184,17 @@ void to_json(json &j, const DidCloseTextDocumentParams &value) {
 void from_json(const json &, DidCloseTextDocumentParams &) {}
 
 void to_json(json &j, const TextDocumentContentChangeEvent &value) {
-    j = {{"range", value.range},
-        {"rangeLength", value.rangeLength},
+    if (value.rangeLength.has_value()) {
+      j = {{"range", value.range},
+          {"rangeLength", value.rangeLength},
+          {"text", value.text}
+      };
+    }
+    else {
+      j = {{"range", value.range},
         {"text", value.text}
-    };
+      };
+    }
 }
 void from_json(const json &, TextDocumentContentChangeEvent &) {}
 
@@ -532,3 +539,9 @@ void from_json(const json &, TypeHierarchyParams &) {}
 
 
 }  // namespace lsp
+
+
+
+
+
+
