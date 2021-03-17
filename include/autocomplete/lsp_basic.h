@@ -176,13 +176,13 @@ struct DidCloseTextDocumentParams {
 struct TextDocumentContentChangeEvent {
     std::optional<Range> range = Range{};
 
-    std::optional<uinteger> rangeLength = uinteger{};
+    std::optional<uinteger> rangeLength;
     std::string text;
 };
 struct DidChangeTextDocumentParams {
     TextDocumentIdentifier textDocument;
     std::vector<TextDocumentContentChangeEvent> contentChanges;
-    std::optional<bool> wantDiagnostics {false};
+    std::optional<bool> wantDiagnostics {true};
 };
 struct FileEvent {
     URIForFile uri;
