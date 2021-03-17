@@ -31,17 +31,17 @@ class LSPHandler : public QObject {
 
  public slots:
   // from LSP client, connected inside
-  void GetNotify(const std::string &, json){}
-  void GetResponse(json, json){}
-  void GetRequest(const std::string &, json, json){}
-  void GetError(json, json){}
-  void GetServerError(QProcess::ProcessError){}
-  void GetServerFinished(int, QProcess::ExitStatus){}
-  void GetStderrOutput(const std::string &){}
+  void GetNotify(const std::string &, json){ }
+  void GetResponse(json, json){ }
+  void GetRequest(const std::string &, json, json){ }
+  void GetError(json, json){ }
+  void GetServerError(QProcess::ProcessError){ }
+  void GetServerFinished(int, QProcess::ExitStatus){ }
+  void GetStderrOutput(const std::string &){ }
 
   // from user
-  void textChanged(){}
-  void requestDiagonistics(){}
+  void textChanged(){ }
+  void requestDiagonistics(){ }
 
  private:
   std::string root_uri_;
@@ -49,5 +49,5 @@ class LSPHandler : public QObject {
   Client client_;
   void set_connections();
 };
-}
+}// namespace lsp
 #endif

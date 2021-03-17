@@ -70,7 +70,7 @@ private slots:
     void OnClientReadyReadStderr();
     void OnClientError(QProcess::ProcessError error);
     void OnClientFinished(int exit_code, QProcess::ExitStatus status);
-    
+
 private:
     std::unique_ptr<QProcess> process_;
     std::vector<std::string> send_to_server_buffer_;
