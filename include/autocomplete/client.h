@@ -7,6 +7,7 @@
 #include <QProcess>
 #include <memory>
 #include <vector>
+#include <string>
 
 #include "enums.h"
 #include "lsp_basic.h"

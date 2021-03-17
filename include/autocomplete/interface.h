@@ -22,7 +22,7 @@ class LSPHandler : public QObject {
   LSPHandler &operator=(LSPHandler &) = delete;
 
   LSPHandler(const std::string& root, const std::string& file_name);
-  
+
   ~LSPHandler() final = default;
 
  signals:
@@ -40,8 +40,8 @@ class LSPHandler : public QObject {
   void GetStderrOutput(const std::string &) { }
 
   // from user
-  void textChanged(){ }
-  void requestDiagonistics(){ }
+  void textChanged() { }
+  void requestDiagonistics() { }
 
  private:
   std::string root_uri_;

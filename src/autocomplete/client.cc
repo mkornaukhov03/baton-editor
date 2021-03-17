@@ -18,8 +18,6 @@ Client::Client(const QString &path, const QStringList &args)
   process_->setArguments(args);
   SetConnections();
 
-  using namespace std::chrono_literals;
-
   process_->start();
   process_->waitForStarted();
 }
