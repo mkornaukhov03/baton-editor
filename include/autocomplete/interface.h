@@ -42,7 +42,7 @@ class LSPHandler : public QObject {
   // from user
   void RequestCompletion(std::size_t, std::size_t);
   void FileChanged(const std::string & new_content, std::size_t, std::size_t);
- 
+
  private:
   std::string root_;
   std::string file_;
