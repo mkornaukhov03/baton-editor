@@ -62,6 +62,7 @@ class MainWindow : public QMainWindow {
   void open();
   bool save();
   bool saveAs();
+  void split();
   void documentWasModified();
   void textSize(const QString &p);
   void mergeFormatOnWordOrSelection(const QTextCharFormat &format);
@@ -82,11 +83,12 @@ class MainWindow : public QMainWindow {
   QString strippedName(const QString &fullFileName);
 
   Editor *textEdit;
+  Editor *splittedTextEdit;
   QString curFile;
   QComboBox *comboSize;
   QToolBar *tb;
   QWidget *central_widget;
   QGridLayout *grid_layout;
-  //  QWidget *terminal;
+  QWidget *terminal;
 };
 #endif  // MAINWINDOW_H

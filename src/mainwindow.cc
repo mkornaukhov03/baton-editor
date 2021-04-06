@@ -12,7 +12,7 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow), textEdit(new Editor) {
   ui->setupUi(this);
   Directory_tree *directory_tree = new Directory_tree(this);
-  Terminal *terminal = new Terminal;
+  //  Terminal *terminal = new Terminal;
   createActions();
 
   connect(textEdit->document(), &QTextDocument::contentsChanged, this,
@@ -64,6 +64,15 @@ bool MainWindow::save() {
   } else {
     return saveFile(curFile);
   }
+}
+
+void MainWindow::split() {
+  splittedTextEdit = new Editor;
+  grid_layout->setColumnStretch(3, 2);
+  grid_layout->addWidget(splittedTextEdit, 0, 3);
+  grid_layout->addWidget(textEdit, 0, 5);
+  grid_layout->setColumnStretch(3, 2);
+  grid_layout->setColumnStretch(5, 2);
 }
 
 void MainWindow::textSize(const QString &p) {
@@ -130,6 +139,13 @@ void MainWindow::createActions() {
       standardSizes.indexOf(QApplication::font().pointSize()));
 
   connect(comboSize, &QComboBox::textActivated, this, &MainWindow::textSize);
+
+  const QIcon splitIcon =
+      QIcon::fromTheme("edit-copy", QIcon(":/images/copy.png"));
+  QAction *splitAct = new QAction(splitIcon, tr("Split"), this);
+  splitAct->setStatusTip("Split right");
+  connect(splitAct, &QAction::triggered, this, &MainWindow::split);
+  tb->addAction(splitAct);
 }
 
 MainWindow::~MainWindow() { delete ui; }
