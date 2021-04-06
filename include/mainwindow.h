@@ -10,6 +10,7 @@
 #include <QtWidgets/QWidget>
 
 #include "editor.h"
+#include "terminal.h"
 
 QT_BEGIN_NAMESPACE
 class QAction;
@@ -86,5 +87,6 @@ class MainWindow : public QMainWindow {
   QToolBar *tb;
   QWidget *central_widget;
   QGridLayout *grid_layout;
+  //  QWidget *terminal;
 };
 #endif  // MAINWINDOW_H

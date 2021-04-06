@@ -28,11 +28,15 @@ SOFTWARE.
 
 #include "editor.h"
 #include "mainwindow.h"
+#include "terminal.h"
 
 int main(int argv, char **args) {
   QApplication app(argv, args);
 
   MainWindow mainwindow;
   mainwindow.show();
+
+  Terminal term;
+  term.show();
   return app.exec();
 }

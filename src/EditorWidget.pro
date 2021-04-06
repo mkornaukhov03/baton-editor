@@ -14,16 +14,19 @@ SOURCES += \
     editor.cc \
     main.cc \
     directory_tree.cc \
-    mainwindow.cc
+    mainwindow.cc \
+    terminal.cpp
 
 HEADERS += \
     ../include/editor.h \
     ../include/mainwindow.h \
-    ../include/directory_tree.h
+    ../include/directory_tree.h \
+    ../include/terminal.h
 
 FORMS += \
     directory_tree.ui \
-    mainwindow.ui
+    mainwindow.ui \
+    terminal.ui
 
 
 # Default rules for deployment.

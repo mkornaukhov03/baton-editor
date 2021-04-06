@@ -6,15 +6,13 @@
 
 #include "directory_tree.h"
 #include "editor.h"
+#include "terminal.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow), textEdit(new Editor) {
   ui->setupUi(this);
   Directory_tree *directory_tree = new Directory_tree(this);
-  //  layout()->addWidget(directory_tree);
-  //  directory_tree->setGeometry(0, 20, 400, 700);
-  //  layout()->addWidget(textEdit);
-  //  textEdit->setGeometry(280, 20, 1000, 700);
+  Terminal *terminal = new Terminal;
   createActions();
 
   connect(textEdit->document(), &QTextDocument::contentsChanged, this,
@@ -29,6 +27,9 @@ MainWindow::MainWindow(QWidget *parent)
   grid_layout->addWidget(textEdit, 0, 3);
   grid_layout->setColumnStretch(0, 1);
   grid_layout->setColumnStretch(3, 5);
+  //  grid_layout->addWidget(terminal, 1, 0, 2, 3);
+  //  grid_layout->setRowStretch(0, 4);
+  //  grid_layout->setRowStretch(1, 1);
   central_widget->setLayout(grid_layout);
   setCentralWidget(central_widget);
   connect(textEdit, SIGNAL(cursorPositionChanged()), this,

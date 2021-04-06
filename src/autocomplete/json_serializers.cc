@@ -5,7 +5,7 @@
 #include "lsp_basic.h"
 
 namespace nlohmann {
-using namespace lsp;
+//using namespace lsp;
 // Serializing enums from enums.h to json using built-in nlohmann macro
 
 NLOHMANN_JSON_SERIALIZE_ENUM(OffsetEncoding,
