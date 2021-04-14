@@ -90,5 +90,7 @@ class MainWindow : public QMainWindow {
   QWidget *central_widget;
   QGridLayout *grid_layout;
   QWidget *terminal;
+
+  bool splitted;
 };
 #endif  // MAINWINDOW_H

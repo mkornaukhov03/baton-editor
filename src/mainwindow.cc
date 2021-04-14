@@ -3,13 +3,17 @@
 #include <QComboBox>
 #include <QLayout>
 #include <QtWidgets>
+#include <utility>
 
 #include "directory_tree.h"
 #include "editor.h"
 #include "terminal.h"
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent), ui(new Ui::MainWindow), textEdit(new Editor) {
+    : QMainWindow(parent),
+      ui(new Ui::MainWindow),
+      textEdit(new Editor),
+      splitted(false) {
   ui->setupUi(this);
   Directory_tree *directory_tree = new Directory_tree(this);
   //  Terminal *terminal = new Terminal;
@@ -67,12 +71,27 @@ bool MainWindow::save() {
 }
 
 void MainWindow::split() {
-  splittedTextEdit = new Editor;
-  grid_layout->setColumnStretch(3, 2);
-  grid_layout->addWidget(splittedTextEdit, 0, 3);
-  grid_layout->addWidget(textEdit, 0, 5);
-  grid_layout->setColumnStretch(3, 2);
-  grid_layout->setColumnStretch(5, 2);
+  if (!splitted) {
+    splitted = true;
+    splittedTextEdit = new Editor;
+    grid_layout->setColumnStretch(3, 2);
+    grid_layout->addWidget(splittedTextEdit, 0, 3);
+    grid_layout->addWidget(textEdit, 0, 5);
+    grid_layout->setColumnStretch(3, 2);
+    grid_layout->setColumnStretch(5, 2);
+  } else {
+    splitted = false;
+    //    grid_layout->removeWidget(grid_layout->itemAt(1)->widget());
+    for (int i = 0; i < 2; i++) {
+      auto it1 = grid_layout->itemAt(1);
+      if (it1) {
+        delete it1->widget();
+        //        delete it1;
+      }
+    }
+    //    grid_layout->addWidget(textEdit, 0, 3);
+    //    grid_layout->setColumnStretch(3, 5);
+  }
 }
 
 void MainWindow::textSize(const QString &p) {
