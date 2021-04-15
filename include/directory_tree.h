@@ -52,7 +52,7 @@ class Directory_tree : public QWidget {
 
  public:
   explicit Directory_tree(QWidget *parent = nullptr);
-  ~Directory_tree();
+  virtual ~Directory_tree();
 
  private:
   Ui::Directory_tree *ui;

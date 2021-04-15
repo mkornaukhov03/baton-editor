@@ -27,7 +27,8 @@ set(HEADERS "include/autocomplete/enums.h"
         "include/autocomplete/json_serializers.h"
         "include/editor.h"
         "include/mainwindow.h"
-        "include/directory_tree.h")
+        "include/directory_tree.h"
+	"include/terminal.h")
 
 # Add your source files here
 set(SOURCES "src/main.cc"
