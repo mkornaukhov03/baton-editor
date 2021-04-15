@@ -36,6 +36,7 @@ set(SOURCES "src/main.cc"
         "src/autocomplete/client.cc"
         "src/autocomplete/interface.cc"
         "src/editor.cc"
+        "src/terminal.cc"
         "src/directory_tree.cc"
         "src/mainwindow.cc")
 
