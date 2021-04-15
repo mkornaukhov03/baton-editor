@@ -15,7 +15,7 @@ SOURCES += \
     main.cc \
     directory_tree.cc \
     mainwindow.cc \
-    terminal.cpp
+    terminal.cc
 
 HEADERS += \
     ../include/editor.h \

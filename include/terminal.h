@@ -13,7 +13,7 @@ class Terminal : public QWidget {
 
  public:
   explicit Terminal(QWidget *parent = nullptr);
-  ~Terminal();
+  virtual ~Terminal();
 
  public slots:
   void setStdout();
