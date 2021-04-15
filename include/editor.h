@@ -27,7 +27,7 @@ class Editor : public QPlainTextEdit {
   void lineNumberAreaPaintEvent(QPaintEvent *event);
   int lineNumberAreaWidth();
 
-  virtual ~Editor(){};
+  virtual ~Editor() {}
 
  protected:
   void resizeEvent(QResizeEvent *event) override;
