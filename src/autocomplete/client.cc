@@ -56,7 +56,9 @@ void Client::OnClientReadyReadStdout() {
          "Server answer does not requre protocol");
   bool ok = false;
 
-  int content_length = buffer.mid(len_start, len_end - len_start).toInt(&ok);
+
+  [[maybe_unused]]int content_length = buffer.mid(len_start, len_end - len_start).toInt(&ok);
+
 
   assert(ok && "Server answer does not requre protocol");
 
