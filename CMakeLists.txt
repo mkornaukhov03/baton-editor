@@ -15,6 +15,7 @@ set(CMAKE_CXX_FLAGS_DEBUG_INIT "-g -fsanitize=address -fsanitize=undefined")
 set(CMAKE_CXX_FLAGS_RELEASE_INIT "-O2")
 
 # Add your included directories here
+
 include_directories("include/"
         "include/autocomplete/"
         "third_party/")
@@ -40,6 +41,7 @@ set(SOURCES "src/main.cc"
         "src/terminal.cc"
         "src/directory_tree.cc"
         "src/mainwindow.cc")
+
 
 find_package(Qt5Core CONFIG REQUIRED)
 find_package(Qt5Widgets CONFIG REQUIRED)
