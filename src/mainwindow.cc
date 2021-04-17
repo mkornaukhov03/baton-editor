@@ -3,6 +3,7 @@
 #include <QComboBox>
 #include <QLayout>
 #include <QtWidgets>
+#include <iostream>
 #include <utility>
 
 #include "directory_tree.h"
@@ -31,9 +32,6 @@ MainWindow::MainWindow(QWidget *parent)
   grid_layout->addWidget(textEdit, 0, 3);
   grid_layout->setColumnStretch(0, 1);
   grid_layout->setColumnStretch(3, 5);
-  //  grid_layout->addWidget(terminal, 1, 0, 2, 3);
-  //  grid_layout->setRowStretch(0, 4);
-  //  grid_layout->setRowStretch(1, 1);
   central_widget->setLayout(grid_layout);
   setCentralWidget(central_widget);
   connect(textEdit, SIGNAL(cursorPositionChanged()), this,
@@ -81,16 +79,10 @@ void MainWindow::split() {
     grid_layout->setColumnStretch(5, 2);
   } else {
     splitted = false;
-    //    grid_layout->removeWidget(grid_layout->itemAt(1)->widget());
-    for (int i = 0; i < 2; i++) {
-      auto it1 = grid_layout->itemAt(1);
-      if (it1) {
-        delete it1->widget();
-        //        delete it1;
-      }
-    }
-    //    grid_layout->addWidget(textEdit, 0, 3);
-    //    grid_layout->setColumnStretch(3, 5);
+    std::swap(textEdit, splittedTextEdit);
+    grid_layout->setColumnStretch(3, 8);
+    grid_layout->removeWidget(splittedTextEdit);
+    splittedTextEdit->hide();
   }
 }
 
