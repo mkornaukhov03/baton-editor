@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QGridLayout>
+#include <QSplitter>
 #include <QtCore/QVariant>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QMainWindow>
@@ -88,7 +89,8 @@ class MainWindow : public QMainWindow {
   QComboBox *comboSize;
   QToolBar *tb;
   QWidget *central_widget;
-  QGridLayout *grid_layout;
+  //  QGridLayout *grid_layout;
+  QSplitter *splitter;
   QWidget *terminal;
 
   bool splitted;

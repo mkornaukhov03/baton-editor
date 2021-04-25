@@ -2,6 +2,7 @@
 
 #include <QComboBox>
 #include <QLayout>
+#include <QSplitter>
 #include <QtWidgets>
 #include <iostream>
 #include <utility>
@@ -27,13 +28,13 @@ MainWindow::MainWindow(QWidget *parent)
 
   createStatusBar();
   central_widget = new QWidget();
-  grid_layout = new QGridLayout(central_widget);
-  grid_layout->addWidget(directory_tree, 0, 0, 1, 1);
-  grid_layout->addWidget(textEdit, 0, 3);
-  grid_layout->setColumnStretch(0, 1);
-  grid_layout->setColumnStretch(3, 5);
-  central_widget->setLayout(grid_layout);
-  setCentralWidget(central_widget);
+  splitter = new QSplitter(centralWidget());
+  splitter->addWidget(directory_tree);
+  splitter->addWidget(textEdit);
+  splitter->setStretchFactor(0, 0);
+  splitter->setStretchFactor(1, 1);
+  setCentralWidget(splitter);
+
   connect(textEdit, SIGNAL(cursorPositionChanged()), this,
           SLOT(showCursorPosition()));
 }
@@ -72,17 +73,12 @@ void MainWindow::split() {
   if (!splitted) {
     splitted = true;
     splittedTextEdit = new Editor;
-    grid_layout->setColumnStretch(3, 2);
-    grid_layout->addWidget(splittedTextEdit, 0, 3);
-    grid_layout->addWidget(textEdit, 0, 5);
-    grid_layout->setColumnStretch(3, 2);
-    grid_layout->setColumnStretch(5, 2);
+    splitter->addWidget(splittedTextEdit);
+    splitter->setStretchFactor(2, 1);
   } else {
     splitted = false;
     std::swap(textEdit, splittedTextEdit);
-    grid_layout->setColumnStretch(3, 8);
-    grid_layout->removeWidget(splittedTextEdit);
-    splittedTextEdit->hide();
+    delete splitter->widget(1);
   }
 }
 
