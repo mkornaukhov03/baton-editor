@@ -20,7 +20,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
 
-
 #include <QApplication>
 #include <QCommandLineOption>
 #include <QCommandLineParser>
@@ -37,8 +36,7 @@ int main(int argv, char **args) {
   MainWindow mainwindow;
   mainwindow.show();
 
-  //  Terminal term;
-  //  term.show();
+  Terminal term;
+  term.show();
   return app.exec();
 }
-

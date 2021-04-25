@@ -39,6 +39,7 @@ class Editor : public QPlainTextEdit {
 
  private:
   QWidget *lineNumberArea;
+  QString curFile;
 };
 
 class LineNumberArea : public QWidget {
