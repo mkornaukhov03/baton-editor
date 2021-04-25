@@ -26,6 +26,7 @@ class Editor : public QPlainTextEdit {
 
   void lineNumberAreaPaintEvent(QPaintEvent *event);
   int lineNumberAreaWidth();
+  QString curFile;
 
   virtual ~Editor() {}
 
@@ -39,7 +40,6 @@ class Editor : public QPlainTextEdit {
 
  private:
   QWidget *lineNumberArea;
-  QString curFile;
 };
 
 class LineNumberArea : public QWidget {

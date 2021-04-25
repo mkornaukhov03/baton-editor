@@ -24,7 +24,7 @@ MainWindow::MainWindow(QWidget *parent)
   connect(textEdit->document(), &QTextDocument::contentsChanged, this,
           &MainWindow::documentWasModified);
 
-  setCurrentFile(QString());
+  setCurrentFile(QString(), textEdit);
 
   createStatusBar();
   central_widget = new QWidget();
@@ -50,7 +50,7 @@ void MainWindow::closeEvent(QCloseEvent *event) {
 void MainWindow::newFile() {
   if (maybeSave()) {
     textEdit->clear();
-    setCurrentFile(QString());
+    setCurrentFile(QString(), textEdit);
   }
 }
 
@@ -62,10 +62,30 @@ void MainWindow::open() {
 }
 
 bool MainWindow::save() {
-  if (curFile.isEmpty()) {
-    return saveAs();
+  QString filename =
+      (textEdit->curFile.isEmpty()) ? "untitled.cpp" : textEdit->curFile;
+  QString splittedFilename = (splittedTextEdit->curFile.isEmpty())
+                                 ? "untitled.cpp"
+                                 : splittedTextEdit->curFile;
+  QMessageBox msgBox;
+  msgBox.setText(tr("Which file would you like to save?"));
+  QAbstractButton *pButtonEdit = msgBox.addButton(
+      tr(filename.toStdString().c_str()), QMessageBox::YesRole);
+  msgBox.addButton(tr(splittedFilename.toStdString().c_str()),
+                   QMessageBox::NoRole);
+  msgBox.exec();
+  if (msgBox.clickedButton() == pButtonEdit) {
+    if (textEdit->curFile.isEmpty()) {
+      return saveAs();
+    } else {
+      return saveFile(textEdit->curFile, textEdit);
+    }
   } else {
-    return saveFile(curFile);
+    if (splittedTextEdit->curFile.isEmpty()) {
+      return saveAs();
+    } else {
+      return saveFile(splittedTextEdit->curFile, splittedTextEdit);
+    }
   }
 }
 
@@ -103,7 +123,22 @@ bool MainWindow::saveAs() {
   dialog.setWindowModality(Qt::WindowModal);
   dialog.setAcceptMode(QFileDialog::AcceptSave);
   if (dialog.exec() != QDialog::Accepted) return false;
-  return saveFile(dialog.selectedFiles().first());
+  QString filename =
+      (textEdit->curFile.isEmpty()) ? "untitled.cpp" : textEdit->curFile;
+  QString splittedFilename = (splittedTextEdit->curFile.isEmpty())
+                                 ? "untitled.cpp"
+                                 : splittedTextEdit->curFile;
+  QMessageBox msgBox;
+  msgBox.setText(tr("Which file would you like to save?"));
+  QAbstractButton *pButtonEdit = msgBox.addButton(
+      tr(filename.toStdString().c_str()), QMessageBox::YesRole);
+  msgBox.addButton(tr(splittedFilename.toStdString().c_str()),
+                   QMessageBox::NoRole);
+  msgBox.exec();
+  if (msgBox.clickedButton() == pButtonEdit) {
+    return saveFile(dialog.selectedFiles().first(), textEdit);
+  }
+  return saveFile(dialog.selectedFiles().first(), splittedTextEdit);
 }
 
 void MainWindow::documentWasModified() {
@@ -194,19 +229,19 @@ void MainWindow::loadFile(const QString &fileName) {
   QGuiApplication::restoreOverrideCursor();
 #endif
 
-  setCurrentFile(fileName);
+  setCurrentFile(fileName, textEdit);
   statusBar()->showMessage(tr("File loaded"), 2000);
 }
 void MainWindow::createStatusBar() { statusBar()->showMessage(tr("Ready")); }
 
-bool MainWindow::saveFile(const QString &fileName) {
+bool MainWindow::saveFile(const QString &fileName, Editor *editArea) {
   QString errorMessage;
 
   QGuiApplication::setOverrideCursor(Qt::WaitCursor);
   QSaveFile file(fileName);
   if (file.open(QFile::WriteOnly | QFile::Text)) {
     QTextStream out(&file);
-    out << textEdit->toPlainText();
+    out << editArea->toPlainText();
     if (!file.commit()) {
       errorMessage =
           tr("Cannot write file %1:\n%2.")
@@ -224,14 +259,14 @@ bool MainWindow::saveFile(const QString &fileName) {
     return false;
   }
 
-  setCurrentFile(fileName);
+  setCurrentFile(fileName, editArea);
   return true;
 }
 
-void MainWindow::setCurrentFile(const QString &fileName) {
-  curFile = fileName;
+void MainWindow::setCurrentFile(const QString &fileName, Editor *editArea) {
+  editArea->curFile = fileName;
   setWindowTitle(tr("MainWindow[*]"));
-  textEdit->document()->setModified(false);
+  editArea->document()->setModified(false);
   setWindowModified(false);
 
   QString shownName = curFile;
