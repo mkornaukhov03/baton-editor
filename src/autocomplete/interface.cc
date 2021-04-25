@@ -3,12 +3,14 @@
 #include <QObject>
 #include <QString>
 
+#include <iostream> // debug
+
 namespace lsp {
 LSPHandler::LSPHandler(const std::string& root, const std::string& file_name,
                        const std::string& content)
     : root_(root), file_(file_name), client_(QString("clangd"), {}) {
   client_.Initialize("file://" + root_);
-  client_.DidOpen("file://" + file_, content);
+  client_.DidOpen("file:///" + file_, content);
   set_connections();
 }
 void LSPHandler::set_connections() {
@@ -24,35 +26,42 @@ void LSPHandler::set_connections() {
           SLOT(GetServerError(QProcess::ProcessError)));
   connect(&client_, SIGNAL(OnServerFinished(int, QProcess::ExitStatus)), this,
           SLOT(GetServerFinished(int, QProcess::ExitStatus)));
-  connect(&client_, SIGNAL(NewStderr(const std::string& content)), this,
+  connect(&client_, SIGNAL(NewStderr(const std::string& )), this,
           SLOT(GetStderrOutput(const std::string&)));
 }
 
 void LSPHandler::GetResponse(json id, json result) {
+  std::cerr << "==== INSIDE GetResponse() ====" << std::endl;
   std::string id_str = id.get<std::string>();
-  if (id_str == "textDocument/Completion") {
+  if (id_str == "textDocument/completion") {
     std::vector<std::string> resp;
     for (auto item : result["items"]) {
       resp.push_back(item["insertText"].get<std::string>());
     }
     emit DoneCompletion(resp);
   }
+  else {
+    std::cerr << "NOT COMPLETION!!\n";
+  }
 }
 
-void LSPHandler::RequestCompletion(std::size_t row, std::size_t col) {
-  client_.Completion("file://" + file_, Position{row, col});
+
+void LSPHandler::RequestCompletion(std::size_t line, std::size_t col) {
+  std::cerr << "Root: " << root_ << '\n';
+  std::cerr << "File: " << file_ << '\n';
+  client_.Completion("file:///" + file_, Position{line, col});
 }
 
 void LSPHandler::FileChanged(const std::string& new_content,
                              std::size_t last_line, std::size_t last_col) {
   client_.DidChange(
-      "file://" + file_,
+      "file:///" + file_,
       std::vector<lsp::TextDocumentContentChangeEvent>{
-          {Range{{0, 0}, {last_line, last_col}}, std::nullopt, new_content}});
+          {Range{{0, 0}, {last_line, last_col}}, std::nullopt, new_content}}, true);
 }
 
 LSPHandler::~LSPHandler() {
-  client_.DidClose("file://" + file_);
+  client_.DidClose("file:///" + file_);
   client_.Shutdown();
   client_.Exit();
 }

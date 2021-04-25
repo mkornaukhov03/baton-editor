@@ -1,8 +1,13 @@
 #include "mainwindow.h"
 
+#include <interface.h>
+
 #include <QComboBox>
+#include <QDir>
 #include <QLayout>
 #include <QtWidgets>
+#include <iostream>  // for debugging/logging
+#include <thread>
 #include <utility>
 
 #include "directory_tree.h"
@@ -17,6 +22,7 @@ MainWindow::MainWindow(QWidget *parent)
   ui->setupUi(this);
   Directory_tree *directory_tree = new Directory_tree(this);
   //  Terminal *terminal = new Terminal;
+  lbl = new Suggest_label(nullptr);
   createActions();
 
   connect(textEdit->document(), &QTextDocument::contentsChanged, this,
@@ -27,6 +33,7 @@ MainWindow::MainWindow(QWidget *parent)
   createStatusBar();
   central_widget = new QWidget();
   grid_layout = new QGridLayout(central_widget);
+  //  grid_layout->addWidget(lbl, 1, 1, 1, 1);
   grid_layout->addWidget(directory_tree, 0, 0, 1, 1);
   grid_layout->addWidget(textEdit, 0, 3);
   grid_layout->setColumnStretch(0, 1);
@@ -38,6 +45,19 @@ MainWindow::MainWindow(QWidget *parent)
   setCentralWidget(central_widget);
   connect(textEdit, SIGNAL(cursorPositionChanged()), this,
           SLOT(showCursorPosition()));
+
+  // setting up autocomplete
+  // filename <--- curFile
+  // root <--- QDir::currentPath()
+  // content <--- empty
+  lsp_handler =
+      new lsp::LSPHandler(QDir::currentPath().toStdString(), "kek.cpp", "");
+  timer = new QTimer(this);
+  connect(timer, SIGNAL(timeout()), this, SLOT(update_autocomplete()));
+  timer->start(3000);
+  connect(lsp_handler, SIGNAL(DoneCompletion(const std::vector<std::string> &)),
+          this,
+          SLOT(set_autocomplete_to_label(const std::vector<std::string> &)));
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
@@ -150,6 +170,7 @@ void MainWindow::createActions() {
   comboSize = new QComboBox(tb);
   comboSize->setObjectName("comboSize");
   tb->addWidget(comboSize);
+
   comboSize->setEditable(true);
 
   const QList<int> standardSizes = QFontDatabase::standardSizes();
@@ -165,9 +186,13 @@ void MainWindow::createActions() {
   splitAct->setStatusTip("Split right");
   connect(splitAct, &QAction::triggered, this, &MainWindow::split);
   tb->addAction(splitAct);
+  tb->addWidget(lbl);
 }
 
-MainWindow::~MainWindow() { delete ui; }
+MainWindow::~MainWindow() {
+  delete ui;
+  delete lsp_handler;
+}
 
 bool MainWindow::maybeSave() {
   if (!textEdit->document()->isModified()) return true;
@@ -268,4 +293,36 @@ void MainWindow::showCursorPosition() {
   int line = textEdit->textCursor().blockNumber() + 1;
   int column = textEdit->textCursor().columnNumber() + 1;
   statusBar()->showMessage(QString("Line %1  Column %2").arg(line).arg(column));
+}
+
+void MainWindow::update_autocomplete() {
+  static int i = 0;
+  std::cerr << i++ << "-th update_autocomplete invokation" << std::endl;
+  static int line = 0;
+  static int col = 0;
+
+  if (line == textEdit->textCursor().blockNumber() &&
+      col == textEdit->textCursor().columnNumber()) {
+    return;
+  }
+  lsp_handler->FileChanged("", line, col);
+  line = textEdit->textCursor().blockNumber();
+  col = textEdit->textCursor().columnNumber();
+  std::string new_content = textEdit->toPlainText().toUtf8().toStdString();
+  if (new_content == "") return;
+  std::cerr << "New file content:\n" << new_content << '\n';
+  std::cerr << "\nLine: " << line << ", column: " << col << '\n';
+
+  lsp_handler->FileChanged(new_content, 0, 0);
+  lsp_handler->RequestCompletion(line, col);
+
+  std::cerr << "=====\n";
+}
+
+void MainWindow::set_autocomplete_to_label(
+    const std::vector<std::string> &vec) {
+  // only first
+  std::cerr << "***** INSIDE SET AUTO COMPLETE TO LABEL ***** " << std::endl;
+  if (vec.size() == 0) return;
+  lbl->setText(QString::fromStdString(vec[0]));
 }

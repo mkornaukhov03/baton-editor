@@ -8,9 +8,12 @@
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QWidget>
+#include <QTimer>
 
 #include "editor.h"
 #include "terminal.h"
+#include "suggest_label.h"
+#include "interface.h"
 
 QT_BEGIN_NAMESPACE
 class QAction;
@@ -90,7 +93,15 @@ class MainWindow : public QMainWindow {
   QWidget *central_widget;
   QGridLayout *grid_layout;
   QWidget *terminal;
-
   bool splitted;
+  // setting up autocomplete below
+  lsp::LSPHandler * lsp_handler;
+  QTimer * timer;
+  Suggest_label * lbl;
+ private slots:
+  void update_autocomplete();
+  void set_autocomplete_to_label(const std::vector<std::string> &);
+
+
 };
 #endif  // MAINWINDOW_H

@@ -56,9 +56,8 @@ void Client::OnClientReadyReadStdout() {
          "Server answer does not requre protocol");
   bool ok = false;
 
-
-  [[maybe_unused]]int content_length = buffer.mid(len_start, len_end - len_start).toInt(&ok);
-
+  [[maybe_unused]] int content_length =
+      buffer.mid(len_start, len_end - len_start).toInt(&ok);
 
   assert(ok && "Server answer does not requre protocol");
 
@@ -66,9 +65,11 @@ void Client::OnClientReadyReadStdout() {
 
   QJsonParseError error{};
   auto msg2 = QJsonDocument::fromJson(payload, &error);
-  assert(payload.size() == content_length && "Not full message!");
+  if (!(payload.size() == content_length && "Not full message!")) {
+    ;
+  }
   //   try {
-  json msg(msg2.toJson().toStdString());  // possibly raise an exception
+  json msg(msg2.toJson().toStdString()); // possibly raise an exception
   auto rpc = json::parse(json::parse(msg.dump()).get<std::string>());
   std::cerr << rpc << '\n';
   msg = rpc;
@@ -98,7 +99,8 @@ void Client::OnClientReadyReadStdout() {
 
 void Client::OnClientReadyReadStderr() {
   std::string content = QString(process_->readAllStandardError()).toStdString();
-  if (!content.empty()) emit NewStderr(content);
+  if (!content.empty())
+    emit NewStderr(content);
 }
 
 void Client::OnClientError(QProcess::ProcessError error) {
@@ -210,7 +212,7 @@ void Client::WriteToServer(std::string dump) {
     }
     send_to_server_buffer_.clear();
   }
-  process_->waitForReadyRead(100);
+  process_->waitForReadyRead(1000);
 }
 
 void Client::NotifyImpl(std::string method, json params) {
@@ -226,4 +228,4 @@ void Client::RequestImpl(std::string method, json params, RequestType type) {
   WriteToServer(request.dump());
 }
 
-}  // namespace lsp
+} // namespace lsp

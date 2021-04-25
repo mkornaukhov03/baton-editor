@@ -6,12 +6,15 @@
 #include <QTimer>
 #include <string>
 #include <vector>
+
+#include <iostream> // debug
+
 #include "client.h"
 // class to parse from json to C++/Qt containers
 
 namespace lsp {
 
-class LSPHandler : public QObject {
+class LSPHandler final: public  QObject  {
   Q_OBJECT
 
  public:
@@ -37,7 +40,10 @@ class LSPHandler : public QObject {
   void GetError(json, json) { }
   void GetServerError(QProcess::ProcessError) { }
   void GetServerFinished(int, QProcess::ExitStatus) { }
-  void GetStderrOutput(const std::string &) { }
+  void GetStderrOutput(const std::string & s) {
+    std::cerr << "Inside LSPHandler::GetStderrrOutput\n";
+    std::cerr << s << std::endl;
+  }
 
   // from user
   void RequestCompletion(std::size_t, std::size_t);
