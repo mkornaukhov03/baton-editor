@@ -119,26 +119,34 @@ void MainWindow::mergeFormatOnWordOrSelection(const QTextCharFormat &format) {
 }
 
 bool MainWindow::saveAs() {
+  if (splitted) {
+    QString filename = (textEdit->curFile.isEmpty()) ? "untitled(left).cpp"
+                                                     : textEdit->curFile;
+    QString splittedFilename = (splittedTextEdit->curFile.isEmpty())
+                                   ? "untitled(right).cpp"
+                                   : splittedTextEdit->curFile;
+    QMessageBox msgBox;
+    msgBox.setText(tr("Which file would you like to save?"));
+    QAbstractButton *pButtonEdit = msgBox.addButton(
+        tr(filename.toStdString().c_str()), QMessageBox::YesRole);
+    msgBox.addButton(tr(splittedFilename.toStdString().c_str()),
+                     QMessageBox::NoRole);
+    msgBox.exec();
+    QFileDialog dialog(this);
+    dialog.setWindowModality(Qt::WindowModal);
+    dialog.setAcceptMode(QFileDialog::AcceptSave);
+    if (dialog.exec() != QDialog::Accepted) return false;
+    if (msgBox.clickedButton() != pButtonEdit) {
+      return saveFile(dialog.selectedFiles().first(), splittedTextEdit);
+    } else {
+      return saveFile(dialog.selectedFiles().first(), textEdit);
+    }
+  }
   QFileDialog dialog(this);
   dialog.setWindowModality(Qt::WindowModal);
   dialog.setAcceptMode(QFileDialog::AcceptSave);
   if (dialog.exec() != QDialog::Accepted) return false;
-  QString filename =
-      (textEdit->curFile.isEmpty()) ? "untitled.cpp" : textEdit->curFile;
-  QString splittedFilename = (splittedTextEdit->curFile.isEmpty())
-                                 ? "untitled.cpp"
-                                 : splittedTextEdit->curFile;
-  QMessageBox msgBox;
-  msgBox.setText(tr("Which file would you like to save?"));
-  QAbstractButton *pButtonEdit = msgBox.addButton(
-      tr(filename.toStdString().c_str()), QMessageBox::YesRole);
-  msgBox.addButton(tr(splittedFilename.toStdString().c_str()),
-                   QMessageBox::NoRole);
-  msgBox.exec();
-  if (msgBox.clickedButton() == pButtonEdit) {
-    return saveFile(dialog.selectedFiles().first(), textEdit);
-  }
-  return saveFile(dialog.selectedFiles().first(), splittedTextEdit);
+  return saveFile(dialog.selectedFiles().first(), textEdit);
 }
 
 void MainWindow::documentWasModified() {
