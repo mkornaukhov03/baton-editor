@@ -71,15 +71,10 @@ void LSPHandler::RequestCompletion(std::size_t line, std::size_t col) {
   client_.Completion("file:///" + file_, Position{line, col});
 }
 
-void LSPHandler::FileChanged(const std::string& new_content,
-                             std::size_t last_line, std::size_t last_col) {
+void LSPHandler::FileChanged(const std::string& new_content) {
   client_.DidChange(
       "file:///" + file_,
-
-      std::vector<lsp::TextDocumentContentChangeEvent>{{new_content}},
-      //          {Range{{0, 0}, {last_line, last_col}}, std::nullopt,
-      //          new_content}},
-      true);  // must be true
+      std::vector<lsp::TextDocumentContentChangeEvent>{{new_content}}, true);
 }
 
 LSPHandler::~LSPHandler() {

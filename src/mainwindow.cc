@@ -46,10 +46,6 @@ MainWindow::MainWindow(QWidget *parent)
   connect(textEdit, SIGNAL(cursorPositionChanged()), this,
           SLOT(showCursorPosition()));
 
-  // setting up autocomplete
-  // filename <--- curFile
-  // root <--- QDir::currentPath()
-  // content <--- empty
   lsp_handler =
       new lsp::LSPHandler(QDir::currentPath().toStdString(), "kek.cpp", "");
   timer = new QTimer(this);
@@ -304,73 +300,24 @@ void MainWindow::showCursorPosition() {
 }
 
 void MainWindow::update_autocomplete() {
-  static int i = 0;
-  //  std::cerr << i++ << "-th update_autocomplete invokation" << std::endl;
-  static int last_line = 0;
-  static int last_col = 0;
   static int cur_line = 0;
   static int cur_col = 0;
 
   static std::string content = "";
   textEdit->setReadOnly(true);
 
-  //  last_line = textEdit->document()->blockCount() - 1;
-  //  last_col = textEdit->document()->lastBlock().length() - 1;
-  //  lsp_handler->FileChanged(textEdit->toPlainText().toUtf8().toStdString(),
-  //  -1,
-  //                           -1);
-
-  //  std::cerr << ++i << "-th update" << std::endl;
-  //  if (last_line != textEdit->document()->blockCount() - 1 ||
-  //      last_col != textEdit->document()->lastBlock().length() - 1) {
-  //    last_line = textEdit->document()->blockCount() - 1;
-  //    last_col = textEdit->document()->lastBlock().length() - 1;
-  //    lsp_handler->FileChanged(textEdit->toPlainText().toUtf8().toStdString(),
-  //    -1,
-  //                             -1);
-  //    //    std::cerr << "Call FileChanged\n";
-  //  }
   if (content != textEdit->toPlainText().toUtf8().toStdString()) {
     content = textEdit->toPlainText().toUtf8().toStdString();
-    lsp_handler->FileChanged(content, -1, -1);
+    lsp_handler->FileChanged(content);
   }
   if (cur_line != textEdit->textCursor().blockNumber() ||
       cur_col != textEdit->textCursor().columnNumber()) {
     cur_line = textEdit->textCursor().blockNumber();
     cur_col = textEdit->textCursor().columnNumber();
-    //    std::cerr << "Call RequestCompletion\n";
     lsp_handler->RequestCompletion(cur_line, cur_col);
-    //     lsp_handler->FileChanged(
-    //   textEdit->toPlainText().toUtf8().toStdString(), 0, 0);
   }
 
   textEdit->setReadOnly(false);
-
-  //  std::cerr << "cur_line: " << cur_line << '\n';
-  //  std::cerr << "cur_col: " << cur_col << '\n';
-  //  std::cerr << "last_line: " << last_line << '\n';
-  //  std::cerr << "last_col: " << last_col << '\n';
-
-  //  static int line = 0;
-  //  static int col = 0;
-
-  //  if (line == textEdit->textCursor().blockNumber() &&
-  //      col == textEdit->textCursor().columnNumber()) {
-  //    return;
-  //  }
-  //  lsp_handler->FileChanged("", line, col);
-  //  line = textEdit->textCursor().blockNumber();
-  //  line = textEdit->document()->blockCount();
-  //  col = textEdit->textCursor().columnNumber();
-  //  std::string new_content = textEdit->toPlainText().toUtf8().toStdString();
-  //  if (new_content == "") return;
-  //  std::cerr << "New file content:\n" << new_content << '\n';
-  //  std::cerr << "\nLine: " << line << ", column: " << col << '\n';
-
-  //  lsp_handler->FileChanged(new_content, 0, 0);
-  //  lsp_handler->RequestCompletion(textEdit->textCursor().blockNumber(), col);
-
-  //  std::cerr << "=====\n";
 }
 
 void MainWindow::set_autocomplete_to_label(

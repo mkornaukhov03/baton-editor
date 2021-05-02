@@ -43,13 +43,13 @@ class LSPHandler final : public QObject {
   void GetServerError(QProcess::ProcessError) {}
   void GetServerFinished(int, QProcess::ExitStatus) {}
   void GetStderrOutput(const std::string &s) {
-    //    std::cerr << "Inside LSPHandler::GetStderrrOutput\n";
-    //    std::cerr << s << std::endl;
+    std::cerr << "Inside LSPHandler::GetStderrrOutput\n";
+    std::cerr << s << std::endl;
   }
 
   // from user
   void RequestCompletion(std::size_t, std::size_t);
-  void FileChanged(const std::string &new_content, std::size_t, std::size_t);
+  void FileChanged(const std::string &new_content);
 
  private:
   std::string root_;
