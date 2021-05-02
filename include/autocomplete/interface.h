@@ -34,9 +34,7 @@ class LSPHandler final : public QObject {
 
  public slots:
   // from LSP client, connected inside
-  void GetNotify(const std::string &s, json); /*{
-    std::cerr << "!!!GOT NOTIFY!!!\n" << s;
-  }*/
+  void GetNotify(const std::string &s, json);
   void GetResponse(json, json);
   void GetRequest(const std::string &, json, json) {}
   void GetError(json, json) {}

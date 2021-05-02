@@ -9,6 +9,8 @@
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QWidget>
+#include <string>
+#include <vector>
 
 #include "editor.h"
 #include "interface.h"
