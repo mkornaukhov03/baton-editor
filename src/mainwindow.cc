@@ -54,7 +54,7 @@ MainWindow::MainWindow(QWidget *parent)
       new lsp::LSPHandler(QDir::currentPath().toStdString(), "kek.cpp", "");
   timer = new QTimer(this);
   connect(timer, SIGNAL(timeout()), this, SLOT(update_autocomplete()));
-  timer->start(3000);
+  timer->start(1000);
   connect(lsp_handler, SIGNAL(DoneCompletion(const std::vector<std::string> &)),
           this,
           SLOT(set_autocomplete_to_label(const std::vector<std::string> &)));
@@ -297,7 +297,7 @@ void MainWindow::showCursorPosition() {
 
 void MainWindow::update_autocomplete() {
   static int i = 0;
-  std::cerr << i++ << "-th update_autocomplete invokation" << std::endl;
+  //  std::cerr << i++ << "-th update_autocomplete invokation" << std::endl;
   static int line = 0;
   static int col = 0;
 

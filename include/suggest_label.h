@@ -20,9 +20,7 @@ class Suggest_label : public QLabel{
   explicit Suggest_label(QWidget *parent = nullptr): QLabel(parent) {
     this->setText("I am a suggested label!");
   }
-  virtual ~Suggest_label() {
-//    delete ui;
-  }
+  virtual ~Suggest_label() = default;
 
  private:
 //  Ui::Suggest_lable *ui;

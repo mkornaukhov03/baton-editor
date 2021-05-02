@@ -29,7 +29,9 @@ set(HEADERS "include/autocomplete/enums.h"
         "include/editor.h"
         "include/mainwindow.h"
         "include/directory_tree.h"
-	"include/terminal.h")
+        "include/terminal.h"
+        "include/suggest_label.h"
+        )
 
 # Add your source files here
 set(SOURCES "src/main.cc"
