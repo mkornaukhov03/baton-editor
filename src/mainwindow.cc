@@ -7,7 +7,6 @@
 #include <QLayout>
 #include <QtWidgets>
 #include <iostream>  // for debugging/logging
-#include <thread>
 #include <utility>
 
 #include "directory_tree.h"
