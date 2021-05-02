@@ -1,7 +1,7 @@
 #ifndef DIRECTORY_TREE_H
 #define DIRECTORY_TREE_H
-
 #include <QFileSystemModel>
+#include <QString>
 #include <QWidget>
 #include <QtCore/QVariant>
 #include <QtWidgets/QApplication>
@@ -9,7 +9,7 @@
 #include <QtWidgets/QHeaderView>
 #include <QtWidgets/QTreeView>
 #include <QtWidgets/QWidget>
-
+#include <string>
 QT_BEGIN_NAMESPACE
 
 class Ui_Directory_tree {
@@ -51,12 +51,16 @@ class Directory_tree : public QWidget {
   Q_OBJECT
 
  public:
+  QTreeView tree;
   explicit Directory_tree(QWidget *parent = nullptr);
   virtual ~Directory_tree();
-
+  // private slots:
+  //  void double_clicked(const QModelIndex& index);
  private:
   Ui::Directory_tree *ui;
-  QFileSystemModel *model;
+  QFileSystemModel model;
+  QString root;
+  QModelIndex rootIndex;
 };
 
 #endif  // DIRECTORY_TREE_H

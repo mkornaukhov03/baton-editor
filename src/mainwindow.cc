@@ -15,7 +15,7 @@ MainWindow::MainWindow(QWidget *parent)
       textEdit(new Editor),
       splitted(false) {
   ui->setupUi(this);
-  Directory_tree *directory_tree = new Directory_tree(this);
+  //  Directory_tree *directory_tree = new Directory_tree(this);
   //  Terminal *terminal = new Terminal;
   createActions();
 
@@ -27,7 +27,7 @@ MainWindow::MainWindow(QWidget *parent)
   createStatusBar();
   central_widget = new QWidget();
   grid_layout = new QGridLayout(central_widget);
-  grid_layout->addWidget(directory_tree, 0, 0, 1, 1);
+  grid_layout->addWidget(&(directory_tree.tree), 0, 0, 1, 1);
   grid_layout->addWidget(textEdit, 0, 3);
   grid_layout->setColumnStretch(0, 1);
   grid_layout->setColumnStretch(3, 5);

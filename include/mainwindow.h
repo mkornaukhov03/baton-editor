@@ -9,6 +9,7 @@
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QWidget>
 
+#include "directory_tree.h"
 #include "editor.h"
 #include "terminal.h"
 
@@ -90,6 +91,7 @@ class MainWindow : public QMainWindow {
   QWidget *central_widget;
   QGridLayout *grid_layout;
   QWidget *terminal;
+  Directory_tree directory_tree;
 
   bool splitted;
 };
