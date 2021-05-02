@@ -1,9 +1,10 @@
 #include "interface.h"
 
+#include <json_serializers.h>
+
 #include <QObject>
 #include <QString>
-
-#include <iostream> // debug
+#include <iostream>  // debug
 
 namespace lsp {
 LSPHandler::LSPHandler(const std::string& root, const std::string& file_name,
@@ -26,7 +27,7 @@ void LSPHandler::set_connections() {
           SLOT(GetServerError(QProcess::ProcessError)));
   connect(&client_, SIGNAL(OnServerFinished(int, QProcess::ExitStatus)), this,
           SLOT(GetServerFinished(int, QProcess::ExitStatus)));
-  connect(&client_, SIGNAL(NewStderr(const std::string& )), this,
+  connect(&client_, SIGNAL(NewStderr(const std::string&)), this,
           SLOT(GetStderrOutput(const std::string&)));
 }
 
@@ -39,12 +40,30 @@ void LSPHandler::GetResponse(json id, json result) {
       resp.push_back(item["insertText"].get<std::string>());
     }
     emit DoneCompletion(resp);
-  }
-  else {
+  } else if (id_str == "textDocument/publishDiagnostics") {
+    std::cerr << "PUBLISH DIAGNOSTICS!!!!!\n";
+  } else {
     std::cerr << "NOT COMPLETION!!\n";
   }
 }
 
+void LSPHandler::GetNotify(const std::string& id, json result) {
+  if (id == "textDocument/publishDiagnostics") {
+    std::cerr << "Vector of diagnostics" << std::endl;
+    //    std::cerr << "Notify result: " << result["diagnostics"] << std::endl;
+    std::vector<lsp::DiagnosticsResponse> resp;
+    for (const auto& item : result["diagnostics"]) {
+      Range rng;
+      from_json(item["range"], rng);
+      resp.emplace_back(
+          lsp::DiagnosticsResponse{item["category"], item["message"], rng});
+      //      std::cerr << kek << std::endl;
+    }
+    emit DoneDiagnostic(resp);
+  } else {
+    std::cerr << "Notification from server: not a diagnostics!\n";
+  }
+}
 
 void LSPHandler::RequestCompletion(std::size_t line, std::size_t col) {
   std::cerr << "Root: " << root_ << '\n';
@@ -56,8 +75,11 @@ void LSPHandler::FileChanged(const std::string& new_content,
                              std::size_t last_line, std::size_t last_col) {
   client_.DidChange(
       "file:///" + file_,
-      std::vector<lsp::TextDocumentContentChangeEvent>{
-          {Range{{0, 0}, {last_line, last_col}}, std::nullopt, new_content}}, true);
+
+      std::vector<lsp::TextDocumentContentChangeEvent>{{new_content}},
+      //          {Range{{0, 0}, {last_line, last_col}}, std::nullopt,
+      //          new_content}},
+      true);  // must be true
 }
 
 LSPHandler::~LSPHandler() {

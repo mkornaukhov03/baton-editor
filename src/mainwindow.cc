@@ -54,10 +54,18 @@ MainWindow::MainWindow(QWidget *parent)
       new lsp::LSPHandler(QDir::currentPath().toStdString(), "kek.cpp", "");
   timer = new QTimer(this);
   connect(timer, SIGNAL(timeout()), this, SLOT(update_autocomplete()));
-  timer->start(1000);
+
+  const int TIMER_PERIOD = 300;
+
+  timer->start(TIMER_PERIOD);
   connect(lsp_handler, SIGNAL(DoneCompletion(const std::vector<std::string> &)),
           this,
           SLOT(set_autocomplete_to_label(const std::vector<std::string> &)));
+  connect(
+      lsp_handler,
+      SIGNAL(DoneDiagnostic(const std::vector<lsp::DiagnosticsResponse> &)),
+      this,
+      SLOT(display_diagnostics(const std::vector<lsp::DiagnosticsResponse> &)));
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
@@ -298,25 +306,71 @@ void MainWindow::showCursorPosition() {
 void MainWindow::update_autocomplete() {
   static int i = 0;
   //  std::cerr << i++ << "-th update_autocomplete invokation" << std::endl;
-  static int line = 0;
-  static int col = 0;
+  static int last_line = 0;
+  static int last_col = 0;
+  static int cur_line = 0;
+  static int cur_col = 0;
 
-  if (line == textEdit->textCursor().blockNumber() &&
-      col == textEdit->textCursor().columnNumber()) {
-    return;
+  static std::string content = "";
+  textEdit->setReadOnly(true);
+
+  //  last_line = textEdit->document()->blockCount() - 1;
+  //  last_col = textEdit->document()->lastBlock().length() - 1;
+  //  lsp_handler->FileChanged(textEdit->toPlainText().toUtf8().toStdString(),
+  //  -1,
+  //                           -1);
+
+  //  std::cerr << ++i << "-th update" << std::endl;
+  //  if (last_line != textEdit->document()->blockCount() - 1 ||
+  //      last_col != textEdit->document()->lastBlock().length() - 1) {
+  //    last_line = textEdit->document()->blockCount() - 1;
+  //    last_col = textEdit->document()->lastBlock().length() - 1;
+  //    lsp_handler->FileChanged(textEdit->toPlainText().toUtf8().toStdString(),
+  //    -1,
+  //                             -1);
+  //    //    std::cerr << "Call FileChanged\n";
+  //  }
+  if (content != textEdit->toPlainText().toUtf8().toStdString()) {
+    content = textEdit->toPlainText().toUtf8().toStdString();
+    lsp_handler->FileChanged(content, -1, -1);
   }
-  lsp_handler->FileChanged("", line, col);
-  line = textEdit->textCursor().blockNumber();
-  col = textEdit->textCursor().columnNumber();
-  std::string new_content = textEdit->toPlainText().toUtf8().toStdString();
-  if (new_content == "") return;
-  std::cerr << "New file content:\n" << new_content << '\n';
-  std::cerr << "\nLine: " << line << ", column: " << col << '\n';
+  if (cur_line != textEdit->textCursor().blockNumber() ||
+      cur_col != textEdit->textCursor().columnNumber()) {
+    cur_line = textEdit->textCursor().blockNumber();
+    cur_col = textEdit->textCursor().columnNumber();
+    //    std::cerr << "Call RequestCompletion\n";
+    lsp_handler->RequestCompletion(cur_line, cur_col);
+    //     lsp_handler->FileChanged(
+    //   textEdit->toPlainText().toUtf8().toStdString(), 0, 0);
+  }
 
-  lsp_handler->FileChanged(new_content, 0, 0);
-  lsp_handler->RequestCompletion(line, col);
+  textEdit->setReadOnly(false);
 
-  std::cerr << "=====\n";
+  //  std::cerr << "cur_line: " << cur_line << '\n';
+  //  std::cerr << "cur_col: " << cur_col << '\n';
+  //  std::cerr << "last_line: " << last_line << '\n';
+  //  std::cerr << "last_col: " << last_col << '\n';
+
+  //  static int line = 0;
+  //  static int col = 0;
+
+  //  if (line == textEdit->textCursor().blockNumber() &&
+  //      col == textEdit->textCursor().columnNumber()) {
+  //    return;
+  //  }
+  //  lsp_handler->FileChanged("", line, col);
+  //  line = textEdit->textCursor().blockNumber();
+  //  line = textEdit->document()->blockCount();
+  //  col = textEdit->textCursor().columnNumber();
+  //  std::string new_content = textEdit->toPlainText().toUtf8().toStdString();
+  //  if (new_content == "") return;
+  //  std::cerr << "New file content:\n" << new_content << '\n';
+  //  std::cerr << "\nLine: " << line << ", column: " << col << '\n';
+
+  //  lsp_handler->FileChanged(new_content, 0, 0);
+  //  lsp_handler->RequestCompletion(textEdit->textCursor().blockNumber(), col);
+
+  //  std::cerr << "=====\n";
 }
 
 void MainWindow::set_autocomplete_to_label(
@@ -324,5 +378,18 @@ void MainWindow::set_autocomplete_to_label(
   // only first
   std::cerr << "***** INSIDE SET AUTO COMPLETE TO LABEL ***** " << std::endl;
   if (vec.size() == 0) return;
+  for (const auto &item : vec) {
+    std::cerr << item << '\n';
+  }
   lbl->setText(QString::fromStdString(vec[0]));
+}
+
+void MainWindow::display_diagnostics(
+    const std::vector<lsp::DiagnosticsResponse> &resp) {
+  std::cerr << "New diagnostics:\n";
+  for (auto &[ctgry, msg, _] : resp) {
+    std::cerr << "category: " << ctgry << '\n';
+    std::cerr << "message: " << msg << std::endl;
+  }
+  std::cerr << "-----" << std::endl;
 }
