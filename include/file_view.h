@@ -2,6 +2,7 @@
 #define FILE_VIEW_H
 
 #include <QWidget>
+#include <string>
 
 #include "editor.h"
 #include "interface.h"
