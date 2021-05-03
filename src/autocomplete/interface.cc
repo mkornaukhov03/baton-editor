@@ -34,11 +34,15 @@ void LSPHandler::set_connections() {
 void LSPHandler::GetResponse(json id, json result) {
   std::cerr << "==== INSIDE GetResponse() ====" << std::endl;
   std::string id_str = id.get<std::string>();
+
+  const unsigned MAX_COMPLETION_ITEMS = 5;
+
   if (id_str == "textDocument/completion") {
     std::vector<std::string> resp;
     for (auto item : result["items"]) {
       resp.push_back(item["insertText"].get<std::string>());
     }
+    if (resp.size() > MAX_COMPLETION_ITEMS) resp.clear();
     emit DoneCompletion(resp);
   } else if (id_str == "textDocument/publishDiagnostics") {
     std::cerr << "PUBLISH DIAGNOSTICS!!!!!\n";
