@@ -71,7 +71,7 @@ Highlighter::Highlighter(QTextDocument *parent) : QSyntaxHighlighter(parent) {
       QStringLiteral("\\breturn\\b"),
       QStringLiteral("\\bif\\b"),
       QStringLiteral("\\belse\\b"),
-      QStringLiteral("\\binclude\\b"),
+      QStringLiteral("\\b#include\\b"),
       QStringLiteral("\\bfor\\b"),
       QStringLiteral("\\bcwhile\\b"),
       QStringLiteral("\\bswitch\\b"),
@@ -95,7 +95,9 @@ Highlighter::Highlighter(QTextDocument *parent) : QSyntaxHighlighter(parent) {
       QStringLiteral("\\bprintf\\b"),
       QStringLiteral("\\bscanf\\b"),
       QStringLiteral("\\bfprintf\\b"),
-      QStringLiteral("\\bfscanf\\b")};
+      QStringLiteral("\\bfscanf\\b"),
+      QStringLiteral("\\bset\\b"),
+      QStringLiteral("\\bstd::set\\b")};
   for (const QString &pattern : keywordPatterns) {
     rule.pattern = QRegularExpression(pattern);
     rule.format = keywordFormat;
