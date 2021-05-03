@@ -15,12 +15,14 @@ SOURCES += \
     main.cc \
     directory_tree.cc \
     mainwindow.cc \
-    terminal.cc
+    terminal.cc \
+    syntax_highlighter.cpp
 
 HEADERS += \
     ../include/editor.h \
     ../include/mainwindow.h \
     ../include/directory_tree.h \
+    ../include/syntax_highlighter.h \
     ../include/terminal.h
 
 FORMS += \

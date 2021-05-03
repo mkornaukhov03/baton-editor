@@ -1,5 +1,5 @@
 #include "mainwindow.h"
-
+#include "syntax_highlighter.h"
 #include <QComboBox>
 #include <QLayout>
 #include <QtWidgets>
