@@ -3,60 +3,57 @@
 
 #include <QByteArray>
 
+#include "lsp_basic.h"
 #include "nlohmann/json.hpp"
 namespace nlohmann {
 template <typename T>
 struct adl_serializer<std::optional<T>> {
-    static void to_json(json &j, const std::optional<T> &opt) {
-        if (opt == std::nullopt) {
-            j = "";
-        } else {
-            j = *opt;
-        }
+  static void to_json(json &j, const std::optional<T> &opt) {
+    if (opt == std::nullopt) {
+      j = "";
+    } else {
+      j = *opt;
     }
+  }
 
-    static void from_json(const json &j, std::optional<T> &opt) {
-        if (j.is_null()) {
-            opt = std::nullopt;
-        } else {
-            opt = j.get<T>();
-        }
+  static void from_json(const json &j, std::optional<T> &opt) {
+    if (j.is_null()) {
+      opt = std::nullopt;
+    } else {
+      opt = j.get<T>();
     }
+  }
 };
 }  // namespace nlohmann
 
 namespace lsp {
 NLOHMANN_JSON_SERIALIZE_ENUM(OffsetEncoding,
-{
-    {   OffsetEncoding::UnsupportedEncoding,
-        "unsupported"
-    },
-    {OffsetEncoding::UTF8, "utf-8"},
-    {OffsetEncoding::UTF16, "utf-16"},
-    {OffsetEncoding::UTF32, "utf-32"},
-})
+                             {
+                                 {OffsetEncoding::UnsupportedEncoding,
+                                  "unsupported"},
+                                 {OffsetEncoding::UTF8, "utf-8"},
+                                 {OffsetEncoding::UTF16, "utf-16"},
+                                 {OffsetEncoding::UTF32, "utf-32"},
+                             })
 NLOHMANN_JSON_SERIALIZE_ENUM(MarkupKind,
-{
-    {MarkupKind::PlainText, "plaintext"},
-    {MarkupKind::Markdown, "markdown"},
-})
+                             {
+                                 {MarkupKind::PlainText, "plaintext"},
+                                 {MarkupKind::Markdown, "markdown"},
+                             })
 NLOHMANN_JSON_SERIALIZE_ENUM(ResourceOperationKind,
-{   {ResourceOperationKind::Create, "create"},
-    {ResourceOperationKind::Rename, "rename"},
-    {ResourceOperationKind::Delete, "dename"}
-})
+                             {{ResourceOperationKind::Create, "create"},
+                              {ResourceOperationKind::Rename, "rename"},
+                              {ResourceOperationKind::Delete, "dename"}})
 NLOHMANN_JSON_SERIALIZE_ENUM(
     FailureHandlingKind,
-{   {FailureHandlingKind::Abort, "abort"},
-    {FailureHandlingKind::Transactional, "transactional"},
-    {FailureHandlingKind::Undo, "undo"},
-    {FailureHandlingKind::TextOnlyTransactional, "textOnlyTransactional"}
-})
+    {{FailureHandlingKind::Abort, "abort"},
+     {FailureHandlingKind::Transactional, "transactional"},
+     {FailureHandlingKind::Undo, "undo"},
+     {FailureHandlingKind::TextOnlyTransactional, "textOnlyTransactional"}})
 NLOHMANN_JSON_SERIALIZE_ENUM(FoldingRangeKind,
-{   {FoldingRangeKind::Comment, "comment"},
-    {FoldingRangeKind::Imports, "imports"},
-    {FoldingRangeKind::Region, "region"}
-})
+                             {{FoldingRangeKind::Comment, "comment"},
+                              {FoldingRangeKind::Imports, "imports"},
+                              {FoldingRangeKind::Region, "region"}})
 
 void to_json(json &j, const lsp::URIForFile &uri);
 void from_json(const json &j, lsp::URIForFile &uri);
@@ -229,11 +226,11 @@ void from_json(const json &, TypeHierarchyParams &);
 }  // namespace lsp
 QT_BEGIN_NAMESPACE
 inline void to_json(nlohmann::json &j, const QByteArray &qba) {
-    j = nlohmann::json{qba.toStdString()};
+  j = nlohmann::json{qba.toStdString()};
 }
 
 inline void from_json(const nlohmann::json &j, QByteArray &qba) {
-    qba = QByteArray::fromStdString(j.get<std::string>());
+  qba = QByteArray::fromStdString(j.get<std::string>());
 }
 QT_END_NAMESPACE
 

@@ -2,14 +2,19 @@
 #define MAINWINDOW_H
 
 #include <QGridLayout>
+#include <QTimer>
 #include <QtCore/QVariant>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QWidget>
+#include <string>
+#include <vector>
 
 #include "editor.h"
+#include "interface.h"
+#include "suggest_label.h"
 #include "terminal.h"
 
 QT_BEGIN_NAMESPACE
@@ -90,7 +95,14 @@ class MainWindow : public QMainWindow {
   QWidget *central_widget;
   QGridLayout *grid_layout;
   QWidget *terminal;
-
   bool splitted;
+  // setting up autocomplete below
+  lsp::LSPHandler *lsp_handler;
+  QTimer *timer;
+  Suggest_label *lbl;
+ private slots:
+  void update_autocomplete();
+  void set_autocomplete_to_label(const std::vector<std::string> &);
+  void display_diagnostics(const std::vector<lsp::DiagnosticsResponse> &);
 };
 #endif  // MAINWINDOW_H

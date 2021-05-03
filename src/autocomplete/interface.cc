@@ -1,14 +1,17 @@
 #include "interface.h"
 
+#include <json_serializers.h>
+
 #include <QObject>
 #include <QString>
+#include <iostream>  // debug
 
 namespace lsp {
 LSPHandler::LSPHandler(const std::string& root, const std::string& file_name,
                        const std::string& content)
     : root_(root), file_(file_name), client_(QString("clangd"), {}) {
   client_.Initialize("file://" + root_);
-  client_.DidOpen("file://" + file_, content);
+  client_.DidOpen("file:///" + file_, content);
   set_connections();
 }
 void LSPHandler::set_connections() {
@@ -24,35 +27,62 @@ void LSPHandler::set_connections() {
           SLOT(GetServerError(QProcess::ProcessError)));
   connect(&client_, SIGNAL(OnServerFinished(int, QProcess::ExitStatus)), this,
           SLOT(GetServerFinished(int, QProcess::ExitStatus)));
-  connect(&client_, SIGNAL(NewStderr(const std::string& content)), this,
+  connect(&client_, SIGNAL(NewStderr(const std::string&)), this,
           SLOT(GetStderrOutput(const std::string&)));
 }
 
 void LSPHandler::GetResponse(json id, json result) {
+  std::cerr << "==== INSIDE GetResponse() ====" << std::endl;
   std::string id_str = id.get<std::string>();
-  if (id_str == "textDocument/Completion") {
+
+  const unsigned MAX_COMPLETION_ITEMS = 5;
+
+  if (id_str == "textDocument/completion") {
     std::vector<std::string> resp;
     for (auto item : result["items"]) {
       resp.push_back(item["insertText"].get<std::string>());
     }
+    if (resp.size() > MAX_COMPLETION_ITEMS) resp.clear();
     emit DoneCompletion(resp);
+  } else if (id_str == "textDocument/publishDiagnostics") {
+    std::cerr << "PUBLISH DIAGNOSTICS!!!!!\n";
+  } else {
+    std::cerr << "NOT COMPLETION!!\n";
   }
 }
 
-void LSPHandler::RequestCompletion(std::size_t row, std::size_t col) {
-  client_.Completion("file://" + file_, Position{row, col});
+void LSPHandler::GetNotify(const std::string& id, json result) {
+  if (id == "textDocument/publishDiagnostics") {
+    std::cerr << "Vector of diagnostics" << std::endl;
+    //    std::cerr << "Notify result: " << result["diagnostics"] << std::endl;
+    std::vector<lsp::DiagnosticsResponse> resp;
+    for (const auto& item : result["diagnostics"]) {
+      Range rng;
+      from_json(item["range"], rng);
+      resp.emplace_back(
+          lsp::DiagnosticsResponse{item["category"], item["message"], rng});
+      //      std::cerr << kek << std::endl;
+    }
+    emit DoneDiagnostic(resp);
+  } else {
+    std::cerr << "Notification from server: not a diagnostics!\n";
+  }
 }
 
-void LSPHandler::FileChanged(const std::string& new_content,
-                             std::size_t last_line, std::size_t last_col) {
+void LSPHandler::RequestCompletion(std::size_t line, std::size_t col) {
+  std::cerr << "Root: " << root_ << '\n';
+  std::cerr << "File: " << file_ << '\n';
+  client_.Completion("file:///" + file_, Position{line, col});
+}
+
+void LSPHandler::FileChanged(const std::string& new_content) {
   client_.DidChange(
-      "file://" + file_,
-      std::vector<lsp::TextDocumentContentChangeEvent>{
-          {Range{{0, 0}, {last_line, last_col}}, std::nullopt, new_content}});
+      "file:///" + file_,
+      std::vector<lsp::TextDocumentContentChangeEvent>{{new_content}}, true);
 }
 
 LSPHandler::~LSPHandler() {
-  client_.DidClose("file://" + file_);
+  client_.DidClose("file:///" + file_);
   client_.Shutdown();
   client_.Exit();
 }

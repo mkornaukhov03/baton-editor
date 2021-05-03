@@ -1,8 +1,12 @@
 #include "mainwindow.h"
 
+#include <interface.h>
+
 #include <QComboBox>
+#include <QDir>
 #include <QLayout>
 #include <QtWidgets>
+#include <iostream>  // for debugging/logging
 #include <utility>
 
 #include "directory_tree.h"
@@ -17,6 +21,7 @@ MainWindow::MainWindow(QWidget *parent)
   ui->setupUi(this);
   Directory_tree *directory_tree = new Directory_tree(this);
   //  Terminal *terminal = new Terminal;
+  lbl = new Suggest_label(nullptr);
   createActions();
 
   connect(textEdit->document(), &QTextDocument::contentsChanged, this,
@@ -27,6 +32,7 @@ MainWindow::MainWindow(QWidget *parent)
   createStatusBar();
   central_widget = new QWidget();
   grid_layout = new QGridLayout(central_widget);
+  //  grid_layout->addWidget(lbl, 1, 1, 1, 1);
   grid_layout->addWidget(directory_tree, 0, 0, 1, 1);
   grid_layout->addWidget(textEdit, 0, 3);
   grid_layout->setColumnStretch(0, 1);
@@ -38,6 +44,23 @@ MainWindow::MainWindow(QWidget *parent)
   setCentralWidget(central_widget);
   connect(textEdit, SIGNAL(cursorPositionChanged()), this,
           SLOT(showCursorPosition()));
+
+  lsp_handler =
+      new lsp::LSPHandler(QDir::currentPath().toStdString(), "kek.cpp", "");
+  timer = new QTimer(this);
+  connect(timer, SIGNAL(timeout()), this, SLOT(update_autocomplete()));
+
+  const int TIMER_PERIOD = 300;
+
+  timer->start(TIMER_PERIOD);
+  connect(lsp_handler, SIGNAL(DoneCompletion(const std::vector<std::string> &)),
+          this,
+          SLOT(set_autocomplete_to_label(const std::vector<std::string> &)));
+  connect(
+      lsp_handler,
+      SIGNAL(DoneDiagnostic(const std::vector<lsp::DiagnosticsResponse> &)),
+      this,
+      SLOT(display_diagnostics(const std::vector<lsp::DiagnosticsResponse> &)));
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
@@ -150,6 +173,7 @@ void MainWindow::createActions() {
   comboSize = new QComboBox(tb);
   comboSize->setObjectName("comboSize");
   tb->addWidget(comboSize);
+
   comboSize->setEditable(true);
 
   const QList<int> standardSizes = QFontDatabase::standardSizes();
@@ -165,9 +189,13 @@ void MainWindow::createActions() {
   splitAct->setStatusTip("Split right");
   connect(splitAct, &QAction::triggered, this, &MainWindow::split);
   tb->addAction(splitAct);
+  tb->addWidget(lbl);
 }
 
-MainWindow::~MainWindow() { delete ui; }
+MainWindow::~MainWindow() {
+  delete ui;
+  delete lsp_handler;
+}
 
 bool MainWindow::maybeSave() {
   if (!textEdit->document()->isModified()) return true;
@@ -268,4 +296,46 @@ void MainWindow::showCursorPosition() {
   int line = textEdit->textCursor().blockNumber() + 1;
   int column = textEdit->textCursor().columnNumber() + 1;
   statusBar()->showMessage(QString("Line %1  Column %2").arg(line).arg(column));
+}
+
+void MainWindow::update_autocomplete() {
+  static int cur_line = 0;
+  static int cur_col = 0;
+
+  static std::string content = "";
+  textEdit->setReadOnly(true);
+
+  if (content != textEdit->toPlainText().toUtf8().toStdString()) {
+    content = textEdit->toPlainText().toUtf8().toStdString();
+    lsp_handler->FileChanged(content);
+  }
+  if (cur_line != textEdit->textCursor().blockNumber() ||
+      cur_col != textEdit->textCursor().columnNumber()) {
+    cur_line = textEdit->textCursor().blockNumber();
+    cur_col = textEdit->textCursor().columnNumber();
+    lsp_handler->RequestCompletion(cur_line, cur_col);
+  }
+
+  textEdit->setReadOnly(false);
+}
+
+void MainWindow::set_autocomplete_to_label(
+    const std::vector<std::string> &vec) {
+  // only first
+  std::cerr << "***** INSIDE SET AUTO COMPLETE TO LABEL ***** " << std::endl;
+  if (vec.size() == 0) return;
+  for (const auto &item : vec) {
+    std::cerr << item << '\n';
+  }
+  lbl->setText(QString::fromStdString(vec[0]));
+}
+
+void MainWindow::display_diagnostics(
+    const std::vector<lsp::DiagnosticsResponse> &resp) {
+  std::cerr << "New diagnostics:\n";
+  for (auto &[ctgry, msg, _] : resp) {
+    std::cerr << "category: " << ctgry << '\n';
+    std::cerr << "message: " << msg << std::endl;
+  }
+  std::cerr << "-----" << std::endl;
 }
