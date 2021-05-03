@@ -4,6 +4,10 @@
 
 Terminal::Terminal(QWidget *parent) : QWidget(parent), ui(new Ui::Terminal) {
   ui->setupUi(this);
+  QPalette p = palette();
+  p.setColor(QPalette::Base, Qt::black);
+  p.setColor(QPalette::Text, Qt::green);
+  setPalette(p);
   process = new QProcess;
   process->start("bash");
   process->waitForStarted();
