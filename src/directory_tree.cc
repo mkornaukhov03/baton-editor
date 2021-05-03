@@ -8,6 +8,8 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+
+#include "mainwindow.h"
 Directory_tree::Directory_tree(QWidget *parent)
     : QWidget(parent), ui(new Ui::Directory_tree) {
   ui->setupUi(this);
@@ -50,7 +52,5 @@ Directory_tree::Directory_tree(QWidget *parent)
   //  tree.show();
   ui->treeView->setModel(&model);
 }
-// void Directory_tree::double_clicked(const QModelIndex &index) {
-//  QFileInfo file_info = model.fileInfo(index);
-//  if (file_info.) }
+
 Directory_tree::~Directory_tree() { delete ui; }

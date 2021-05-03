@@ -69,6 +69,7 @@ class MainWindow : public QMainWindow {
   void mergeFormatOnWordOrSelection(const QTextCharFormat &format);
   void currentCharFormatChanged(const QTextCharFormat &format);
   void showCursorPosition();
+  void on_tree_clicked(const QModelIndex &index);
 
  private:
   Ui::MainWindow *ui;

@@ -54,11 +54,10 @@ class Directory_tree : public QWidget {
   QTreeView tree;
   explicit Directory_tree(QWidget *parent = nullptr);
   virtual ~Directory_tree();
-  // private slots:
-  //  void double_clicked(const QModelIndex& index);
- private:
-  Ui::Directory_tree *ui;
   QFileSystemModel model;
+  Ui::Directory_tree *ui;
+
+ private:
   QString root;
   QModelIndex rootIndex;
 };

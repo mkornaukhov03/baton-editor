@@ -3,6 +3,7 @@
 #include <QComboBox>
 #include <QLayout>
 #include <QtWidgets>
+#include <iostream>
 #include <utility>
 
 #include "directory_tree.h"
@@ -38,6 +39,8 @@ MainWindow::MainWindow(QWidget *parent)
   setCentralWidget(central_widget);
   connect(textEdit, SIGNAL(cursorPositionChanged()), this,
           SLOT(showCursorPosition()));
+  connect(&directory_tree.tree, SIGNAL(clicked(QModelIndex)), this,
+          SLOT(on_tree_clicked(const QModelIndex &)));
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
@@ -268,4 +271,12 @@ void MainWindow::showCursorPosition() {
   int line = textEdit->textCursor().blockNumber() + 1;
   int column = textEdit->textCursor().columnNumber() + 1;
   statusBar()->showMessage(QString("Line %1  Column %2").arg(line).arg(column));
+}
+
+void MainWindow::on_tree_clicked(const QModelIndex &index) {
+  QFileInfo file_info = directory_tree.model.fileInfo(index);
+  if (file_info.isFile()) {
+    MainWindow::loadFile(file_info.filePath());
+    return;
+  }
 }
