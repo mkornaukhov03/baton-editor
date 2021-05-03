@@ -67,7 +67,35 @@ Highlighter::Highlighter(QTextDocument *parent) : QSyntaxHighlighter(parent) {
       QStringLiteral("\\bint8_t\\b"),
       QStringLiteral("\\buint8_t\\b"),
       QStringLiteral("\\bchar32_t\\b"),
-      QStringLiteral("\\bchar16_t\\b")};
+      QStringLiteral("\\bchar16_t\\b"),
+      QStringLiteral("\\breturn\\b"),
+      QStringLiteral("\\bif\\b"),
+      QStringLiteral("\\belse\\b"),
+      QStringLiteral("\\binclude\\b"),
+      QStringLiteral("\\bfor\\b"),
+      QStringLiteral("\\bcwhile\\b"),
+      QStringLiteral("\\bswitch\\b"),
+      QStringLiteral("\\bcase\\b"),
+      QStringLiteral("\\bstd::stringstream\\b"),
+      QStringLiteral("\\bstringstream\\b"),
+      QStringLiteral("\\bstd::cerr\\b"),
+      QStringLiteral("\\bcerr\\b"),
+      QStringLiteral("\\bcout\\b"),
+      QStringLiteral("\\bstd::cout\\b"),
+      QStringLiteral("\\bcin\\b"),
+      QStringLiteral("\\bstd::cin\\b"),
+      QStringLiteral("\\bifstream\\b"),
+      QStringLiteral("\\bstd::ifstream\\b"),
+      QStringLiteral("\\bistream\\b"),
+      QStringLiteral("\\bstd::istream\\b"),
+      QStringLiteral("\\bostream\\b"),
+      QStringLiteral("\\bofstream\\b"),
+      QStringLiteral("\\bstd::ostream\\b"),
+      QStringLiteral("\\bstd::ofstream\\b"),
+      QStringLiteral("\\bprintf\\b"),
+      QStringLiteral("\\bscanf\\b"),
+      QStringLiteral("\\bfprintf\\b"),
+      QStringLiteral("\\bfscanf\\b")};
   for (const QString &pattern : keywordPatterns) {
     rule.pattern = QRegularExpression(pattern);
     rule.format = keywordFormat;
@@ -94,6 +122,30 @@ Highlighter::Highlighter(QTextDocument *parent) : QSyntaxHighlighter(parent) {
   functionFormat.setForeground(Qt::blue);
   rule.pattern = QRegularExpression(QStringLiteral("\\b[A-Za-z0-9_]+(?=\\()"));
   rule.format = functionFormat;
+  highlightingRules.append(rule);
+
+  returnFormat.setForeground(Qt::darkMagenta);
+  rule.pattern = QRegularExpression(QStringLiteral("\\breturn\\b"));
+  rule.format = returnFormat;
+  highlightingRules.append(rule);
+
+  conditionalStatementsFormat.setForeground(Qt::darkGreen);
+  rule.pattern = QRegularExpression(QStringLiteral("\\b(if|else)\\b"));
+  rule.format = conditionalStatementsFormat;
+  highlightingRules.append(rule);
+
+  conditionalCyclesFormat.setForeground(Qt::magenta);
+  rule.pattern =
+      QRegularExpression(QStringLiteral("\\b(while|for|switch|case)\\b"));
+  rule.format = conditionalCyclesFormat;
+  highlightingRules.append(rule);
+
+  streamFormat.setForeground(Qt::darkGreen);
+  rule.pattern = QRegularExpression(QStringLiteral(
+      "\\b(std::stringstream|stringstream|std::cerr|std::cout|cerr|cout|cin|"
+      "std::cin|ifstream|std::ifstream|istream|std::istream|ostream|std::"
+      "ostream|ofstream|std::ofstream|printf|scanf|fprintf|fscanf)\\b"));
+  rule.format = streamFormat;
   highlightingRules.append(rule);
 
   commentStartExpression = QRegularExpression(QStringLiteral("/\\*"));
