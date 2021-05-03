@@ -33,7 +33,9 @@ void Terminal::readStandardOutput() {
 void Terminal::readStandardError() {
   QByteArray cmdout = process->readAllStandardError();
   if (!cmdout.isEmpty()) {
+    ui->textBrowser->setTextColor(Qt::red);
     ui->textBrowser->append(QString::fromLocal8Bit(cmdout));
+    ui->textBrowser->setTextColor(Qt::green);
   }
 }
 
