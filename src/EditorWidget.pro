@@ -12,10 +12,10 @@ INCLUDEPATH += ../include
 
 SOURCES += \
     editor.cc \
-    main.cc \
     directory_tree.cc \
     mainwindow.cc \
-    terminal.cc
+    terminal.cc \
+    main.cc
 
 HEADERS += \
     ../include/editor.h \
