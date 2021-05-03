@@ -14,6 +14,7 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
       ui(new Ui::MainWindow),
       textEdit(new Editor),
+      splittedTextEdit(new Editor),
       splitted(false) {
   ui->setupUi(this);
   //  Directory_tree *directory_tree = new Directory_tree(this);
@@ -39,6 +40,8 @@ MainWindow::MainWindow(QWidget *parent)
   setCentralWidget(central_widget);
   connect(textEdit, SIGNAL(cursorPositionChanged()), this,
           SLOT(showCursorPosition()));
+  connect(splittedTextEdit, SIGNAL(cursorPositionChanged()), this,
+          SLOT(showCursorPositionOnSplitted()));
   connect(&directory_tree.tree, SIGNAL(clicked(QModelIndex)), this,
           SLOT(on_tree_clicked(const QModelIndex &)));
 }
@@ -76,7 +79,7 @@ bool MainWindow::save() {
 void MainWindow::split() {
   if (!splitted) {
     splitted = true;
-    splittedTextEdit = new Editor;
+    //    splittedTextEdit = new Editor;
     grid_layout->setColumnStretch(3, 2);
     grid_layout->addWidget(splittedTextEdit, 0, 3);
     grid_layout->addWidget(textEdit, 0, 5);
@@ -270,6 +273,12 @@ QString MainWindow::strippedName(const QString &fullFileName) {
 void MainWindow::showCursorPosition() {
   int line = textEdit->textCursor().blockNumber() + 1;
   int column = textEdit->textCursor().columnNumber() + 1;
+  statusBar()->showMessage(QString("Line %1  Column %2").arg(line).arg(column));
+}
+
+void MainWindow::showCursorPositionOnSplitted() {
+  int line = splittedTextEdit->textCursor().blockNumber() + 1;
+  int column = splittedTextEdit->textCursor().columnNumber() + 1;
   statusBar()->showMessage(QString("Line %1  Column %2").arg(line).arg(column));
 }
 
