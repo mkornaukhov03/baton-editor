@@ -14,6 +14,7 @@ class Highlighter : public QSyntaxHighlighter {
 
  public:
   explicit Highlighter(QTextDocument *parent = nullptr);
+  virtual ~Highlighter() {}
 
  protected:
   void highlightBlock(const QString &text) override;
