@@ -71,7 +71,7 @@ Highlighter::Highlighter(QTextDocument *parent) : QSyntaxHighlighter(parent) {
       QStringLiteral("\\breturn\\b"),
       QStringLiteral("\\bif\\b"),
       QStringLiteral("\\belse\\b"),
-      QStringLiteral("\\b#include\\b"),
+      QStringLiteral("\\binclude\\b"),
       QStringLiteral("\\bfor\\b"),
       QStringLiteral("\\bcwhile\\b"),
       QStringLiteral("\\bswitch\\b"),

@@ -1,11 +1,13 @@
 #include "editor.h"
-#include "syntax_highlighter.h"
-#include <QPainter>
-#include <QTextBlock>
+
 #include <QFont>
-#include <QSyntaxHighlighter>
-#include <QTextCharFormat>
+#include <QPainter>
 #include <QRegularExpression>
+#include <QSyntaxHighlighter>
+#include <QTextBlock>
+#include <QTextCharFormat>
+
+#include "syntax_highlighter.h"
 
 Editor::Editor(QWidget *parent) : QPlainTextEdit(parent) {
   lineNumberArea = new LineNumberArea(this);
@@ -23,7 +25,7 @@ Editor::Editor(QWidget *parent) : QPlainTextEdit(parent) {
   font.setFixedPitch(true);
   font.setPointSize(10);
   setFont(font);
-  Highlighter * highlighter = new Highlighter(this->document());
+  highlighter = new Highlighter(this->document());
 }
 
 int Editor::lineNumberAreaWidth() {

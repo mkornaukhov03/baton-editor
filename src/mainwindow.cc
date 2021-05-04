@@ -1,5 +1,5 @@
 #include "mainwindow.h"
-#include "syntax_highlighter.h"
+
 #include <QComboBox>
 #include <QLayout>
 #include <QtWidgets>
@@ -8,6 +8,7 @@
 
 #include "directory_tree.h"
 #include "editor.h"
+#include "syntax_highlighter.h"
 #include "terminal.h"
 
 MainWindow::MainWindow(QWidget *parent)

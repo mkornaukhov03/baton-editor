@@ -1,10 +1,11 @@
 #ifndef Editor_H
 #define Editor_H
-
 #include <QMap>
 #include <QPlainTextEdit>
 #include <QPointer>
 #include <QToolBar>
+
+#include "syntax_highlighter.h"
 
 QT_BEGIN_NAMESPACE
 class QPaintEvent;
@@ -38,6 +39,7 @@ class Editor : public QPlainTextEdit {
   void updateLineNumberArea(const QRect &rect, int dy);
 
  private:
+  Highlighter *highlighter;
   QWidget *lineNumberArea;
 };
 
