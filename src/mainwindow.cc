@@ -44,7 +44,7 @@ MainWindow::MainWindow(QWidget *parent)
   connect(splittedTextEdit, SIGNAL(cursorPositionChanged()), this,
           SLOT(showCursorPositionOnSplitted()));
   connect(&directory_tree.tree, SIGNAL(clicked(QModelIndex)), this,
-          SLOT(on_tree_clicked(const QModelIndex &)));
+          SLOT(tree_clicked(const QModelIndex &)));
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
@@ -283,7 +283,7 @@ void MainWindow::showCursorPositionOnSplitted() {
   statusBar()->showMessage(QString("Line %1  Column %2").arg(line).arg(column));
 }
 
-void MainWindow::on_tree_clicked(const QModelIndex &index) {
+void MainWindow::tree_clicked(const QModelIndex &index) {
   QFileInfo file_info = directory_tree.model.fileInfo(index);
   if (file_info.isFile()) {
     MainWindow::loadFile(file_info.filePath());

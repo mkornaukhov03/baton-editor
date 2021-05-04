@@ -70,7 +70,7 @@ class MainWindow : public QMainWindow {
   void currentCharFormatChanged(const QTextCharFormat &format);
   void showCursorPosition();
   void showCursorPositionOnSplitted();
-  void on_tree_clicked(const QModelIndex &index);
+  void tree_clicked(const QModelIndex &index);
 
  private:
   Ui::MainWindow *ui;

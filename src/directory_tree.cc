@@ -46,10 +46,6 @@ Directory_tree::Directory_tree(QWidget *parent)
   tree.setColumnWidth(0, tree.width() / 3);
   // Make it flickable on touchscreens
   QScroller::grabGesture(&tree, QScroller::TouchGesture);
-
-  //  connect(ui->treeView, SIGNAL(doubleClicked(QModelIndex)), this,
-  //          SLOT(double_clicked(QModelIndex)));
-  //  tree.show();
   ui->treeView->setModel(&model);
 }
 
