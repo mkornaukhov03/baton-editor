@@ -25,7 +25,8 @@ Editor::Editor(QWidget *parent) : QPlainTextEdit(parent) {
   font.setFixedPitch(true);
   font.setPointSize(10);
   setFont(font);
-  highlighter = new Highlighter(this->document());
+  QTextDocument *document = this->document();
+  highlighter = new Highlighter(document);
 }
 
 int Editor::lineNumberAreaWidth() {

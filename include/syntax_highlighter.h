@@ -13,7 +13,7 @@ class Highlighter : public QSyntaxHighlighter {
   Q_OBJECT
 
  public:
-  explicit Highlighter(QTextDocument *parent = 0);
+  explicit Highlighter(QTextDocument *parent = nullptr);
 
  protected:
   void highlightBlock(const QString &text) override;

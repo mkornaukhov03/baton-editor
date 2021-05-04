@@ -97,7 +97,9 @@ Highlighter::Highlighter(QTextDocument *parent) : QSyntaxHighlighter(parent) {
       QStringLiteral("\\bfprintf\\b"),
       QStringLiteral("\\bfscanf\\b"),
       QStringLiteral("\\bset\\b"),
-      QStringLiteral("\\bstd::set\\b")};
+      QStringLiteral("\\bstd::set\\b"),
+      QStringLiteral("\\bstd::pair\\b"),
+      QStringLiteral("\\bpair\\b")};
   for (const QString &pattern : keywordPatterns) {
     rule.pattern = QRegularExpression(pattern);
     rule.format = keywordFormat;
