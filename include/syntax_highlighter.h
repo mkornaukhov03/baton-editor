@@ -13,8 +13,8 @@ class Highlighter : public QSyntaxHighlighter {
   Q_OBJECT
 
  public:
-  explicit Highlighter(QTextDocument *parent = nullptr);
-  virtual ~Highlighter() {}
+  explicit Highlighter(QTextDocument *parent = 0);
+  ~Highlighter() override {}
 
  protected:
   void highlightBlock(const QString &text) override;

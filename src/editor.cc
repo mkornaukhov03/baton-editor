@@ -10,7 +10,8 @@
 
 #include "syntax_highlighter.h"
 
-Editor::Editor(QWidget *parent) : QPlainTextEdit(parent) {
+Editor::Editor(QWidget *parent)
+    : QPlainTextEdit(parent), highlighter(new Highlighter(this->document())) {
   lineNumberArea = new LineNumberArea(this);
 
   connect(this, &Editor::blockCountChanged, this,
@@ -26,8 +27,8 @@ Editor::Editor(QWidget *parent) : QPlainTextEdit(parent) {
   font.setFixedPitch(true);
   font.setPointSize(10);
   setFont(font);
-  QTextDocument *document = this->document();
-  highlighter = new Highlighter(document);
+  //  QTextDocument *document = this->document();
+  //  highlighter = new Highlighter(document);
 }
 
 int Editor::lineNumberAreaWidth() {
