@@ -20,14 +20,14 @@ MainWindow::MainWindow(QWidget *parent)
       textEdit(new Editor),
       splitted(false) {
   ui->setupUi(this);
-  Directory_tree *directory_tree = new Directory_tree(this);
+  // Directory_tree *directory_tree = new Directory_tree(this);
   //  Terminal *terminal = new Terminal;
   lbl = new Suggest_label(nullptr);
   createActions();
 
   connect(textEdit->document(), &QTextDocument::contentsChanged, this,
           &MainWindow::documentWasModified);
-  
+
   setCurrentFile(QString());
 
   createStatusBar();
@@ -228,14 +228,6 @@ void MainWindow::loadFile(const QString &fileName) {
             .arg(QDir::toNativeSeparators(fileName), file.errorString()));
     return;
   }
-  
-void MainWindow::tree_clicked(const QModelIndex &index) {
-  QFileInfo file_info = directory_tree.model.fileInfo(index);
-  if (file_info.isFile()) {
-    MainWindow::loadFile(file_info.filePath());
-    return;
-  }
-}
   QTextStream in(&file);
 #ifndef QT_NO_CURSOR
   QGuiApplication::setOverrideCursor(Qt::WaitCursor);
@@ -247,6 +239,14 @@ void MainWindow::tree_clicked(const QModelIndex &index) {
 
   setCurrentFile(fileName);
   statusBar()->showMessage(tr("File loaded"), 2000);
+}
+
+void MainWindow::tree_clicked(const QModelIndex &index) {
+  QFileInfo file_info = directory_tree.model.fileInfo(index);
+  if (file_info.isFile()) {
+    MainWindow::loadFile(file_info.filePath());
+    return;
+  }
 }
 void MainWindow::createStatusBar() { statusBar()->showMessage(tr("Ready")); }
 
