@@ -44,56 +44,63 @@ void Client::SetConnections() {
 void Client::OnClientReadyReadStdout() {
   // FIXME should create new thread and use waitForReadyRead
 
-  QByteArray buffer = process_->readAllStandardOutput();
-  int msg_start =
-      buffer.indexOf("\r\n\r\n") + static_cast<int>(std::strlen("\r\n\r\n"));
-  int len_start = buffer.indexOf("Content-Length: ") +
-                  static_cast<int>(std::strlen("Content-Length: "));
-  int len_end = buffer.indexOf("\r\n");
-  assert(buffer.indexOf("\r\n\r\n") != -1 &&
-         "Server answer does not requre protocol");
-  assert(buffer.indexOf("Content-Length: ") != -1 &&
-         "Server answer does not requre protocol");
-  bool ok = false;
+  static std::string buff{};
+  static unsigned msg_size = 0;
 
+  QByteArray cur_buffer = process_->readAllStandardOutput();
 
-  [[maybe_unused]]int content_length = buffer.mid(len_start, len_end - len_start).toInt(&ok);
+  std::cerr << "GOT MSG: " << cur_buffer.toStdString() << std::endl;
 
+  auto process_message = [&]() {
+    json msg = json::parse(buff);
 
-  assert(ok && "Server answer does not requre protocol");
-
-  QByteArray payload = buffer.mid(msg_start);
-
-  QJsonParseError error{};
-  auto msg2 = QJsonDocument::fromJson(payload, &error);
-  assert(payload.size() == content_length && "Not full message!");
-  //   try {
-  json msg(msg2.toJson().toStdString());  // possibly raise an exception
-  auto rpc = json::parse(json::parse(msg.dump()).get<std::string>());
-  std::cerr << rpc << '\n';
-  msg = rpc;
-  if (msg.contains("id")) {
-    if (msg.contains("method")) {
-      emit OnRequest(msg["method"].get<std::string>(), msg["params"],
-                     msg["id"]);
-    } else if (msg.contains("result")) {
-      std::cerr << "Emitting OnResponse!\n";
-      emit OnResponse(msg["id"], msg["result"]);
-    } else if (msg.contains("error")) {
-      emit OnError(msg["id"], msg["error"]);
+    std::cerr << " PROCESS MESSAGE: " << msg << '\n';
+    if (msg.contains("id")) {
+      if (msg.contains("method")) {
+        emit OnRequest(msg["method"].get<std::string>(), msg["params"],
+                       msg["id"]);
+      } else if (msg.contains("result")) {
+        std::cerr << "Emitting OnResponse!\n";
+        emit OnResponse(msg["id"], msg["result"]);
+      } else if (msg.contains("error")) {
+        emit OnError(msg["id"], msg["error"]);
+      }
+    } else if (msg.contains("method")) {
+      if (msg.contains("params")) {
+        emit OnNotify(msg["method"].get<std::string>(), msg["params"]);
+      }
+    } else {
+      std::cerr << "Nothing emitted!\n";
     }
-  } else if (msg.contains("method")) {
-    if (msg.contains("params")) {
-      emit OnNotify(msg["method"].get<std::string>(), msg["params"]);
+
+    buff.clear();
+    msg_size = 0;
+  };
+
+  if (cur_buffer.indexOf("\r\n\r\n") == -1) {  // the middle of the message
+    for (const auto ch : cur_buffer.toStdString()) {
+      buff.push_back(ch);
     }
-  } else {
-    std::cerr << "Nothing emitted!\n";
+    if (buff.size() == msg_size) {
+      process_message();
+    }
+  } else {  // the start of the message
+    std::cerr << "INSIDE the start of the msg" << std::endl;
+    int msg_start = cur_buffer.indexOf("\r\n\r\n") +
+                    static_cast<int>(std::strlen("\r\n\r\n"));
+    int len_start = cur_buffer.indexOf("Content-Length: ") +
+                    static_cast<int>(std::strlen("Content-Length: "));
+    int len_end = cur_buffer.indexOf("\r\n");
+    bool ok = false;
+    [[maybe_unused]] int content_length =
+        cur_buffer.mid(len_start, len_end - len_start).toInt(&ok);
+    QByteArray payload = cur_buffer.mid(msg_start);
+    msg_size = payload.size();
+    buff = payload.toStdString();
+    if (payload.size() == content_length) {
+      process_message();
+    }
   }
-
-  //   } catch (const std::exception &ex) {
-  //     std::cerr << ex.what();
-  //     return;
-  //   }
 }
 
 void Client::OnClientReadyReadStderr() {
@@ -210,7 +217,7 @@ void Client::WriteToServer(std::string dump) {
     }
     send_to_server_buffer_.clear();
   }
-  process_->waitForReadyRead(100);
+  process_->waitForReadyRead(10);
 }
 
 void Client::NotifyImpl(std::string method, json params) {
