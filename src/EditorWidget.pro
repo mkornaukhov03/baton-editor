@@ -15,8 +15,8 @@ SOURCES += \
     main.cc \
     directory_tree.cc \
     mainwindow.cc \
-    terminal.cc \
-    syntax_highlighter.cpp
+    syntax_highlighter.cc \
+    terminal.cc
 
 HEADERS += \
     ../include/editor.h \

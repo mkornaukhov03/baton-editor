@@ -6,6 +6,7 @@
 #include <QSyntaxHighlighter>
 #include <QTextBlock>
 #include <QTextCharFormat>
+#include <QTextDocument>
 
 #include "syntax_highlighter.h"
 
