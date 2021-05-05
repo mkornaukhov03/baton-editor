@@ -12,6 +12,7 @@
 #include <string>
 #include <vector>
 
+#include "directory_tree.h"
 #include "editor.h"
 #include "interface.h"
 #include "suggest_label.h"
@@ -73,6 +74,8 @@ class MainWindow : public QMainWindow {
   void mergeFormatOnWordOrSelection(const QTextCharFormat &format);
   void currentCharFormatChanged(const QTextCharFormat &format);
   void showCursorPosition();
+  void showCursorPositionOnSplitted();
+  void tree_clicked(const QModelIndex &index);
 
  private:
   Ui::MainWindow *ui;
@@ -95,6 +98,7 @@ class MainWindow : public QMainWindow {
   QWidget *central_widget;
   QGridLayout *grid_layout;
   QWidget *terminal;
+  Directory_tree directory_tree;
   bool splitted;
   // setting up autocomplete below
   lsp::LSPHandler *lsp_handler;

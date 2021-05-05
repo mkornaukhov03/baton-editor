@@ -11,15 +11,17 @@
 
 #include "directory_tree.h"
 #include "editor.h"
+#include "syntax_highlighter.h"
 #include "terminal.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
       ui(new Ui::MainWindow),
       textEdit(new Editor),
+      splittedTextEdit(new Editor),
       splitted(false) {
   ui->setupUi(this);
-  Directory_tree *directory_tree = new Directory_tree(this);
+  // Directory_tree *directory_tree = new Directory_tree(this);
   //  Terminal *terminal = new Terminal;
   lbl = new Suggest_label(nullptr);
   createActions();
@@ -33,7 +35,7 @@ MainWindow::MainWindow(QWidget *parent)
   central_widget = new QWidget();
   grid_layout = new QGridLayout(central_widget);
   //  grid_layout->addWidget(lbl, 1, 1, 1, 1);
-  grid_layout->addWidget(directory_tree, 0, 0, 1, 1);
+  grid_layout->addWidget(&directory_tree, 0, 0, 1, 1);
   grid_layout->addWidget(textEdit, 0, 3);
   grid_layout->setColumnStretch(0, 1);
   grid_layout->setColumnStretch(3, 5);
@@ -44,7 +46,10 @@ MainWindow::MainWindow(QWidget *parent)
   setCentralWidget(central_widget);
   connect(textEdit, SIGNAL(cursorPositionChanged()), this,
           SLOT(showCursorPosition()));
-
+  connect(splittedTextEdit, SIGNAL(cursorPositionChanged()), this,
+          SLOT(showCursorPositionOnSplitted()));
+  connect(&directory_tree.tree, SIGNAL(clicked(QModelIndex)), this,
+          SLOT(tree_clicked(const QModelIndex &)));
   lsp_handler =
       new lsp::LSPHandler(QDir::currentPath().toStdString(), "kek.cpp", "");
   timer = new QTimer(this);
@@ -96,7 +101,7 @@ bool MainWindow::save() {
 void MainWindow::split() {
   if (!splitted) {
     splitted = true;
-    splittedTextEdit = new Editor;
+    //    splittedTextEdit = new Editor;
     grid_layout->setColumnStretch(3, 2);
     grid_layout->addWidget(splittedTextEdit, 0, 3);
     grid_layout->addWidget(textEdit, 0, 5);
@@ -224,7 +229,6 @@ void MainWindow::loadFile(const QString &fileName) {
             .arg(QDir::toNativeSeparators(fileName), file.errorString()));
     return;
   }
-
   QTextStream in(&file);
 #ifndef QT_NO_CURSOR
   QGuiApplication::setOverrideCursor(Qt::WaitCursor);
@@ -236,6 +240,14 @@ void MainWindow::loadFile(const QString &fileName) {
 
   setCurrentFile(fileName);
   statusBar()->showMessage(tr("File loaded"), 2000);
+}
+
+void MainWindow::tree_clicked(const QModelIndex &index) {
+  QFileInfo file_info = directory_tree.model.fileInfo(index);
+  if (file_info.isFile()) {
+    MainWindow::loadFile(file_info.filePath());
+    return;
+  }
 }
 void MainWindow::createStatusBar() { statusBar()->showMessage(tr("Ready")); }
 
@@ -295,6 +307,12 @@ QString MainWindow::strippedName(const QString &fullFileName) {
 void MainWindow::showCursorPosition() {
   int line = textEdit->textCursor().blockNumber() + 1;
   int column = textEdit->textCursor().columnNumber() + 1;
+  statusBar()->showMessage(QString("Line %1  Column %2").arg(line).arg(column));
+}
+
+void MainWindow::showCursorPositionOnSplitted() {
+  int line = splittedTextEdit->textCursor().blockNumber() + 1;
+  int column = splittedTextEdit->textCursor().columnNumber() + 1;
   statusBar()->showMessage(QString("Line %1  Column %2").arg(line).arg(column));
 }
 

@@ -5,8 +5,7 @@
 Terminal::Terminal(QWidget *parent)
     : QWidget(parent), ui(new Ui::Terminal), process(new QProcess) {
   ui->setupUi(this);
-  // connect(process, SIGNAL(readyReadStandardOutput()), this,
-  // SLOT(setStdout()));
+  connect(process, SIGNAL(readyReadStandardError()), this, SLOT(setStdout()));
   connect(process, SIGNAL(readyReadStandardOutput()), this, SLOT(setStdout()));
   connect(ui->lineEdit, SIGNAL(returnPressed()), this, SLOT(command()));
 }
@@ -19,7 +18,7 @@ void Terminal::setStdout() {
     ui->textBrowser->append(codec->toUnicode(process->readAllStandardOutput()));
   } else {
     ui->textBrowser->append(process->readAllStandardOutput());
-    //    ui->textBrowser->append(process->readAllStandardError());
+    ui->textBrowser->append(process->readAllStandardError());
   }
 }
 

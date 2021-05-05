@@ -15,12 +15,14 @@ SOURCES += \
     main.cc \
     directory_tree.cc \
     mainwindow.cc \
+    syntax_highlighter.cc \
     terminal.cc
 
 HEADERS += \
     ../include/editor.h \
     ../include/mainwindow.h \
     ../include/directory_tree.h \
+    ../include/syntax_highlighter.h \
     ../include/terminal.h
 
 FORMS += \
@@ -33,5 +35,8 @@ FORMS += \
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+DISTFILES += \
+    config.txt
 
 
