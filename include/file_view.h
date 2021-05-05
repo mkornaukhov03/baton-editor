@@ -13,11 +13,14 @@ class FileView : public QWidget {
   Q_OBJECT
 
  public:
-  explicit FileView(const std::string& filename, Editor*,
-                    QWidget* parent = nullptr);
+  explicit FileView(const std::string& filename, QWidget* parent = nullptr);
   virtual ~FileView();
 
   void update();
+
+ public slots:
+  void uploadContent(const std::string& s);
+  void changeCursor(int new_line, int new_col);
 
  private:
   LSPHandler handler_;
@@ -25,8 +28,6 @@ class FileView : public QWidget {
   int carriage_line_;
   int carriage_col_;
   bool completion_required_;
-  Editor* editor_;  // non-owning, TODO: delete this, check for another way to
-                    // transfer content
 };
 }  // namespace lsp
 

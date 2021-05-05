@@ -321,7 +321,7 @@ void MainWindow::update_autocomplete() {
   static int cur_col = 0;
 
   static std::string content = "";
-  textEdit->setReadOnly(true);
+  //  textEdit->setReadOnly(true);
 
   if (content != textEdit->toPlainText().toUtf8().toStdString()) {
     content = textEdit->toPlainText().toUtf8().toStdString();
@@ -334,7 +334,7 @@ void MainWindow::update_autocomplete() {
     lsp_handler->RequestCompletion(cur_line, cur_col);
   }
 
-  textEdit->setReadOnly(false);
+  //  textEdit->setReadOnly(false);
 }
 
 void MainWindow::set_autocomplete_to_label(
