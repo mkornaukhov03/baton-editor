@@ -16,13 +16,20 @@ class FileView : public QWidget {
   explicit FileView(const std::string& filename, QWidget* parent = nullptr);
   virtual ~FileView();
 
-  void update();
-
+ signals:
+  void DoneCompletion(const std::vector<std::string>&);
+  void DoneDiagnostic(const std::vector<lsp::DiagnosticsResponse>&);
  public slots:
-  void uploadContent(const std::string& s);
-  void changeCursor(int new_line, int new_col);
+  void UploadContent(const std::string& s);
+  void ChangeCursor(int new_line, int new_col);
+
+ private slots:
+  void GetCompletion(const std::vector<std::string>&);
+  void GetDiagnostic(const std::vector<lsp::DiagnosticsResponse>&);
 
  private:
+  void Update();
+
   LSPHandler handler_;
   std::string content_;
   int carriage_line_;
