@@ -4,6 +4,7 @@
 #include <QPlainTextEdit>
 #include <QPointer>
 #include <QToolBar>
+#include <string>
 
 #include "syntax_highlighter.h"
 
@@ -33,6 +34,9 @@ class Editor : public QPlainTextEdit {
  protected:
   void resizeEvent(QResizeEvent *event) override;
 
+ signals:
+  void changeCursor(int new_line, int new_col);
+  void changeContent(const std::string &new_cont);
  private slots:
   void updateLineNumberAreaWidth(int newBlockCount);
   void highlightCurrentLine();

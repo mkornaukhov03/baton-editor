@@ -32,7 +32,7 @@ void LSPHandler::set_connections() {
 }
 
 void LSPHandler::GetResponse(json id, json result) {
-  std::cerr << "==== INSIDE GetResponse() ====" << std::endl;
+  //  std::cerr << "==== INSIDE GetResponse() ====" << std::endl;
   std::string id_str = id.get<std::string>();
 
   const unsigned MAX_COMPLETION_ITEMS = 5;
@@ -53,7 +53,7 @@ void LSPHandler::GetResponse(json id, json result) {
 
 void LSPHandler::GetNotify(const std::string& id, json result) {
   if (id == "textDocument/publishDiagnostics") {
-    std::cerr << "Vector of diagnostics" << std::endl;
+    //    std::cerr << "Vector of diagnostics" << std::endl;
     //    std::cerr << "Notify result: " << result["diagnostics"] << std::endl;
     std::vector<lsp::DiagnosticsResponse> resp;
     for (const auto& item : result["diagnostics"]) {

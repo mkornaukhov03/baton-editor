@@ -49,18 +49,18 @@ void Client::OnClientReadyReadStdout() {
 
   QByteArray cur_buffer = process_->readAllStandardOutput();
 
-  std::cerr << "GOT MSG: " << cur_buffer.toStdString() << std::endl;
+  //  std::cerr << "GOT MSG: " << cur_buffer.toStdString() << std::endl;
 
   auto process_message = [&]() {
     json msg = json::parse(buff);
 
-    std::cerr << " PROCESS MESSAGE: " << msg << '\n';
+    //    std::cerr << " PROCESS MESSAGE: " << msg << '\n';
     if (msg.contains("id")) {
       if (msg.contains("method")) {
         emit OnRequest(msg["method"].get<std::string>(), msg["params"],
                        msg["id"]);
       } else if (msg.contains("result")) {
-        std::cerr << "Emitting OnResponse!\n";
+        //        std::cerr << "Emitting OnResponse!\n";
         emit OnResponse(msg["id"], msg["result"]);
       } else if (msg.contains("error")) {
         emit OnError(msg["id"], msg["error"]);
@@ -70,7 +70,7 @@ void Client::OnClientReadyReadStdout() {
         emit OnNotify(msg["method"].get<std::string>(), msg["params"]);
       }
     } else {
-      std::cerr << "Nothing emitted!\n";
+      //      std::cerr << "Nothing emitted!\n";
     }
 
     buff.clear();
@@ -85,7 +85,7 @@ void Client::OnClientReadyReadStdout() {
       process_message();
     }
   } else {  // the start of the message
-    std::cerr << "INSIDE the start of the msg" << std::endl;
+            //    std::cerr << "INSIDE the start of the msg" << std::endl;
     int msg_start = cur_buffer.indexOf("\r\n\r\n") +
                     static_cast<int>(std::strlen("\r\n\r\n"));
     int len_start = cur_buffer.indexOf("Content-Length: ") +

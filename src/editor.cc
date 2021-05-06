@@ -20,6 +20,14 @@ Editor::Editor(QWidget *parent)
   connect(this, &Editor::cursorPositionChanged, this,
           &Editor::highlightCurrentLine);
 
+  connect(this, &Editor::cursorPositionChanged, this, [&]() {
+    emit changeCursor(this->textCursor().blockNumber(),
+                      this->textCursor().columnNumber());
+  });
+  connect(this, &Editor::textChanged, this, [&]() {
+    emit changeContent(this->toPlainText().toUtf8().toStdString());
+  });
+
   updateLineNumberAreaWidth(0);
   highlightCurrentLine();
   QFont font;
@@ -27,6 +35,7 @@ Editor::Editor(QWidget *parent)
   font.setFixedPitch(true);
   font.setPointSize(10);
   setFont(font);
+
   //  QTextDocument *document = this->document();
   //  highlighter = new Highlighter(document);
 }
@@ -71,7 +80,7 @@ void Editor::highlightCurrentLine() {
   if (!isReadOnly()) {
     QTextEdit::ExtraSelection selection;
 
-    QColor lineColor = QColor(218, 140, 219);
+    QColor lineColor = QColor(255, 128, 232);
 
     selection.format.setBackground(lineColor);
     selection.format.setProperty(QTextFormat::FullWidthSelection, true);
