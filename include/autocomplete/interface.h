@@ -41,8 +41,8 @@ class LSPHandler final : public QObject {
   void GetServerError(QProcess::ProcessError) {}
   void GetServerFinished(int, QProcess::ExitStatus) {}
   void GetStderrOutput(const std::string &s) {
-    std::cerr << "Inside LSPHandler::GetStderrrOutput\n";
-    std::cerr << s << std::endl;
+    //    std::cerr << "Inside LSPHandler::GetStderrrOutput\n";
+    //    std::cerr << s << std::endl;
   }
 
   // from user

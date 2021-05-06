@@ -8,7 +8,6 @@
 #include "interface.h"
 #include "lsp_basic.h"
 
-namespace lsp {
 class FileView : public QWidget {
   Q_OBJECT
 
@@ -30,12 +29,11 @@ class FileView : public QWidget {
  private:
   void Update();
 
-  LSPHandler handler_;
+  lsp::LSPHandler handler_;
   std::string content_;
   int carriage_line_;
   int carriage_col_;
   bool completion_required_;
 };
-}  // namespace lsp
 
 #endif  // FILE_VIEW_H

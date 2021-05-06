@@ -50,20 +50,36 @@ MainWindow::MainWindow(QWidget *parent)
           SLOT(showCursorPositionOnSplitted()));
   connect(&directory_tree.tree, SIGNAL(clicked(QModelIndex)), this,
           SLOT(tree_clicked(const QModelIndex &)));
-  lsp_handler =
-      new lsp::LSPHandler(QDir::currentPath().toStdString(), "kek.cpp", "");
-  timer = new QTimer(this);
-  connect(timer, SIGNAL(timeout()), this, SLOT(update_autocomplete()));
 
-  const int TIMER_PERIOD = 300;
+  // for autocompletion
+  //  lsp_handler =
+  //      new lsp::LSPHandler(QDir::currentPath().toStdString(), "kek.cpp", "");
+  //  timer = new QTimer(this);
+  //  connect(timer, SIGNAL(timeout()), this, SLOT(update_autocomplete()));
 
-  timer->start(TIMER_PERIOD);
-  connect(lsp_handler, SIGNAL(DoneCompletion(const std::vector<std::string> &)),
-          this,
+  //  const int TIMER_PERIOD = 300;
+
+  //  timer->start(TIMER_PERIOD);
+  //  connect(lsp_handler, SIGNAL(DoneCompletion(const std::vector<std::string>
+  //  &)),
+  //          this,
+  //          SLOT(set_autocomplete_to_label(const std::vector<std::string>
+  //          &)));
+  //  connect(
+  //      lsp_handler,
+  //      SIGNAL(DoneDiagnostic(const std::vector<lsp::DiagnosticsResponse> &)),
+  //      this,
+  //      SLOT(display_diagnostics(const std::vector<lsp::DiagnosticsResponse>
+  //      &)));
+  fv = new FileView("kek.cpp", this);
+  connect(textEdit, SIGNAL(changeContent(const std::string &)), fv,
+          SLOT(UploadContent(const std::string &)));
+  connect(textEdit, SIGNAL(changeCursor(int, int)), fv,
+          SLOT(ChangeCursor(int, int)));
+  connect(fv, SIGNAL(DoneCompletion(const std::vector<std::string> &)), this,
           SLOT(set_autocomplete_to_label(const std::vector<std::string> &)));
   connect(
-      lsp_handler,
-      SIGNAL(DoneDiagnostic(const std::vector<lsp::DiagnosticsResponse> &)),
+      fv, SIGNAL(DoneDiagnostic(const std::vector<lsp::DiagnosticsResponse> &)),
       this,
       SLOT(display_diagnostics(const std::vector<lsp::DiagnosticsResponse> &)));
 }
@@ -199,7 +215,7 @@ void MainWindow::createActions() {
 
 MainWindow::~MainWindow() {
   delete ui;
-  delete lsp_handler;
+  //  delete lsp_handler;
 }
 
 bool MainWindow::maybeSave() {
@@ -317,22 +333,22 @@ void MainWindow::showCursorPositionOnSplitted() {
 }
 
 void MainWindow::update_autocomplete() {
-  static int cur_line = 0;
-  static int cur_col = 0;
+  //  static int cur_line = 0;
+  //  static int cur_col = 0;
 
-  static std::string content = "";
-  //  textEdit->setReadOnly(true);
+  //  static std::string content = "";
+  //  //  textEdit->setReadOnly(true);
 
-  if (content != textEdit->toPlainText().toUtf8().toStdString()) {
-    content = textEdit->toPlainText().toUtf8().toStdString();
-    lsp_handler->FileChanged(content);
-  }
-  if (cur_line != textEdit->textCursor().blockNumber() ||
-      cur_col != textEdit->textCursor().columnNumber()) {
-    cur_line = textEdit->textCursor().blockNumber();
-    cur_col = textEdit->textCursor().columnNumber();
-    lsp_handler->RequestCompletion(cur_line, cur_col);
-  }
+  //  if (content != textEdit->toPlainText().toUtf8().toStdString()) {
+  //    content = textEdit->toPlainText().toUtf8().toStdString();
+  //    lsp_handler->FileChanged(content);
+  //  }
+  //  if (cur_line != textEdit->textCursor().blockNumber() ||
+  //      cur_col != textEdit->textCursor().columnNumber()) {
+  //    cur_line = textEdit->textCursor().blockNumber();
+  //    cur_col = textEdit->textCursor().columnNumber();
+  //    lsp_handler->RequestCompletion(cur_line, cur_col);
+  //  }
 
   //  textEdit->setReadOnly(false);
 }
