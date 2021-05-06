@@ -4,6 +4,7 @@
 #include <QPlainTextEdit>
 #include <QPointer>
 #include <QToolBar>
+#include <string>
 
 #include "syntax_highlighter.h"
 
