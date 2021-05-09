@@ -35,7 +35,7 @@ MainWindow::MainWindow(QWidget *parent)
   central_widget = new QWidget();
   grid_layout = new QGridLayout(central_widget);
   //  grid_layout->addWidget(lbl, 1, 1, 1, 1);
-  grid_layout->addWidget(&directory_tree, 0, 0, 1, 1);
+  grid_layout->addWidget(&directory_tree.tree, 0, 0, 1, 1);
   grid_layout->addWidget(textEdit, 0, 3);
   grid_layout->setColumnStretch(0, 1);
   grid_layout->setColumnStretch(3, 5);
