@@ -84,16 +84,17 @@ MainWindow::MainWindow(QWidget *parent)
           SLOT(set_autocomplete_to_label(const std::vector<std::string> &)));
   //  connect(
   //      fv, SIGNAL(DoneDiagnostic(const std::vector<lsp::DiagnosticsResponse>
-  //      &)), this, SLOT(display_diagnostics(const
+  //      &)), this, SLOT(display_diagnotics(const
   //      std::vector<lsp::DiagnosticsResponse> &)));
   connect(fv,
           SIGNAL(DoneDiagnostic(const std::vector<lsp::DiagnosticsResponse> &)),
           this,
           SLOT(display_failure(const std::vector<lsp::DiagnosticsResponse> &)));
-  fv_split = new FileView("kek.cpp", this);
-  connect(textEdit, SIGNAL(changeContent(const std::string &)), fv_split,
-          SLOT(UploadContent(const std::string &)));
-  connect(textEdit, SIGNAL(changeCursor(int, int)), fv_split,
+
+  fv_split = new FileView("lol.cpp", this);
+  connect(splittedTextEdit, SIGNAL(changeContent(const std::string &)),
+          fv_split, SLOT(UploadContent(const std::string &)));
+  connect(splittedTextEdit, SIGNAL(changeCursor(int, int)), fv_split,
           SLOT(ChangeCursor(int, int)));
   connect(fv_split, SIGNAL(DoneCompletion(const std::vector<std::string> &)),
           this,
