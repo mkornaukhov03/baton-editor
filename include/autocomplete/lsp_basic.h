@@ -11,7 +11,6 @@
 #include <string_view>
 #include <utility>
 #include <vector>
-#include <optional>
 
 #include "enums.h"
 #include "nlohmann/json.hpp"
