@@ -3,14 +3,20 @@
 
 #include <QGridLayout>
 #include <QSplitter>
+#include <QTimer>
 #include <QtCore/QVariant>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QWidget>
+#include <string>
+#include <vector>
 
+#include "autocomplete/interface.h"
+#include "directory_tree.h"
 #include "editor.h"
+#include "suggest_label.h"
 #include "terminal.h"
 
 QT_BEGIN_NAMESPACE
@@ -69,6 +75,8 @@ class MainWindow : public QMainWindow {
   void mergeFormatOnWordOrSelection(const QTextCharFormat &format);
   void currentCharFormatChanged(const QTextCharFormat &format);
   void showCursorPosition();
+  void showCursorPositionOnSplitted();
+  void tree_clicked(const QModelIndex &index);
 
  private:
   Ui::MainWindow *ui;
@@ -92,7 +100,15 @@ class MainWindow : public QMainWindow {
   //  QGridLayout *grid_layout;
   QSplitter *splitter;
   QWidget *terminal;
-
+  Directory_tree directory_tree;
   bool splitted;
+  // setting up autocomplete below
+  lsp::LSPHandler *lsp_handler;
+  QTimer *timer;
+  Suggest_label *lbl;
+ private slots:
+  void update_autocomplete();
+  void set_autocomplete_to_label(const std::vector<std::string> &);
+  void display_diagnostics(const std::vector<lsp::DiagnosticsResponse> &);
 };
 #endif  // MAINWINDOW_H

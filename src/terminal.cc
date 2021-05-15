@@ -26,7 +26,7 @@ void Terminal::readStandardOutput() {
     ui->textBrowser->append(codec->toUnicode(process->readAllStandardOutput()));
   } else {
     ui->textBrowser->append(process->readAllStandardOutput());
-    //    ui->textBrowser->append(process->readAllStandardError());
+    ui->textBrowser->append(process->readAllStandardError());
   }
 }
 
