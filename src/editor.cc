@@ -11,7 +11,10 @@
 #include "syntax_highlighter.h"
 
 Editor::Editor(QWidget *parent)
-    : QPlainTextEdit(parent), highlighter(new Highlighter(this->document())) {
+    : QPlainTextEdit(parent),
+      highlighter(new Highlighter(this->document())),
+      curIndent(0),
+      newLine(true) {
   lineNumberArea = new LineNumberArea(this);
 
   connect(this, &Editor::blockCountChanged, this,
@@ -80,8 +83,7 @@ void Editor::highlightCurrentLine() {
   if (!isReadOnly()) {
     QTextEdit::ExtraSelection selection;
 
-    QColor lineColor = QColor(255, 128, 232);
-
+    QColor lineColor = QColor(173, 216, 230);
     selection.format.setBackground(lineColor);
     selection.format.setProperty(QTextFormat::FullWidthSelection, true);
     selection.cursor = textCursor();

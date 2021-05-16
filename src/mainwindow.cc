@@ -5,6 +5,7 @@
 #include <QComboBox>
 #include <QDir>
 #include <QLayout>
+#include <QSplitter>
 #include <QtWidgets>
 #include <iostream>  // for debugging/logging
 #include <utility>
@@ -21,6 +22,20 @@ MainWindow::MainWindow(QWidget *parent)
       splittedTextEdit(new Editor),
       splitted(false) {
   ui->setupUi(this);
+  QFont font;
+  font.setFamily("Courier");
+  font.setStyleHint(QFont::Monospace);
+  font.setFixedPitch(true);
+  font.setPointSize(10);
+
+  textEdit->setFont(font);
+  splittedTextEdit->setFont(font);
+
+  const int tabStop = 4;  // 4 characters
+
+  QFontMetrics metrics(font);
+  textEdit->setTabStopWidth(tabStop * metrics.width(' '));
+  splittedTextEdit->setTabStopWidth(tabStop * metrics.width(' '));
   // Directory_tree *directory_tree = new Directory_tree(this);
   //  Terminal *terminal = new Terminal;
   lbl = new Suggest_label(nullptr);
@@ -29,21 +44,17 @@ MainWindow::MainWindow(QWidget *parent)
   connect(textEdit->document(), &QTextDocument::contentsChanged, this,
           &MainWindow::documentWasModified);
 
-  setCurrentFile(QString());
+  setCurrentFile(QString(), textEdit);
 
   createStatusBar();
   central_widget = new QWidget();
-  grid_layout = new QGridLayout(central_widget);
-  //  grid_layout->addWidget(lbl, 1, 1, 1, 1);
-  grid_layout->addWidget(&directory_tree.tree, 0, 0, 1, 1);
-  grid_layout->addWidget(textEdit, 0, 3);
-  grid_layout->setColumnStretch(0, 1);
-  grid_layout->setColumnStretch(3, 5);
-  //  grid_layout->addWidget(terminal, 1, 0, 2, 3);
-  //  grid_layout->setRowStretch(0, 4);
-  //  grid_layout->setRowStretch(1, 1);
-  central_widget->setLayout(grid_layout);
-  setCentralWidget(central_widget);
+
+  splitter = new QSplitter(centralWidget());
+  splitter->addWidget(&directory_tree.tree);
+  splitter->addWidget(textEdit);
+  splitter->setStretchFactor(0, 0);
+  splitter->setStretchFactor(1, 1);
+  setCentralWidget(splitter);
   connect(textEdit, SIGNAL(cursorPositionChanged()), this,
           SLOT(showCursorPosition()));
   connect(splittedTextEdit, SIGNAL(cursorPositionChanged()), this,
@@ -82,6 +93,8 @@ MainWindow::MainWindow(QWidget *parent)
       fv, SIGNAL(DoneDiagnostic(const std::vector<lsp::DiagnosticsResponse> &)),
       this,
       SLOT(display_diagnostics(const std::vector<lsp::DiagnosticsResponse> &)));
+
+  textEdit->setFocus();
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
@@ -95,7 +108,7 @@ void MainWindow::closeEvent(QCloseEvent *event) {
 void MainWindow::newFile() {
   if (maybeSave()) {
     textEdit->clear();
-    setCurrentFile(QString());
+    setCurrentFile(QString(), textEdit);
   }
 }
 
@@ -107,34 +120,43 @@ void MainWindow::open() {
 }
 
 bool MainWindow::save() {
-  if (curFile.isEmpty()) {
-    return saveAs();
+  QString filename =
+      (textEdit->curFile.isEmpty()) ? "untitled.cpp" : textEdit->curFile;
+  QString splittedFilename = (splittedTextEdit->curFile.isEmpty())
+                                 ? "untitled.cpp"
+                                 : splittedTextEdit->curFile;
+  QMessageBox msgBox;
+  msgBox.setText(tr("Which file would you like to save?"));
+  QAbstractButton *pButtonEdit = msgBox.addButton(
+      tr(filename.toStdString().c_str()), QMessageBox::YesRole);
+  msgBox.addButton(tr(splittedFilename.toStdString().c_str()),
+                   QMessageBox::NoRole);
+  msgBox.exec();
+  if (msgBox.clickedButton() == pButtonEdit) {
+    if (textEdit->curFile.isEmpty()) {
+      return saveAs();
+    } else {
+      return saveFile(textEdit->curFile, textEdit);
+    }
   } else {
-    return saveFile(curFile);
+    if (splittedTextEdit->curFile.isEmpty()) {
+      return saveAs();
+    } else {
+      return saveFile(splittedTextEdit->curFile, splittedTextEdit);
+    }
   }
 }
 
 void MainWindow::split() {
   if (!splitted) {
     splitted = true;
-    //    splittedTextEdit = new Editor;
-    grid_layout->setColumnStretch(3, 2);
-    grid_layout->addWidget(splittedTextEdit, 0, 3);
-    grid_layout->addWidget(textEdit, 0, 5);
-    grid_layout->setColumnStretch(3, 2);
-    grid_layout->setColumnStretch(5, 2);
+    splittedTextEdit = new Editor;
+    splitter->addWidget(splittedTextEdit);
+    splitter->setStretchFactor(2, 1);
   } else {
     splitted = false;
-    //    grid_layout->removeWidget(grid_layout->itemAt(1)->widget());
-    for (int i = 0; i < 2; i++) {
-      auto it1 = grid_layout->itemAt(1);
-      if (it1) {
-        delete it1->widget();
-        //        delete it1;
-      }
-    }
-    //    grid_layout->addWidget(textEdit, 0, 3);
-    //    grid_layout->setColumnStretch(3, 5);
+    std::swap(textEdit, splittedTextEdit);
+    delete splitter->widget(1);
   }
 }
 
@@ -155,11 +177,34 @@ void MainWindow::mergeFormatOnWordOrSelection(const QTextCharFormat &format) {
 }
 
 bool MainWindow::saveAs() {
+  if (splitted) {
+    QString filename = (textEdit->curFile.isEmpty()) ? "untitled(left).cpp"
+                                                     : textEdit->curFile;
+    QString splittedFilename = (splittedTextEdit->curFile.isEmpty())
+                                   ? "untitled(right).cpp"
+                                   : splittedTextEdit->curFile;
+    QMessageBox msgBox;
+    msgBox.setText(tr("Which file would you like to save?"));
+    QAbstractButton *pButtonEdit = msgBox.addButton(
+        tr(filename.toStdString().c_str()), QMessageBox::YesRole);
+    msgBox.addButton(tr(splittedFilename.toStdString().c_str()),
+                     QMessageBox::NoRole);
+    msgBox.exec();
+    QFileDialog dialog(this);
+    dialog.setWindowModality(Qt::WindowModal);
+    dialog.setAcceptMode(QFileDialog::AcceptSave);
+    if (dialog.exec() != QDialog::Accepted) return false;
+    if (msgBox.clickedButton() != pButtonEdit) {
+      return saveFile(dialog.selectedFiles().first(), splittedTextEdit);
+    } else {
+      return saveFile(dialog.selectedFiles().first(), textEdit);
+    }
+  }
   QFileDialog dialog(this);
   dialog.setWindowModality(Qt::WindowModal);
   dialog.setAcceptMode(QFileDialog::AcceptSave);
   if (dialog.exec() != QDialog::Accepted) return false;
-  return saveFile(dialog.selectedFiles().first());
+  return saveFile(dialog.selectedFiles().first(), textEdit);
 }
 
 void MainWindow::documentWasModified() {
@@ -254,7 +299,7 @@ void MainWindow::loadFile(const QString &fileName) {
   QGuiApplication::restoreOverrideCursor();
 #endif
 
-  setCurrentFile(fileName);
+  setCurrentFile(fileName, textEdit);
   statusBar()->showMessage(tr("File loaded"), 2000);
 }
 
@@ -267,14 +312,14 @@ void MainWindow::tree_clicked(const QModelIndex &index) {
 }
 void MainWindow::createStatusBar() { statusBar()->showMessage(tr("Ready")); }
 
-bool MainWindow::saveFile(const QString &fileName) {
+bool MainWindow::saveFile(const QString &fileName, Editor *editArea) {
   QString errorMessage;
 
   QGuiApplication::setOverrideCursor(Qt::WaitCursor);
   QSaveFile file(fileName);
   if (file.open(QFile::WriteOnly | QFile::Text)) {
     QTextStream out(&file);
-    out << textEdit->toPlainText();
+    out << editArea->toPlainText();
     if (!file.commit()) {
       errorMessage =
           tr("Cannot write file %1:\n%2.")
@@ -292,14 +337,14 @@ bool MainWindow::saveFile(const QString &fileName) {
     return false;
   }
 
-  setCurrentFile(fileName);
+  setCurrentFile(fileName, editArea);
   return true;
 }
 
-void MainWindow::setCurrentFile(const QString &fileName) {
-  curFile = fileName;
+void MainWindow::setCurrentFile(const QString &fileName, Editor *editArea) {
+  editArea->curFile = fileName;
   setWindowTitle(tr("MainWindow[*]"));
-  textEdit->document()->setModified(false);
+  editArea->document()->setModified(false);
   setWindowModified(false);
 
   QString shownName = curFile;
