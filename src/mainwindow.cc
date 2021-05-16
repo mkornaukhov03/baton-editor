@@ -17,31 +17,31 @@
 #include "editor.h"
 #include "syntax_highlighter.h"
 #include "terminal.h"
-
+const int tabStop = 4;
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
       ui(new Ui::MainWindow),
       textEdit(new Editor),
-      splittedTextEdit(new Editor),
+      //      splittedTextEdit(new Editor),
+      terminal(new Terminal),
       splitted(false),
       lbl(new Suggest_label),
       display_failure_log(new QPlainTextEdit),
-      terminal(new Terminal) {
+      font(new QFont) {
   ui->setupUi(this);
-  QFont font;
-  font.setFamily("Courier");
-  font.setStyleHint(QFont::Monospace);
-  font.setFixedPitch(true);
-  font.setPointSize(10);
+  font->setFamily("Courier");
+  font->setStyleHint(QFont::Monospace);
+  font->setFixedPitch(true);
+  font->setPointSize(10);
 
-  textEdit->setFont(font);
-  splittedTextEdit->setFont(font);
+  textEdit->setFont(*font);
+  //  splittedTextEdit->setFont(font);
 
-  const int tabStop = 4;  // 4 characters
+  // 4 characters
 
-  QFontMetrics metrics(font);
-  textEdit->setTabStopWidth(tabStop * metrics.width(' '));
-  splittedTextEdit->setTabStopWidth(tabStop * metrics.width(' '));
+  metrics = new QFontMetrics(*font);
+  textEdit->setTabStopWidth(tabStop * metrics->width(' '));
+  //  splittedTextEdit->setTabStopWidth(tabStop * metrics.width(' '));
   // Directory_tree *directory_tree = new Directory_tree(this);
   // Terminal *terminal = new Terminal;
   // lbl = new Suggest_label(nullptr);
@@ -78,8 +78,8 @@ MainWindow::MainWindow(QWidget *parent)
   //  setCentralWidget(splitter);
   connect(textEdit, SIGNAL(cursorPositionChanged()), this,
           SLOT(showCursorPosition()));
-  connect(splittedTextEdit, SIGNAL(cursorPositionChanged()), this,
-          SLOT(showCursorPositionOnSplitted()));
+  //  connect(splittedTextEdit, SIGNAL(cursorPositionChanged()), this,
+  //          SLOT(showCursorPositionOnSplitted()));
   connect(&directory_tree.tree, SIGNAL(clicked(QModelIndex)), this,
           SLOT(tree_clicked(const QModelIndex &)));
   display_failure_log->setReadOnly(1);
@@ -119,18 +119,20 @@ MainWindow::MainWindow(QWidget *parent)
           this,
           SLOT(display_failure(const std::vector<lsp::DiagnosticsResponse> &)));
 
-  fv_split = new FileView("lol.cpp", this);
-  connect(splittedTextEdit, SIGNAL(changeContent(const std::string &)),
-          fv_split, SLOT(UploadContent(const std::string &)));
-  connect(splittedTextEdit, SIGNAL(changeCursor(int, int)), fv_split,
-          SLOT(ChangeCursor(int, int)));
-  connect(fv_split, SIGNAL(DoneCompletion(const std::vector<std::string> &)),
-          this,
-          SLOT(set_autocomplete_to_label(const std::vector<std::string> &)));
-  connect(fv_split,
-          SIGNAL(DoneDiagnostic(const std::vector<lsp::DiagnosticsResponse> &)),
-          this,
-          SLOT(display_failure(const std::vector<lsp::DiagnosticsResponse> &)));
+  //  fv_split = new FileView("lol.cpp", this);
+  //  connect(splittedTextEdit, SIGNAL(changeContent(const std::string &)),
+  //          fv_split, SLOT(UploadContent(const std::string &)));
+  //  connect(splittedTextEdit, SIGNAL(changeCursor(int, int)), fv_split,
+  //          SLOT(ChangeCursor(int, int)));
+  //  connect(fv_split, SIGNAL(DoneCompletion(const std::vector<std::string>
+  //  &)),
+  //          this,
+  //          SLOT(set_autocomplete_to_label(const std::vector<std::string>
+  //          &)));
+  //  connect(fv_split,
+  //          SIGNAL(DoneDiagnostic(const std::vector<lsp::DiagnosticsResponse>
+  //          &)), this, SLOT(display_failure(const
+  //          std::vector<lsp::DiagnosticsResponse> &)));
 
   textEdit->setFocus();
 }
@@ -188,9 +190,41 @@ bool MainWindow::save() {
 void MainWindow::split() {
   if (!splitted) {
     splitted = true;
+    splittedTextEdit = new Editor;
     splitter->addWidget(splittedTextEdit);
     splitter->setStretchFactor(2, 1);
+    fv_split = new FileView("lol.cpp", this);
+    connect(splittedTextEdit, SIGNAL(changeContent(const std::string &)),
+            fv_split, SLOT(UploadContent(const std::string &)));
+    connect(splittedTextEdit, SIGNAL(changeCursor(int, int)), fv_split,
+            SLOT(ChangeCursor(int, int)));
+    connect(fv_split, SIGNAL(DoneCompletion(const std::vector<std::string> &)),
+            this,
+            SLOT(set_autocomplete_to_label(const std::vector<std::string> &)));
+    connect(
+        fv_split,
+        SIGNAL(DoneDiagnostic(const std::vector<lsp::DiagnosticsResponse> &)),
+        this,
+        SLOT(display_failure(const std::vector<lsp::DiagnosticsResponse> &)));
+    splittedTextEdit->setTabStopWidth(tabStop * metrics->width(' '));
+    connect(splittedTextEdit, SIGNAL(cursorPositionChanged()), this,
+            SLOT(showCursorPositionOnSplitted()));
+    splittedTextEdit->setFont(*font);
   } else {
+    disconnect(splittedTextEdit, SIGNAL(changeContent(const std::string &)),
+               fv_split, SLOT(UploadContent(const std::string &)));
+    disconnect(splittedTextEdit, SIGNAL(changeCursor(int, int)), fv_split,
+               SLOT(ChangeCursor(int, int)));
+    disconnect(
+        fv_split, SIGNAL(DoneCompletion(const std::vector<std::string> &)),
+        this,
+        SLOT(set_autocomplete_to_label(const std::vector<std::string> &)));
+    disconnect(
+        fv_split,
+        SIGNAL(DoneDiagnostic(const std::vector<lsp::DiagnosticsResponse> &)),
+        this,
+        SLOT(display_failure(const std::vector<lsp::DiagnosticsResponse> &)));
+    delete fv_split;
     splitted = false;
     std::swap(textEdit, splittedTextEdit);
     delete splitter->widget(1);
