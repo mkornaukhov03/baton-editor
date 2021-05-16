@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QGridLayout>
+#include <QSplitter>
 #include <QTimer>
 #include <QtCore/QVariant>
 #include <QtWidgets/QApplication>
@@ -86,8 +87,8 @@ class MainWindow : public QMainWindow {
   void readSettings();
   void writeSettings();
   bool maybeSave();
-  bool saveFile(const QString &fileName);
-  void setCurrentFile(const QString &fileName);
+  bool saveFile(const QString &fileName, Editor *editArea);
+  void setCurrentFile(const QString &fileName, Editor *editArea);
   void fontChanged(const QFont &f);
   QString strippedName(const QString &fullFileName);
 
@@ -98,7 +99,8 @@ class MainWindow : public QMainWindow {
   QToolBar *tb;
   QWidget *central_widget;
   QGridLayout *grid_layout;
-  QWidget *terminal;
+  QSplitter *splitter;
+  Terminal *terminal;
   Directory_tree directory_tree;
   bool splitted;
   // setting up autocomplete below
