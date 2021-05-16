@@ -224,7 +224,7 @@ bool MainWindow::saveAs() {
 }
 
 void MainWindow::documentWasModified() {
-  setWindowTitle(tr("MainWindow[*]"));
+  setWindowTitle(tr("Baton Editor[*]"));
   setWindowModified(textEdit->document()->isModified());
 }
 
@@ -359,7 +359,7 @@ bool MainWindow::saveFile(const QString &fileName, Editor *editArea) {
 
 void MainWindow::setCurrentFile(const QString &fileName, Editor *editArea) {
   editArea->curFile = fileName;
-  setWindowTitle(tr("MainWindow[*]"));
+  setWindowTitle(tr("Baton Editor[*]"));
   editArea->document()->setModified(false);
   setWindowModified(false);
 
@@ -430,7 +430,8 @@ void MainWindow::displayAutocompleteOptions(
   disp->clear();
   std::cerr << "______AUTOCOMPLETE DISPLAY________" << std::endl;
   if (vec.size() == 0) return;
-  QStringListModel *model = (QStringListModel *)(completer->model());
+  QStringListModel *model =
+      reinterpret_cast<QStringListModel *>(completer->model());
   QStringList stringList;
 
   for (const auto &item : vec) {
