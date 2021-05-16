@@ -1,5 +1,6 @@
 #ifndef Editor_H
 #define Editor_H
+#include <QCompleter>
 #include <QMap>
 #include <QPlainTextEdit>
 #include <QPointer>
@@ -33,32 +34,15 @@ class Editor : public QPlainTextEdit {
   int curIndent;
   bool newLine;
 
+  void setCompleter(QCompleter *c);
+  QCompleter *completer() const;
+
   virtual ~Editor() {}
 
  protected:
   void resizeEvent(QResizeEvent *event) override;
-  void keyPressEvent(QKeyEvent *e) override {
-    QPlainTextEdit::keyPressEvent(e);
-    if (newLine && e->key() == Qt::Key_Space) {
-      //      std::cerr << '\n' << "Space +1" << '\n';
-      curIndent += 1;
-    }
-    if (newLine && e->key() == Qt::Key_Tab) {
-      //      std::cerr << '\n' << "Tab +1" << '\n';
-      curIndent += 4;
-    }
-    if (e->key() == Qt::Key_Return || e->key() == Qt::Key_Enter) {
-      //      std::cerr << '\n';
-      //      std::cerr << "indent = " << curIndent << '\n';
-      newLine = true;
-      for (int i = 0; i < curIndent; i++) {
-        insertPlainText(" ");
-      }
-    } else if (e->key() != Qt::Key_Space && e->key() != Qt::Key_Tab &&
-               e->key() != Qt::Key_Enter && e->key() != Qt::Key_Return) {
-      newLine = false;
-    }
-  }
+  void keyPressEvent(QKeyEvent *e) override;
+  void focusInEvent(QFocusEvent *e) override;
 
  signals:
   void changeCursor(int new_line, int new_col);
@@ -69,10 +53,13 @@ class Editor : public QPlainTextEdit {
   void highlightCurrentLine();
   void updateLineNumberArea(const QRect &rect, int dy);
   void resolveCompletion(const std::string &compl_item);
+  void insertCompletion(const QString &completion);
 
  private:
   Highlighter *highlighter;
   QWidget *lineNumberArea;
+  QCompleter *c = nullptr;
+  QString textUnderCursor() const;
 };
 
 class LineNumberArea : public QWidget {

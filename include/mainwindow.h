@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <QAbstractItemModel>
 #include <QGridLayout>
 #include <QSplitter>
 #include <QTimer>
@@ -111,6 +112,8 @@ class MainWindow : public QMainWindow {
   Suggest_label *lbl;
   FileView *fv = nullptr;
   autocompleteDisplay *disp;
+  QAbstractItemModel *model;
+  QCompleter *completer = nullptr;
  private slots:
   void update_autocomplete();
   void set_autocomplete_to_label(const std::vector<std::string> &);

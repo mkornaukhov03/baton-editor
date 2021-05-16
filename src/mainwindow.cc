@@ -8,6 +8,7 @@
 #include <QSplitter>
 #include <QtWidgets>
 #include <iostream>  // for debugging/logging
+#include <list>
 #include <utility>
 
 #include "directory_tree.h"
@@ -84,7 +85,19 @@ MainWindow::MainWindow(QWidget *parent)
   //      this,
   //      SLOT(display_diagnostics(const std::vector<lsp::DiagnosticsResponse>
   //      &)));
+
   fv = new FileView("kek.cpp", this);
+  QStringList stringList;
+  stringList << "m0"
+             << "m1"
+             << "m2";
+  QStringListModel *model = new QStringListModel(stringList);
+  completer = new QCompleter(model, this);
+  completer->setModelSorting(QCompleter::CaseInsensitivelySortedModel);
+  completer->setCaseSensitivity(Qt::CaseInsensitive);
+  completer->setWrapAround(false);
+  textEdit->setCompleter(completer);
+
   connect(textEdit, SIGNAL(changeContent(const std::string &)), fv,
           SLOT(UploadContent(const std::string &)));
   connect(textEdit, SIGNAL(changeCursor(int, int)), fv,
@@ -417,10 +430,15 @@ void MainWindow::displayAutocompleteOptions(
   disp->clear();
   std::cerr << "______AUTOCOMPLETE DISPLAY________" << std::endl;
   if (vec.size() == 0) return;
+  QStringListModel *model = (QStringListModel *)(completer->model());
+  QStringList stringList;
+
   for (const auto &item : vec) {
     std::cerr << item << '\n';
     disp->appendText(item);
+    stringList << QString::fromStdString(item);
   }
+  model->setStringList(stringList);
 }
 
 void MainWindow::display_diagnostics(
