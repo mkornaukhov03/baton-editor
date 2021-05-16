@@ -16,6 +16,8 @@
 #include "autocomplete/interface.h"
 #include "directory_tree.h"
 #include "editor.h"
+#include "file_view.h"
+#include "interface.h"
 #include "suggest_label.h"
 #include "terminal.h"
 
@@ -106,6 +108,7 @@ class MainWindow : public QMainWindow {
   lsp::LSPHandler *lsp_handler;
   QTimer *timer;
   Suggest_label *lbl;
+  FileView *fv = nullptr;
  private slots:
   void update_autocomplete();
   void set_autocomplete_to_label(const std::vector<std::string> &);

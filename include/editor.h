@@ -5,6 +5,7 @@
 #include <QPointer>
 #include <QToolBar>
 #include <iostream>
+#include <string>
 
 #include "syntax_highlighter.h"
 
@@ -36,7 +37,6 @@ class Editor : public QPlainTextEdit {
 
  protected:
   void resizeEvent(QResizeEvent *event) override;
-
   void keyPressEvent(QKeyEvent *e) override {
     QPlainTextEdit::keyPressEvent(e);
     if (newLine && e->key() == Qt::Key_Space) {
@@ -60,6 +60,9 @@ class Editor : public QPlainTextEdit {
     }
   }
 
+ signals:
+  void changeCursor(int new_line, int new_col);
+  void changeContent(const std::string &new_cont);
  private slots:
   void updateLineNumberAreaWidth(int newBlockCount);
   void highlightCurrentLine();
