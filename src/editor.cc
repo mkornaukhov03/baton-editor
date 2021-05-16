@@ -7,6 +7,7 @@
 #include <QTextBlock>
 #include <QTextCharFormat>
 #include <QTextDocument>
+#include <QTextDocumentFragment>
 
 #include "syntax_highlighter.h"
 
@@ -31,6 +32,8 @@ Editor::Editor(QWidget *parent)
     emit changeContent(this->toPlainText().toUtf8().toStdString());
   });
 
+  connect(this, &Editor::transferCompletion, this, &Editor::resolveCompletion);
+
   updateLineNumberAreaWidth(0);
   highlightCurrentLine();
   QFont font;
@@ -41,6 +44,42 @@ Editor::Editor(QWidget *parent)
 
   //  QTextDocument *document = this->document();
   //  highlighter = new Highlighter(document);
+}
+
+void Editor::resolveCompletion(const std::string &compl_item) {
+  std::cerr << "SELECTION:\n"
+            << this->textCursor().selection().toPlainText().toStdString()
+            << std::endl;
+
+  auto cursor = this->textCursor();
+  cursor.movePosition(QTextCursor::PreviousWord, QTextCursor::KeepAnchor);
+  cursor.removeSelectedText();
+  cursor.insertText(QString::fromStdString(compl_item));
+  cursor.clearSelection();
+  this->setTextCursor(cursor);
+
+  //  this->textCursor().insertText(QString::fromStdString(compl_item));
+  //  this->textCursor().movePosition(QTextCursor::NextWord);
+
+  //  this->textCursor().endEditBlock();
+  //  this->undo();
+
+  //  this->textCursor().insertText("ZHOPA");
+
+  //  auto curs = this->textCursor();
+  //  curs.movePosition(QTextCursor::StartOfWord, QTextCursor::KeepAnchor);
+
+  //  std::cerr << "AFTER RESOLVE:\n"
+  //            << this->toPlainText().toStdString() << std::endl;
+  //  this->setTextCursor(curs);
+
+  //  this->textCursor().removeSelectedText();
+  //  this->textCursor().clearSelection();
+  //  this->setFocus();
+  //  emit cursorPositionChanged();
+  //  emit changeContent(this->toPlainText().toStdString());
+  //  textCursor().clearSelection();
+  //  setFocus();
 }
 
 int Editor::lineNumberAreaWidth() {

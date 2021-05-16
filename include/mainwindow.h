@@ -14,6 +14,7 @@
 #include <vector>
 
 #include "autocomplete/interface.h"
+#include "autocompletedisplay.h"
 #include "directory_tree.h"
 #include "editor.h"
 #include "file_view.h"
@@ -109,9 +110,11 @@ class MainWindow : public QMainWindow {
   QTimer *timer;
   Suggest_label *lbl;
   FileView *fv = nullptr;
+  autocompleteDisplay *disp;
  private slots:
   void update_autocomplete();
   void set_autocomplete_to_label(const std::vector<std::string> &);
+  void displayAutocompleteOptions(const std::vector<std::string> &);
   void display_diagnostics(const std::vector<lsp::DiagnosticsResponse> &);
 };
 #endif  // MAINWINDOW_H

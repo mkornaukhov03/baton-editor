@@ -33,6 +33,7 @@ set(HEADERS "include/autocomplete/enums.h"
         "include/syntax_highlighter.h"
         "include/suggest_label.h"
         "include/file_view.h"
+        "include/autocompletedisplay.h"
         )
 
 # Add your source files here
@@ -46,7 +47,8 @@ set(SOURCES "src/main.cc"
         "src/directory_tree.cc"
         "src/mainwindow.cc"
         "src/syntax_highlighter.cc"
-        "src/file_view.cc")
+        "src/file_view.cc"
+        "src/autocompletedisplay.cc")
 
 
 find_package(Qt5Core CONFIG REQUIRED)

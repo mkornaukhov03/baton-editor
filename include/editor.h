@@ -63,10 +63,12 @@ class Editor : public QPlainTextEdit {
  signals:
   void changeCursor(int new_line, int new_col);
   void changeContent(const std::string &new_cont);
+  void transferCompletion(const std::string &compl_item);
  private slots:
   void updateLineNumberAreaWidth(int newBlockCount);
   void highlightCurrentLine();
   void updateLineNumberArea(const QRect &rect, int dy);
+  void resolveCompletion(const std::string &compl_item);
 
  private:
   Highlighter *highlighter;

@@ -39,6 +39,8 @@ MainWindow::MainWindow(QWidget *parent)
   // Directory_tree *directory_tree = new Directory_tree(this);
   //  Terminal *terminal = new Terminal;
   lbl = new Suggest_label(nullptr);
+  disp = new autocompleteDisplay(nullptr);
+  disp->show();
   createActions();
 
   connect(textEdit->document(), &QTextDocument::contentsChanged, this,
@@ -93,7 +95,8 @@ MainWindow::MainWindow(QWidget *parent)
       fv, SIGNAL(DoneDiagnostic(const std::vector<lsp::DiagnosticsResponse> &)),
       this,
       SLOT(display_diagnostics(const std::vector<lsp::DiagnosticsResponse> &)));
-
+  connect(fv, SIGNAL(DoneCompletion(const std::vector<std::string> &)), this,
+          SLOT(displayAutocompleteOptions(const std::vector<std::string> &)));
   textEdit->setFocus();
 }
 
@@ -407,6 +410,17 @@ void MainWindow::set_autocomplete_to_label(
     std::cerr << item << '\n';
   }
   lbl->setText(QString::fromStdString(vec[0]));
+}
+
+void MainWindow::displayAutocompleteOptions(
+    const std::vector<std::string> &vec) {
+  disp->clear();
+  std::cerr << "______AUTOCOMPLETE DISPLAY________" << std::endl;
+  if (vec.size() == 0) return;
+  for (const auto &item : vec) {
+    std::cerr << item << '\n';
+    disp->appendText(item);
+  }
 }
 
 void MainWindow::display_diagnostics(
