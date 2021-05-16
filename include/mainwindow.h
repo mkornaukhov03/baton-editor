@@ -17,7 +17,6 @@
 #include "directory_tree.h"
 #include "editor.h"
 #include "file_view.h"
-#include "interface.h"
 #include "suggest_label.h"
 #include "terminal.h"
 
@@ -99,9 +98,9 @@ class MainWindow : public QMainWindow {
   QComboBox *comboSize;
   QToolBar *tb;
   QWidget *central_widget;
-  //  QGridLayout *grid_layout;
+  QGridLayout *grid_layout;
   QSplitter *splitter;
-  QWidget *terminal;
+  Terminal *terminal;
   Directory_tree directory_tree;
   bool splitted;
   // setting up autocomplete below
@@ -109,9 +108,12 @@ class MainWindow : public QMainWindow {
   QTimer *timer;
   Suggest_label *lbl;
   FileView *fv = nullptr;
+  FileView *fv_split = nullptr;
+  QPlainTextEdit *display_failure_log;
  private slots:
   void update_autocomplete();
   void set_autocomplete_to_label(const std::vector<std::string> &);
-  void display_diagnostics(const std::vector<lsp::DiagnosticsResponse> &);
+  //  void display_diagnostics(const std::vector<lsp::DiagnosticsResponse> &);
+  void display_failure(const std::vector<lsp::DiagnosticsResponse> &);
 };
 #endif  // MAINWINDOW_H

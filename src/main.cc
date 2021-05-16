@@ -32,11 +32,10 @@ SOFTWARE.
 
 int main(int argv, char **args) {
   QApplication app(argv, args);
-
   MainWindow mainwindow;
   mainwindow.show();
 
-  Terminal term;
-  term.show();
+  //  Terminal term;
+  //  term.show();
   return app.exec();
 }
