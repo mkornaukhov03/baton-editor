@@ -110,6 +110,8 @@ class MainWindow : public QMainWindow {
   FileView *fv = nullptr;
   FileView *fv_split = nullptr;
   QPlainTextEdit *display_failure_log;
+  QFont *font;
+  QFontMetrics *metrics;
  private slots:
   void update_autocomplete();
   void set_autocomplete_to_label(const std::vector<std::string> &);
