@@ -100,7 +100,12 @@ Highlighter::Highlighter(QTextDocument *parent) : QSyntaxHighlighter(parent) {
       QStringLiteral("\\bset\\b"),
       QStringLiteral("\\bstd::set\\b"),
       QStringLiteral("\\bstd::pair\\b"),
-      QStringLiteral("\\bpair\\b")};
+      QStringLiteral("\\bpair\\b"),
+      QStringLiteral("\\bunordered_set\\b"),
+      QStringLiteral("\\bstd::unordered_set\\b"),
+      QStringLiteral("\\bbitset\\b"),
+      QStringLiteral("\\bstd::bitset\\b"),
+  };
   for (const QString &pattern : keywordPatterns) {
     rule.pattern = QRegularExpression(pattern);
     rule.format = keywordFormat;
