@@ -114,6 +114,7 @@ class MainWindow : public QMainWindow {
   autocompleteDisplay *disp;
   QAbstractItemModel *model;
   QCompleter *completer = nullptr;
+
  private slots:
   void update_autocomplete();
   void set_autocomplete_to_label(const std::vector<std::string> &);

@@ -31,9 +31,9 @@ class Editor : public QPlainTextEdit {
   void lineNumberAreaPaintEvent(QPaintEvent *event);
   int lineNumberAreaWidth();
   QString curFile;
-  int curIndent;
+  std::size_t curIndent;
   bool newLine;
-
+  // std::size_t blockCount = 0;
   void setCompleter(QCompleter *c);
   QCompleter *completer() const;
 
@@ -60,6 +60,15 @@ class Editor : public QPlainTextEdit {
   QWidget *lineNumberArea;
   QCompleter *c = nullptr;
   QString textUnderCursor() const;
+  int getIndentationSpaces() const;
+  bool m_autoIndentation = true;
+  bool m_autoParentheses = true;
+  bool m_replaceTab = true;
+  QString m_tabReplace = "    ";
+  QChar charUnderCursor(int offset = 0) const;
+  QString wordUnderCursor() const;
+  bool procCompleterStart(QKeyEvent *e);
+  void procCompleterFinish(QKeyEvent *e);
 };
 
 class LineNumberArea : public QWidget {
