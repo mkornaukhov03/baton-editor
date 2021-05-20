@@ -34,7 +34,10 @@ void FileView::GetDiagnostic(
 
 void FileView::UploadContent(const std::string& new_content) {
   content_ = new_content;
-  Update();
+  if (content_.back() != '\n') {
+    content_ += '\n';
+  }
+  handler_.FileChanged(content_);
 }
 
 void FileView::ChangeCursor(int new_line, int new_col) {
@@ -44,34 +47,33 @@ void FileView::ChangeCursor(int new_line, int new_col) {
 
   // searching for next charachter after cursor
   auto it = content_.begin();
-  for (int line = 0; line < carriage_line_ && it != content_.end(); ++line) {
+  for (int line = 0; line < carriage_line_; ++line) {
     it = std::find(it, content_.end(), '\n');
+    it++;
   }
-  if (it == content_.end()) {
-    it = content_.begin();
-  }
-  //  char next_char =
-  //      content_.at(std::distance(content_.begin(), it) + carriage_col_);
   char next_char =
       content_[(std::distance(content_.begin(), it) + carriage_col_)];
 
-  static char allowable_for_completion[] = {'\n', '\0', '\t', ' '};
+  static char allowable_for_completion[] = {'\n', '\0', '\t', ' ',
+                                            '}',  ')',  ']'};
 
   cond = std::find(std::begin(allowable_for_completion),
                    std::end(allowable_for_completion),
                    next_char) != std::end(allowable_for_completion);
 
-  if (cond) {
-    completion_required_ = true;
+  completion_required_ = cond;
+  std::cerr << "COMPLETION REQUIRED: " << std::boolalpha << completion_required_
+            << std::endl
+            << content_ << std::endl;
+  if (completion_required_) {
+    handler_.RequestCompletion(carriage_line_, carriage_col_);
   }
-  std::cerr << "COMPLETION REQUIRED: " << std::boolalpha << std::endl;
-  Update();
 }
 
 // not ready
 void FileView::Update() {
-  handler_.FileChanged(content_);
-  if (completion_required_) {
-    handler_.RequestCompletion(carriage_line_, carriage_col_);
-  }
+  //  handler_.FileChanged(content_);
+  //  if (completion_required_) {
+  //    handler_.RequestCompletion(carriage_line_, carriage_col_);
+  //  }
 }
