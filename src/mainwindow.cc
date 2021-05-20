@@ -226,7 +226,7 @@ void MainWindow::split() {
         SLOT(display_failure(const std::vector<lsp::DiagnosticsResponse> &)));
     delete fv_split;
     splitted = false;
-    std::swap(textEdit, splittedTextEdit);
+    // std::swap(textEdit, splittedTextEdit);
     delete splitter->widget(1);
   }
 }
