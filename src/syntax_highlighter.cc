@@ -1,11 +1,41 @@
 #include "syntax_highlighter.h"
 
+#include <QColor>
+#include <QPalette>
 #include <QTextDocument>
+#include <cmath>
+#include <iostream>
+#include <string>
+
+namespace {
+// http://alienryderflex.com/hsp.html
+bool isLight(int r, int g, int b) {  // in hex
+  double brightness = std::sqrt(0.299 * r * r + 0.587 * g * g + 0.114 * b * b);
+  return brightness > (255.0 / 2);
+}
+
+}  // namespace
+
 Highlighter::Highlighter(QTextDocument *parent) : QSyntaxHighlighter(parent) {
   HighlightingRule rule;
 
-  keywordFormat.setForeground(Qt::darkBlue);
+  QColor color = QPalette().color(QPalette::Window); /*name().toStdString();*/
+  int r, g, b;
+  color.getRgb(&r, &g, &b);
+  bool is_light = isLight(r, g, b);
+
+  QColor keywordColor = is_light ? Qt::darkBlue : QColor("#63ceff");
+  QColor classColor = is_light ? Qt::darkMagenta : QColor("");
+  QColor commentColor = is_light ? Qt::red : QColor("#ff4646");
+  QColor quotationColor = is_light ? Qt::darkGreen : QColor("#76ff3d");
+  QColor functionColor = is_light ? Qt::blue : QColor("#625df3");
+  QColor returnColor = is_light ? Qt::darkMagenta : QColor("#ffa602");
+  QColor condCycleColor = is_light ? Qt::magenta : QColor("#ff6df6");
+  QColor streamColor = is_light ? Qt::darkGreen : QColor("#f4bbff");
+
+  keywordFormat.setForeground(keywordColor);
   keywordFormat.setFontWeight(QFont::Bold);
+
   const QString keywordPatterns[] = {
       QStringLiteral("\\bchar\\b"),
       QStringLiteral("\\bclass\\b"),
@@ -105,52 +135,57 @@ Highlighter::Highlighter(QTextDocument *parent) : QSyntaxHighlighter(parent) {
       QStringLiteral("\\bstd::unordered_set\\b"),
       QStringLiteral("\\bbitset\\b"),
       QStringLiteral("\\bstd::bitset\\b"),
-  };
+      QStringLiteral("\\btrue\\b"),
+      QStringLiteral("\\bfalse\\b"),
+      QStringLiteral("\\bauto\\b"),
+      QStringLiteral("\\bdecltype\\b"),
+      QStringLiteral("\\btemplate\\b"),
+      QStringLiteral("\\bsizeof...\\b"),
+      QStringLiteral("\\bsize\\b")};
   for (const QString &pattern : keywordPatterns) {
     rule.pattern = QRegularExpression(pattern);
     rule.format = keywordFormat;
     highlightingRules.append(rule);
   }
-  classFormat.setFontWeight(QFont::Bold);
-  classFormat.setForeground(Qt::darkMagenta);
-  rule.pattern = QRegularExpression(QStringLiteral("\\bQ[A-Za-z]+\\b"));
-  rule.format = classFormat;
-  highlightingRules.append(rule);
-  singleLineCommentFormat.setForeground(Qt::red);
+
+  singleLineCommentFormat.setForeground(commentColor);
   rule.pattern = QRegularExpression(QStringLiteral("//[^\n]*"));
   rule.format = singleLineCommentFormat;
   highlightingRules.append(rule);
 
-  multiLineCommentFormat.setForeground(Qt::red);
-
-  quotationFormat.setForeground(Qt::darkGreen);
+  multiLineCommentFormat.setForeground(commentColor);
+  quotationFormat.setForeground(quotationColor);
   rule.pattern = QRegularExpression(QStringLiteral("\".*\""));
   rule.format = quotationFormat;
   highlightingRules.append(rule);
 
-  functionFormat.setFontItalic(true);
-  functionFormat.setForeground(Qt::blue);
+  //  functionFormat.setFontItalic(true);
+  functionFormat.setForeground(functionColor);
+  functionFormat.setFontWeight(QFont::Bold);
   rule.pattern = QRegularExpression(QStringLiteral("\\b[A-Za-z0-9_]+(?=\\()"));
   rule.format = functionFormat;
   highlightingRules.append(rule);
 
-  returnFormat.setForeground(Qt::darkMagenta);
+  returnFormat.setForeground(returnColor);
   rule.pattern = QRegularExpression(QStringLiteral("\\breturn\\b"));
   rule.format = returnFormat;
   highlightingRules.append(rule);
 
-  conditionalStatementsFormat.setForeground(Qt::darkGreen);
+  conditionalStatementsFormat.setForeground(condCycleColor);
+  conditionalStatementsFormat.setFontWeight(QFont::Bold);
   rule.pattern = QRegularExpression(QStringLiteral("\\b(if|else)\\b"));
   rule.format = conditionalStatementsFormat;
   highlightingRules.append(rule);
 
-  conditionalCyclesFormat.setForeground(Qt::magenta);
+  conditionalCyclesFormat.setForeground(condCycleColor);
+  conditionalCyclesFormat.setFontWeight(QFont::Bold);
   rule.pattern =
       QRegularExpression(QStringLiteral("\\b(while|for|switch|case)\\b"));
   rule.format = conditionalCyclesFormat;
   highlightingRules.append(rule);
 
-  streamFormat.setForeground(Qt::darkGreen);
+  streamFormat.setForeground(streamColor);
+  streamFormat.setFontWeight(QFont::Bold);
   rule.pattern = QRegularExpression(QStringLiteral(
       "\\b(std::stringstream|stringstream|std::cerr|std::cout|cerr|cout|cin|"
       "std::cin|ifstream|std::ifstream|istream|std::istream|ostream|std::"

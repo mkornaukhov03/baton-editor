@@ -54,8 +54,7 @@ void FileView::ChangeCursor(int new_line, int new_col) {
   char next_char =
       content_[(std::distance(content_.begin(), it) + carriage_col_)];
 
-  static char allowable_for_completion[] = {'\n', '\0', '\t', ' ',
-                                            '}',  ')',  ']'};
+  static char allowable_for_completion[] = {'\n', '\0', '\t', ' ', '}', ')'};
 
   cond = std::find(std::begin(allowable_for_completion),
                    std::end(allowable_for_completion),
