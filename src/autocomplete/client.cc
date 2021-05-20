@@ -50,56 +50,59 @@ void Client::OnClientReadyReadStdout() {
   QByteArray cur_buffer = process_->readAllStandardOutput();
 
   //  std::cerr << "GOT MSG: " << cur_buffer.toStdString() << std::endl;
+  try {
+    auto process_message = [&]() {
+      json msg = json::parse(buff);
 
-  auto process_message = [&]() {
-    json msg = json::parse(buff);
-
-    //    std::cerr << " PROCESS MESSAGE: " << msg << '\n';
-    if (msg.contains("id")) {
-      if (msg.contains("method")) {
-        emit OnRequest(msg["method"].get<std::string>(), msg["params"],
-                       msg["id"]);
-      } else if (msg.contains("result")) {
-        //        std::cerr << "Emitting OnResponse!\n";
-        emit OnResponse(msg["id"], msg["result"]);
-      } else if (msg.contains("error")) {
-        emit OnError(msg["id"], msg["error"]);
+      //    std::cerr << " PROCESS MESSAGE: " << msg << '\n';
+      if (msg.contains("id")) {
+        if (msg.contains("method")) {
+          emit OnRequest(msg["method"].get<std::string>(), msg["params"],
+                         msg["id"]);
+        } else if (msg.contains("result")) {
+          //        std::cerr << "Emitting OnResponse!\n";
+          emit OnResponse(msg["id"], msg["result"]);
+        } else if (msg.contains("error")) {
+          emit OnError(msg["id"], msg["error"]);
+        }
+      } else if (msg.contains("method")) {
+        if (msg.contains("params")) {
+          emit OnNotify(msg["method"].get<std::string>(), msg["params"]);
+        }
+      } else {
+        //      std::cerr << "Nothing emitted!\n";
       }
-    } else if (msg.contains("method")) {
-      if (msg.contains("params")) {
-        emit OnNotify(msg["method"].get<std::string>(), msg["params"]);
+
+      buff.clear();
+      msg_size = 0;
+    };
+
+    if (cur_buffer.indexOf("\r\n\r\n") == -1) {  // the middle of the message
+      for (const auto ch : cur_buffer.toStdString()) {
+        buff.push_back(ch);
       }
-    } else {
-      //      std::cerr << "Nothing emitted!\n";
+      if (buff.size() == msg_size) {
+        process_message();
+      }
+    } else {  // the start of the message
+              //    std::cerr << "INSIDE the start of the msg" << std::endl;
+      int msg_start = cur_buffer.indexOf("\r\n\r\n") +
+                      static_cast<int>(std::strlen("\r\n\r\n"));
+      int len_start = cur_buffer.indexOf("Content-Length: ") +
+                      static_cast<int>(std::strlen("Content-Length: "));
+      int len_end = cur_buffer.indexOf("\r\n");
+      bool ok = false;
+      [[maybe_unused]] int content_length =
+          cur_buffer.mid(len_start, len_end - len_start).toInt(&ok);
+      QByteArray payload = cur_buffer.mid(msg_start);
+      msg_size = payload.size();
+      buff = payload.toStdString();
+      if (payload.size() == content_length) {
+        process_message();
+      }
     }
-
-    buff.clear();
-    msg_size = 0;
-  };
-
-  if (cur_buffer.indexOf("\r\n\r\n") == -1) {  // the middle of the message
-    for (const auto ch : cur_buffer.toStdString()) {
-      buff.push_back(ch);
-    }
-    if (buff.size() == msg_size) {
-      process_message();
-    }
-  } else {  // the start of the message
-            //    std::cerr << "INSIDE the start of the msg" << std::endl;
-    int msg_start = cur_buffer.indexOf("\r\n\r\n") +
-                    static_cast<int>(std::strlen("\r\n\r\n"));
-    int len_start = cur_buffer.indexOf("Content-Length: ") +
-                    static_cast<int>(std::strlen("Content-Length: "));
-    int len_end = cur_buffer.indexOf("\r\n");
-    bool ok = false;
-    [[maybe_unused]] int content_length =
-        cur_buffer.mid(len_start, len_end - len_start).toInt(&ok);
-    QByteArray payload = cur_buffer.mid(msg_start);
-    msg_size = payload.size();
-    buff = payload.toStdString();
-    if (payload.size() == content_length) {
-      process_message();
-    }
+  } catch (...) {
+    std::cerr << "ASSERT IN JSON FAULT!\n";
   }
 }
 
