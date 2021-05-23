@@ -70,6 +70,7 @@ class MainWindow : public QMainWindow {
   void open();
   bool save();
   bool saveAs();
+  void choose_directory();
   void split();
   void documentWasModified();
   void textSize(const QString &p);
@@ -81,7 +82,6 @@ class MainWindow : public QMainWindow {
 
  private:
   Ui::MainWindow *ui;
-
   void createActions();
   void createStatusBar();
   void readSettings();
@@ -101,7 +101,7 @@ class MainWindow : public QMainWindow {
   QGridLayout *grid_layout;
   QSplitter *splitter;
   Terminal *terminal;
-  Directory_tree directory_tree;
+  Directory_tree *directory_tree;
   bool splitted;
   // setting up autocomplete below
   lsp::LSPHandler *lsp_handler;
