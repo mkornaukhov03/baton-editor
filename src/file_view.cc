@@ -12,7 +12,8 @@ FileView::FileView(const std::string& filename, QWidget* parent)
       content_(""),
       carriage_line_(0),
       carriage_col_(0),
-      completion_required_(false) {
+      completion_required_(false),
+      valid_cpp_(true) {
   connect(&handler_, SIGNAL(DoneCompletion(const std::vector<std::string>&)),
           this, SLOT(GetCompletion(const std::vector<std::string>&)));
 
@@ -32,7 +33,11 @@ void FileView::GetDiagnostic(
   emit DoneDiagnostic(diagns);
 }
 
+void FileView::SetValidity(bool val) { valid_cpp_ = val; }
 void FileView::UploadContent(const std::string& new_content) {
+  if (!valid_cpp_) {
+    return;
+  }
   content_ = new_content;
   if (content_.back() != '\n') {
     content_ += '\n';
@@ -41,6 +46,9 @@ void FileView::UploadContent(const std::string& new_content) {
 }
 
 void FileView::ChangeCursor(int new_line, int new_col) {
+  if (!valid_cpp_) {
+    return;
+  }
   carriage_line_ = new_line;
   carriage_col_ = new_col;
   [[maybe_unused]] bool cond = true;  // TODO: check the next symbol
