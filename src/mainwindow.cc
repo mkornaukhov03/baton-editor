@@ -26,6 +26,7 @@ MainWindow::MainWindow(QWidget *parent)
       textEdit(new Editor),
       //      splittedTextEdit(new Editor),
       terminal(new Terminal),
+      directory_tree(new Directory_tree),
       splitted(false),
       lbl(new Suggest_label),
       display_failure_log(new QPlainTextEdit),
@@ -51,6 +52,8 @@ MainWindow::MainWindow(QWidget *parent)
   fv = new FileView("kek.cpp", centralWidget());
   // Terminal *terminal = new Terminal;
   // lbl = new Suggest_label(nullptr);
+  fv = new FileView("kek.cpp", this);
+  createStatusBar();
   createActions();
 
   (textEdit->document(), &QTextDocument::contentsChanged, this,
@@ -58,10 +61,12 @@ MainWindow::MainWindow(QWidget *parent)
 
   setCurrentFile(QString(), textEdit);
 
-  createStatusBar();
   central_widget = new QWidget();
   grid_layout = new QGridLayout(central_widget);
-  grid_layout->addWidget(&directory_tree.tree, 0, 0, 1, 3);
+
+  //  grid_layout->addWidget(lbl, 1, 1, 1, 1);
+  grid_layout->addWidget(&directory_tree->tree, 0, 0, 1, 3);
+
   //  grid_layout->addWidget(textEdit, 0, 3);
   //  grid_layout->setColumnStretch(0, 2);
   //  grid_layout->setColumnStretch(3, 7);
@@ -85,7 +90,7 @@ MainWindow::MainWindow(QWidget *parent)
           SLOT(showCursorPosition()));
   //  connect(splittedTextEdit, SIGNAL(cursorPositionChanged()), this,
   //          SLOT(showCursorPositionOnSplitted()));
-  connect(&directory_tree.tree, SIGNAL(clicked(QModelIndex)), this,
+  connect(&directory_tree->tree, SIGNAL(clicked(QModelIndex)), this,
           SLOT(tree_clicked(const QModelIndex &)));
   display_failure_log->setReadOnly(1);
   // for autocompletion
@@ -109,6 +114,8 @@ MainWindow::MainWindow(QWidget *parent)
   //      SLOT(display_diagnostics(const std::vector<lsp::DiagnosticsResponse>
   //      &)));
 
+
+
   QStringList stringList;
   stringList << "m0"
              << "m1"
@@ -119,6 +126,7 @@ MainWindow::MainWindow(QWidget *parent)
   completer->setCaseSensitivity(Qt::CaseInsensitive);
   completer->setWrapAround(false);
   textEdit->setCompleter(completer);
+
 
   connect(textEdit, SIGNAL(changeContent(const std::string &)), fv,
           SLOT(UploadContent(const std::string &)));
@@ -176,6 +184,11 @@ void MainWindow::open() {
     QString fileName = QFileDialog::getOpenFileName(this);
     if (!fileName.isEmpty()) loadFile(fileName);
   }
+}
+
+void MainWindow::choose_directory() {
+  directory_tree->dir_name = QFileDialog::getExistingDirectory(this);
+  directory_tree->set_root_path();
 }
 
 bool MainWindow::save() {
@@ -336,6 +349,13 @@ void MainWindow::createActions() {
   saveAsAct->setShortcuts(QKeySequence::SaveAs);
   saveAsAct->setStatusTip(tr("Save the document under a new name"));
 
+  QAction *set_root_directory = fileMenu->addAction(
+      tr("&Set root directory..."), this, &MainWindow::choose_directory);
+  set_root_directory->setStatusTip(
+      tr("Choose the directory which will be shown in directory tree"));
+  //    connect(set_root_directory, &QAction::triggered, this,
+  //            &MainWindow::choose_directory);
+
   tb = addToolBar(tr("Format Actions"));
   tb->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
   addToolBarBreak(Qt::TopToolBarArea);
@@ -409,7 +429,7 @@ void MainWindow::loadFile(const QString &fileName) {
 }
 
 void MainWindow::tree_clicked(const QModelIndex &index) {
-  QFileInfo file_info = directory_tree.model.fileInfo(index);
+  QFileInfo file_info = directory_tree->model.fileInfo(index);
   if (file_info.isFile()) {
     MainWindow::loadFile(file_info.filePath());
     return;
@@ -506,10 +526,10 @@ void MainWindow::update_autocomplete() {
 void MainWindow::set_autocomplete_to_label(
     const std::vector<std::string> &vec) {
   // only first
-  std::cerr << "***** INSIDE SET AUTO COMPLETE TO LABEL ***** " << std::endl;
+  // std::cerr << "***** INSIDE SET AUTO COMPLETE TO LABEL ***** " << std::endl;
   if (vec.size() == 0) return;
   for (const auto &item : vec) {
-    std::cerr << item << '\n';
+    // std::cerr << item << '\n';
   }
   lbl->setText(QString::fromStdString(vec[0]));
 }
