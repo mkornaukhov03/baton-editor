@@ -525,7 +525,7 @@ void MainWindow::displayAutocompleteOptions(
   disp->clear();
   std::cerr << "______AUTOCOMPLETE DISPLAY________" << std::endl;
   if (vec.size() == 0) return;
-  QStringListModel *model = (QStringListModel *)(completer->model());
+  QStringListModel *model = reinterpret_cast<QStringListModel *>(completer->model());
   QStringList stringList;
 
   for (const auto &item : vec) {
