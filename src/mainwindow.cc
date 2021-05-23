@@ -277,7 +277,7 @@ void MainWindow::mergeFormatOnWordOrSelection(const QTextCharFormat &format) {
   cursor.movePosition(QTextCursor::End);
   textEdit->setTextCursor(cursor);
 
-  if (splittedTextEdit) {
+  if (splitted) {
     QTextCursor splitCursor = splittedTextEdit->textCursor();
     splittedTextEdit->selectAll();
     //      if (!cursor.hasSelection())
