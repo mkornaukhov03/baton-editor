@@ -46,8 +46,8 @@ MainWindow::MainWindow(QWidget *parent)
   fv = new FileView("kek.cpp", centralWidget());
   createActions();
 
-  connect(textEdit->document(), &QTextDocument::contentsChanged, this,
-          &MainWindow::documentWasModified);
+  (textEdit->document(), &QTextDocument::contentsChanged, this,
+   &MainWindow::documentWasModified);
 
   setCurrentFile(QString(), textEdit);
 
