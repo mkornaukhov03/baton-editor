@@ -151,6 +151,9 @@ MainWindow::MainWindow(QWidget *parent)
   //          &)), this, SLOT(display_failure(const
   //          std::vector<lsp::DiagnosticsResponse> &)));
 
+  connect(fv, SIGNAL(DoneCompletion(const std::vector<std::string> &)), this,
+          SLOT(displayAutocompleteOptions(const std::vector<std::string> &)));
+
   textEdit->setFocus();
 }
 
@@ -496,6 +499,22 @@ void MainWindow::set_autocomplete_to_label(
     std::cerr << item << '\n';
   }
   lbl->setText(QString::fromStdString(vec[0]));
+}
+
+void MainWindow::displayAutocompleteOptions(
+    const std::vector<std::string> &vec) {
+  disp->clear();
+  std::cerr << "______AUTOCOMPLETE DISPLAY________" << std::endl;
+  if (vec.size() == 0) return;
+  QStringListModel *model = (QStringListModel *)(completer->model());
+  QStringList stringList;
+
+  for (const auto &item : vec) {
+    std::cerr << item << '\n';
+    disp->appendText(item);
+    stringList << QString::fromStdString(item);
+  }
+  model->setStringList(stringList);
 }
 
 // void MainWindow::display_diagnostics(

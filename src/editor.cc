@@ -200,7 +200,7 @@ void Editor::procCompleterFinish(QKeyEvent *e) {
   cursRect.setWidth(
       completer()->popup()->sizeHintForColumn(0) +
       completer()->popup()->verticalScrollBar()->sizeHint().width());
-
+  std::cerr << "Completter triggered!!!!!!!!!!!!!!" << std::endl;
   completer()->complete(cursRect);
 }
 

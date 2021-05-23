@@ -124,6 +124,7 @@ class MainWindow : public QMainWindow {
   void update_autocomplete();
   void set_autocomplete_to_label(const std::vector<std::string> &);
   //  void display_diagnostics(const std::vector<lsp::DiagnosticsResponse> &);
+  void displayAutocompleteOptions(const std::vector<std::string> &);
   void display_failure(const std::vector<lsp::DiagnosticsResponse> &);
 };
 #endif  // MAINWINDOW_H
