@@ -31,9 +31,10 @@ Directory_tree::Directory_tree(QWidget *parent)
     QModelIndex rootIndex = model.index(root);
     tree.setRootIndex(rootIndex);
   } else {
-    model.setRootPath("");
+    std::string root_path = "/home/" + user_name + "/";
+    model.setRootPath(QString::fromStdString(root_path));
     tree.setModel(&model);
-    QModelIndex rootIndex = model.index("/");
+    QModelIndex rootIndex = model.index(QString::fromStdString(root_path));
     tree.setRootIndex(rootIndex);
   }
   //  model.setRootPath("/home/mdmalofeev/programm/labs-mmalofeev");
