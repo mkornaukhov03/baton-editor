@@ -26,7 +26,6 @@ MainWindow::MainWindow(QWidget *parent)
       textEdit(new Editor),
       //      splittedTextEdit(new Editor),
       terminal(new Terminal),
-      //      director_tree(new Directory_tree),
       splitted(false),
       //      lbl(new Suggest_label),
       display_failure_log(new QPlainTextEdit),
@@ -35,7 +34,7 @@ MainWindow::MainWindow(QWidget *parent)
   font->setFamily("Courier");
   font->setStyleHint(QFont::Monospace);
   font->setFixedPitch(true);
-  font->setPointSize(10);
+  font->setPointSize(11);
 
   textEdit->setFont(*font);
   //  splittedTextEdit->setFont(font);
@@ -221,7 +220,8 @@ bool MainWindow::save() {
 void MainWindow::split() {
   if (!splitted) {
     splitted = true;
-    splittedTextEdit = new Editor;
+    splittedTextEdit = new Editor(textEdit->fontSize);
+    splittedTextEdit->setCompleter(completer);
     splitter->addWidget(splittedTextEdit);
     splitter->setStretchFactor(2, 1);
     fv_split = new FileView("lol.cpp", this);
@@ -232,6 +232,9 @@ void MainWindow::split() {
     connect(fv_split, SIGNAL(DoneCompletion(const std::vector<std::string> &)),
             this,
             SLOT(set_autocomplete_to_label(const std::vector<std::string> &)));
+    connect(fv_split, SIGNAL(DoneCompletion(const std::vector<std::string> &)),
+            this,
+            SLOT(displayAutocompleteOptions(const std::vector<std::string> &)));
     connect(
         fv_split,
         SIGNAL(DoneDiagnostic(const std::vector<lsp::DiagnosticsResponse> &)),
@@ -268,6 +271,12 @@ void MainWindow::textSize(const QString &p) {
   if (p.toFloat() > 0) {
     QTextCharFormat fmt;
     fmt.setFontPointSize(pointSize);
+    textEdit->fontSize = pointSize;
+    textEdit->repaint();
+    if (splitted) {
+      splittedTextEdit->fontSize = pointSize;
+      splittedTextEdit->repaint();
+    }
     mergeFormatOnWordOrSelection(fmt);
   }
 }
@@ -275,7 +284,8 @@ void MainWindow::textSize(const QString &p) {
 void MainWindow::mergeFormatOnWordOrSelection(const QTextCharFormat &format) {
   QTextCursor cursor = textEdit->textCursor();
   textEdit->selectAll();
-  //  if (!cursor.hasSelection()) cursor.select(QTextCursor::WordUnderCursor);
+  //  if (!cursor.hasSelection())
+  cursor.select(QTextCursor::WordUnderCursor);
   cursor.mergeCharFormat(format);
   textEdit->mergeCurrentCharFormat(format);
   cursor.movePosition(QTextCursor::End);
@@ -283,6 +293,7 @@ void MainWindow::mergeFormatOnWordOrSelection(const QTextCharFormat &format) {
 
   if (splitted) {
     QTextCursor splitCursor = splittedTextEdit->textCursor();
+    splittedTextEdit->repaint();
     splittedTextEdit->selectAll();
     //      if (!cursor.hasSelection())
     //      cursor.select(QTextCursor::WordUnderCursor);

@@ -1,6 +1,7 @@
 #ifndef Editor_H
 #define Editor_H
 #include <QCompleter>
+#include <QFontMetrics>
 #include <QMap>
 #include <QPlainTextEdit>
 #include <QPointer>
@@ -28,13 +29,14 @@ class Editor : public QPlainTextEdit {
   Q_OBJECT
 
  public:
-  explicit Editor(QWidget *parent = nullptr);
+  explicit Editor(std::size_t fontSize = 11, QWidget *parent = nullptr);
 
   void lineNumberAreaPaintEvent(QPaintEvent *event);
   int lineNumberAreaWidth();
   QString curFile;
   std::size_t curIndent;
   bool newLine;
+  std::size_t fontSize;
   // std::size_t blockCount = 0;
   void setCompleter(QCompleter *c);
   QCompleter *completer() const;
