@@ -75,6 +75,7 @@ class MainWindow : public QMainWindow {
   void open();
   bool save();
   bool saveAs();
+  void choose_directory();
   void split();
   void documentWasModified();
   void textSize(const QString &p);
@@ -86,7 +87,6 @@ class MainWindow : public QMainWindow {
 
  private:
   Ui::MainWindow *ui;
-
   void createActions();
   void createStatusBar();
   void readSettings();

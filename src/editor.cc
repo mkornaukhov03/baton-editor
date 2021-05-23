@@ -5,6 +5,7 @@
 #include <QPainter>
 #include <QRegularExpression>
 #include <QScrollBar>
+#include <QStringListModel>
 #include <QSyntaxHighlighter>
 #include <QTextBlock>
 #include <QTextCharFormat>
@@ -16,12 +17,13 @@
 static QVector<QPair<QString, QString>> parentheses = {
     {"(", ")"}, {"{", "}"}, {"[", "]"}, {"\"", "\""}, {"'", "'"}};
 
-Editor::Editor(QWidget *parent)
+Editor::Editor(std::size_t fontSize, QWidget *parent)
     : QPlainTextEdit(parent),
       highlighter(new Highlighter(this->document())),
       curIndent(0),
       newLine(true),
-      m_autoIndentation(true) {
+      m_autoIndentation(true),
+      fontSize(fontSize) {
   lineNumberArea = new LineNumberArea(this);
 
   connect(this, &Editor::blockCountChanged, this,
@@ -48,7 +50,7 @@ Editor::Editor(QWidget *parent)
   QFont font;
   font.setFamily("Courier");
   font.setFixedPitch(true);
-  font.setPointSize(10);
+  font.setPointSize(fontSize);
   setFont(font);
 
   //  QTextDocument *document = this->document();
@@ -98,6 +100,8 @@ int Editor::lineNumberAreaWidth() {
     max /= 10;
     ++digits;
   }
+  std::cerr << "FONT METRIX: "
+            << fontMetrics().horizontalAdvance(QLatin1Char('9')) << '\n';
 
   int space = 3 + fontMetrics().horizontalAdvance(QLatin1Char('9')) * digits;
 
@@ -391,6 +395,11 @@ void Editor::lineNumberAreaPaintEvent(QPaintEvent *event) {
   QPainter painter(lineNumberArea);
   painter.fillRect(event->rect(), Qt::lightGray);
 
+  std::cerr << "PaintEvent called" << '\n';
+  QFont fnt = painter.font();
+  fnt.setPointSize(fontSize);
+  painter.setFont(fnt);
+  setFont(fnt);
   QTextBlock block = firstVisibleBlock();
   int blockNumber = block.blockNumber();
   int top =
@@ -401,6 +410,7 @@ void Editor::lineNumberAreaPaintEvent(QPaintEvent *event) {
     if (block.isVisible() && bottom >= event->rect().top()) {
       QString number = QString::number(blockNumber + 1);
       painter.setPen(Qt::black);
+
       painter.drawText(0, top, lineNumberArea->width(), fontMetrics().height(),
                        Qt::AlignRight, number);
     }

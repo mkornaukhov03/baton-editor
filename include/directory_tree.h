@@ -53,9 +53,11 @@ class Directory_tree : public QWidget {
  public:
   QTreeView tree;
   explicit Directory_tree(QWidget *parent = nullptr);
+  void set_root_path();
   virtual ~Directory_tree();
   QFileSystemModel model;
   Ui::Directory_tree *ui;
+  QString dir_name;
 
  private:
   QString root;

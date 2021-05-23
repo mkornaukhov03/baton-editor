@@ -26,6 +26,7 @@ MainWindow::MainWindow(QWidget *parent)
       textEdit(new Editor),
       //      splittedTextEdit(new Editor),
       terminal(new Terminal),
+      //      directory_tree(new Directory_tree),
       splitted(false),
       lbl(new Suggest_label),
       display_failure_log(new QPlainTextEdit),
@@ -34,7 +35,7 @@ MainWindow::MainWindow(QWidget *parent)
   font->setFamily("Courier");
   font->setStyleHint(QFont::Monospace);
   font->setFixedPitch(true);
-  font->setPointSize(10);
+  font->setPointSize(11);
 
   textEdit->setFont(*font);
   //  splittedTextEdit->setFont(font);
@@ -51,6 +52,8 @@ MainWindow::MainWindow(QWidget *parent)
   fv = new FileView("kek.cpp", centralWidget());
   // Terminal *terminal = new Terminal;
   // lbl = new Suggest_label(nullptr);
+  fv = new FileView("kek.cpp", this);
+  createStatusBar();
   createActions();
 
   (textEdit->document(), &QTextDocument::contentsChanged, this,
@@ -58,10 +61,12 @@ MainWindow::MainWindow(QWidget *parent)
 
   setCurrentFile(QString(), textEdit);
 
-  createStatusBar();
   central_widget = new QWidget();
   grid_layout = new QGridLayout(central_widget);
+
+  //  grid_layout->addWidget(lbl, 1, 1, 1, 1);
   grid_layout->addWidget(&directory_tree.tree, 0, 0, 1, 3);
+
   //  grid_layout->addWidget(textEdit, 0, 3);
   //  grid_layout->setColumnStretch(0, 2);
   //  grid_layout->setColumnStretch(3, 7);
@@ -178,6 +183,11 @@ void MainWindow::open() {
   }
 }
 
+void MainWindow::choose_directory() {
+  directory_tree.dir_name = QFileDialog::getExistingDirectory(this);
+  directory_tree.set_root_path();
+}
+
 bool MainWindow::save() {
   QString filename =
       (textEdit->curFile.isEmpty()) ? "untitled.cpp" : textEdit->curFile;
@@ -209,7 +219,8 @@ bool MainWindow::save() {
 void MainWindow::split() {
   if (!splitted) {
     splitted = true;
-    splittedTextEdit = new Editor;
+    splittedTextEdit = new Editor(textEdit->fontSize);
+    splittedTextEdit->setCompleter(completer);
     splitter->addWidget(splittedTextEdit);
     splitter->setStretchFactor(2, 1);
     fv_split = new FileView("lol.cpp", this);
@@ -220,6 +231,9 @@ void MainWindow::split() {
     connect(fv_split, SIGNAL(DoneCompletion(const std::vector<std::string> &)),
             this,
             SLOT(set_autocomplete_to_label(const std::vector<std::string> &)));
+    connect(fv_split, SIGNAL(DoneCompletion(const std::vector<std::string> &)),
+            this,
+            SLOT(displayAutocompleteOptions(const std::vector<std::string> &)));
     connect(
         fv_split,
         SIGNAL(DoneDiagnostic(const std::vector<lsp::DiagnosticsResponse> &)),
@@ -255,6 +269,12 @@ void MainWindow::textSize(const QString &p) {
   if (p.toFloat() > 0) {
     QTextCharFormat fmt;
     fmt.setFontPointSize(pointSize);
+    textEdit->fontSize = pointSize;
+    textEdit->repaint();
+    if (splitted) {
+      splittedTextEdit->fontSize = pointSize;
+      splittedTextEdit->repaint();
+    }
     mergeFormatOnWordOrSelection(fmt);
   }
 }
@@ -262,14 +282,16 @@ void MainWindow::textSize(const QString &p) {
 void MainWindow::mergeFormatOnWordOrSelection(const QTextCharFormat &format) {
   QTextCursor cursor = textEdit->textCursor();
   textEdit->selectAll();
-  //  if (!cursor.hasSelection()) cursor.select(QTextCursor::WordUnderCursor);
+  //  if (!cursor.hasSelection())
+  cursor.select(QTextCursor::WordUnderCursor);
   cursor.mergeCharFormat(format);
   textEdit->mergeCurrentCharFormat(format);
   cursor.movePosition(QTextCursor::End);
   textEdit->setTextCursor(cursor);
 
-  if (splittedTextEdit) {
+  if (splitted) {
     QTextCursor splitCursor = splittedTextEdit->textCursor();
+    splittedTextEdit->repaint();
     splittedTextEdit->selectAll();
     //      if (!cursor.hasSelection())
     //      cursor.select(QTextCursor::WordUnderCursor);
@@ -335,6 +357,13 @@ void MainWindow::createActions() {
       fileMenu->addAction(tr("Save &As..."), this, &MainWindow::saveAs);
   saveAsAct->setShortcuts(QKeySequence::SaveAs);
   saveAsAct->setStatusTip(tr("Save the document under a new name"));
+
+  QAction *set_root_directory = fileMenu->addAction(
+      tr("&Set root directory..."), this, &MainWindow::choose_directory);
+  set_root_directory->setStatusTip(
+      tr("Choose the directory which will be shown in directory tree"));
+  //    connect(set_root_directory, &QAction::triggered, this,
+  //            &MainWindow::choose_directory);
 
   tb = addToolBar(tr("Format Actions"));
   tb->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
@@ -506,10 +535,10 @@ void MainWindow::update_autocomplete() {
 void MainWindow::set_autocomplete_to_label(
     const std::vector<std::string> &vec) {
   // only first
-  std::cerr << "***** INSIDE SET AUTO COMPLETE TO LABEL ***** " << std::endl;
+  // std::cerr << "***** INSIDE SET AUTO COMPLETE TO LABEL ***** " << std::endl;
   if (vec.size() == 0) return;
   for (const auto &item : vec) {
-    std::cerr << item << '\n';
+    // std::cerr << item << '\n';
   }
   lbl->setText(QString::fromStdString(vec[0]));
 }
