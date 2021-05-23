@@ -26,7 +26,7 @@ MainWindow::MainWindow(QWidget *parent)
       textEdit(new Editor),
       //      splittedTextEdit(new Editor),
       terminal(new Terminal),
-      directory_tree(new Directory_tree),
+      //      directory_tree(new Directory_tree),
       splitted(false),
       lbl(new Suggest_label),
       display_failure_log(new QPlainTextEdit),
@@ -35,7 +35,7 @@ MainWindow::MainWindow(QWidget *parent)
   font->setFamily("Courier");
   font->setStyleHint(QFont::Monospace);
   font->setFixedPitch(true);
-  font->setPointSize(10);
+  font->setPointSize(11);
 
   textEdit->setFont(*font);
   //  splittedTextEdit->setFont(font);
@@ -65,7 +65,7 @@ MainWindow::MainWindow(QWidget *parent)
   grid_layout = new QGridLayout(central_widget);
 
   //  grid_layout->addWidget(lbl, 1, 1, 1, 1);
-  grid_layout->addWidget(&directory_tree->tree, 0, 0, 1, 3);
+  grid_layout->addWidget(&directory_tree.tree, 0, 0, 1, 3);
 
   //  grid_layout->addWidget(textEdit, 0, 3);
   //  grid_layout->setColumnStretch(0, 2);
@@ -90,7 +90,7 @@ MainWindow::MainWindow(QWidget *parent)
           SLOT(showCursorPosition()));
   //  connect(splittedTextEdit, SIGNAL(cursorPositionChanged()), this,
   //          SLOT(showCursorPositionOnSplitted()));
-  connect(&directory_tree->tree, SIGNAL(clicked(QModelIndex)), this,
+  connect(&directory_tree.tree, SIGNAL(clicked(QModelIndex)), this,
           SLOT(tree_clicked(const QModelIndex &)));
   display_failure_log->setReadOnly(1);
   // for autocompletion
@@ -114,8 +114,6 @@ MainWindow::MainWindow(QWidget *parent)
   //      SLOT(display_diagnostics(const std::vector<lsp::DiagnosticsResponse>
   //      &)));
 
-
-
   QStringList stringList;
   stringList << "m0"
              << "m1"
@@ -126,7 +124,6 @@ MainWindow::MainWindow(QWidget *parent)
   completer->setCaseSensitivity(Qt::CaseInsensitive);
   completer->setWrapAround(false);
   textEdit->setCompleter(completer);
-
 
   connect(textEdit, SIGNAL(changeContent(const std::string &)), fv,
           SLOT(UploadContent(const std::string &)));
@@ -187,8 +184,8 @@ void MainWindow::open() {
 }
 
 void MainWindow::choose_directory() {
-  directory_tree->dir_name = QFileDialog::getExistingDirectory(this);
-  directory_tree->set_root_path();
+  directory_tree.dir_name = QFileDialog::getExistingDirectory(this);
+  directory_tree.set_root_path();
 }
 
 bool MainWindow::save() {
@@ -222,7 +219,8 @@ bool MainWindow::save() {
 void MainWindow::split() {
   if (!splitted) {
     splitted = true;
-    splittedTextEdit = new Editor;
+    splittedTextEdit = new Editor(textEdit->fontSize);
+    splittedTextEdit->setCompleter(completer);
     splitter->addWidget(splittedTextEdit);
     splitter->setStretchFactor(2, 1);
     fv_split = new FileView("lol.cpp", this);
@@ -233,6 +231,9 @@ void MainWindow::split() {
     connect(fv_split, SIGNAL(DoneCompletion(const std::vector<std::string> &)),
             this,
             SLOT(set_autocomplete_to_label(const std::vector<std::string> &)));
+    connect(fv_split, SIGNAL(DoneCompletion(const std::vector<std::string> &)),
+            this,
+            SLOT(displayAutocompleteOptions(const std::vector<std::string> &)));
     connect(
         fv_split,
         SIGNAL(DoneDiagnostic(const std::vector<lsp::DiagnosticsResponse> &)),
@@ -268,6 +269,12 @@ void MainWindow::textSize(const QString &p) {
   if (p.toFloat() > 0) {
     QTextCharFormat fmt;
     fmt.setFontPointSize(pointSize);
+    textEdit->fontSize = pointSize;
+    textEdit->repaint();
+    if (splitted) {
+      splittedTextEdit->fontSize = pointSize;
+      splittedTextEdit->repaint();
+    }
     mergeFormatOnWordOrSelection(fmt);
   }
 }
@@ -275,14 +282,16 @@ void MainWindow::textSize(const QString &p) {
 void MainWindow::mergeFormatOnWordOrSelection(const QTextCharFormat &format) {
   QTextCursor cursor = textEdit->textCursor();
   textEdit->selectAll();
-  //  if (!cursor.hasSelection()) cursor.select(QTextCursor::WordUnderCursor);
+  //  if (!cursor.hasSelection())
+  cursor.select(QTextCursor::WordUnderCursor);
   cursor.mergeCharFormat(format);
   textEdit->mergeCurrentCharFormat(format);
   cursor.movePosition(QTextCursor::End);
   textEdit->setTextCursor(cursor);
 
-  if (splittedTextEdit) {
+  if (splitted) {
     QTextCursor splitCursor = splittedTextEdit->textCursor();
+    splittedTextEdit->repaint();
     splittedTextEdit->selectAll();
     //      if (!cursor.hasSelection())
     //      cursor.select(QTextCursor::WordUnderCursor);
@@ -429,7 +438,7 @@ void MainWindow::loadFile(const QString &fileName) {
 }
 
 void MainWindow::tree_clicked(const QModelIndex &index) {
-  QFileInfo file_info = directory_tree->model.fileInfo(index);
+  QFileInfo file_info = directory_tree.model.fileInfo(index);
   if (file_info.isFile()) {
     MainWindow::loadFile(file_info.filePath());
     return;
