@@ -486,7 +486,7 @@ QChar Editor::charUnderCursor(int offset) const {
 
 void Editor::updateExtraSelection() {
   QList<QTextEdit::ExtraSelection> extra;
-  highlightParenthesis(extra);
+  highlightParenthesis(&extra);
 
   setExtraSelections(extra);
 }
