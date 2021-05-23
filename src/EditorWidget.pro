@@ -34,6 +34,9 @@ FORMS += \
     mainwindow.ui \
     terminal.ui
 
+RESOURCES += \
+    resources
+
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

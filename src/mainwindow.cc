@@ -5,6 +5,7 @@
 #include <QComboBox>
 #include <QDir>
 #include <QLayout>
+#include <QMenuBar>
 #include <QSplitter>
 #include <QtWidgets>
 #include <iostream>  // for debugging/logging
@@ -42,6 +43,7 @@ MainWindow::MainWindow(QWidget *parent)
   lbl = new Suggest_label(nullptr);
   disp = new autocompleteDisplay(nullptr);
   disp->show();
+  fv = new FileView("kek.cpp", centralWidget());
   createActions();
 
   connect(textEdit->document(), &QTextDocument::contentsChanged, this,
@@ -86,7 +88,6 @@ MainWindow::MainWindow(QWidget *parent)
   //      SLOT(display_diagnostics(const std::vector<lsp::DiagnosticsResponse>
   //      &)));
 
-  fv = new FileView("kek.cpp", this);
   QStringList stringList;
   stringList << "m0"
              << "m1"
@@ -230,6 +231,7 @@ void MainWindow::documentWasModified() {
 
 void MainWindow::createActions() {
   QMenu *fileMenu = menuBar()->addMenu(tr("&File"));
+
   QAction *newAct = new QAction(tr("&New"), this);
   newAct->setShortcuts(QKeySequence::New);
   newAct->setStatusTip(tr("Create a new file"));

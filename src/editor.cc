@@ -36,6 +36,9 @@ Editor::Editor(QWidget *parent)
   });
   connect(this, &Editor::textChanged, this, [&]() {
     emit changeContent(this->toPlainText().toUtf8().toStdString());
+
+    connect(this, &QPlainTextEdit::cursorPositionChanged, this,
+            &Editor::updateExtraSelection);
   });
 
   connect(this, &Editor::transferCompletion, this, &Editor::resolveCompletion);
@@ -308,78 +311,81 @@ void Editor::keyPressEvent(QKeyEvent *e) {
   procCompleterFinish(e);
 }
 
-// void Editor::keyPressEvent(QKeyEvent *e) {
-//  if (c && c->popup()->isVisible()) {
-//    switch (e->key()) {
-//      case Qt::Key_Enter:
-//      case Qt::Key_Return:
-//      case Qt::Key_Escape:
-//      case Qt::Key_Tab:
-//      case Qt::Key_Backtab:
-//        e->ignore();
-//        return;
-//      default:
-//        break;
-//    }
-//  }
+void Editor::highlightParenthesis(
+    QList<QTextEdit::ExtraSelection> &extraSelection) {
+  auto currentSymbol = charUnderCursor();
+  auto prevSymbol = charUnderCursor(-1);
 
-//  const bool isShortcut = (e->modifiers().testFlag(Qt::ControlModifier) &&
-//                           e->key() == Qt::Key_E);  // CTRL+E
-//  if (!c || !isShortcut) {
-//    if (newLine && e->key() == Qt::Key_Space) {
-//      //                std::cerr << '\n' << "Space +1" << '\n';
-//      curIndent += 1;
-//    }
-//    if (newLine && e->key() == Qt::Key_Tab) {
-//      //      std::cerr << '\n' << "Tab +1" << '\n';
-//      curIndent += 4;
-//    }
-//    if (e->text() == '{') {
-//      //      //        blockCount++;
-//      appendPlainText("}");
-//      moveCursor(QTextCursor::MoveOperation::Left);
-//    }
-//    //    if (e->text() == '}') {
-//    //        blockCount--;
-//    //    }
-//    if (e->key() == Qt::Key_Return || e->key() == Qt::Key_Enter) {
-//      //      std::cerr << '\n';
-//      //      std::cerr << "indent = " << curIndent << '\n';
-//      newLine = true;
-//      for (std::size_t i = 0; i < curIndent; i++) {
-//        insertPlainText(" ");
-//      }
+  for (auto &pair : parentheses) {
+    int direction;
 
-//    }
+    QChar counterSymbol;
+    QChar activeSymbol;
+    auto position = textCursor().position();
 
-//    QPlainTextEdit::keyPressEvent(e);
-//  }
+    if (pair.first == currentSymbol) {
+      direction = 1;
+      counterSymbol = pair.second[0];
+      activeSymbol = currentSymbol;
+    } else if (pair.second == prevSymbol) {
+      direction = -1;
+      counterSymbol = pair.first[0];
+      activeSymbol = prevSymbol;
+      position--;
+    } else {
+      continue;
+    }
 
-//  const bool ctrlOrShift = e->modifiers().testFlag(Qt::ControlModifier) ||
-//                           e->modifiers().testFlag(Qt::ShiftModifier);
-//  if (!c || (ctrlOrShift && e->text().isEmpty())) return;
+    auto counter = 1;
 
-//  static QString eow("~!@#$%^&*()_+{}|:\"<>?,./;'[]\\-=");  // end of word
-//  const bool hasModifier = (e->modifiers() != Qt::NoModifier) &&
-//  !ctrlOrShift; QString completionPrefix = textUnderCursor();
+    while (counter != 0 && position > 0 &&
+           position < (document()->characterCount() - 1)) {
+      // Moving position
+      position += direction;
 
-//  if (!isShortcut &&
-//      (hasModifier || e->text().isEmpty() || completionPrefix.length() < 3
-//      ||
-//       eow.contains(e->text().right(1)))) {
-//    c->popup()->hide();
-//    return;
-//  }
+      auto character = document()->characterAt(position);
+      // Checking symbol under position
+      if (character == activeSymbol) {
+        ++counter;
+      } else if (character == counterSymbol) {
+        --counter;
+      }
+    }
 
-//  if (completionPrefix != c->completionPrefix()) {
-//    c->setCompletionPrefix(completionPrefix);
-//    c->popup()->setCurrentIndex(c->completionModel()->index(0, 0));
-//  }
-//  QRect cr = cursorRect();
-//  cr.setWidth(c->popup()->sizeHintForColumn(0) +
-//              c->popup()->verticalScrollBar()->sizeHint().width());
-//  c->complete(cr);  // popup it up!
-//}
+    QTextCharFormat format;
+    format.setForeground(QColor("#ff0000"));
+    format.setBackground(QColor("#b4eeb4"));
+
+    // Found
+    if (counter == 0) {
+      QTextEdit::ExtraSelection selection{};
+
+      auto directionEnum = direction < 0 ? QTextCursor::MoveOperation::Left
+                                         : QTextCursor::MoveOperation::Right;
+
+      selection.format = format;
+      selection.cursor = textCursor();
+      selection.cursor.clearSelection();
+      selection.cursor.movePosition(
+          directionEnum, QTextCursor::MoveMode::MoveAnchor,
+          std::abs(textCursor().position() - position));
+
+      selection.cursor.movePosition(QTextCursor::MoveOperation::Right,
+                                    QTextCursor::MoveMode::KeepAnchor, 1);
+
+      extraSelection.append(selection);
+
+      selection.cursor = textCursor();
+      selection.cursor.clearSelection();
+      selection.cursor.movePosition(directionEnum,
+                                    QTextCursor::MoveMode::KeepAnchor, 1);
+
+      extraSelection.append(selection);
+    }
+
+    break;
+  }
+}
 
 void Editor::lineNumberAreaPaintEvent(QPaintEvent *event) {
   QPainter painter(lineNumberArea);
@@ -476,4 +482,11 @@ QChar Editor::charUnderCursor(int offset) const {
   }
 
   return text[index];
+}
+
+void Editor::updateExtraSelection() {
+  QList<QTextEdit::ExtraSelection> extra;
+  highlightParenthesis(extra);
+
+  setExtraSelections(extra);
 }

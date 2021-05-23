@@ -30,6 +30,9 @@ class QPlainTextEdit;
 class QSessionManager;
 class QComboBox;
 
+class QSyntaxStyle;
+class QStyleSyntaxHighlighter;
+
 class Ui_MainWindow {
  public:
   QWidget *centralwidget;

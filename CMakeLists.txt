@@ -14,6 +14,8 @@ set(CMAKE_CXX_FLAGS "-Wall -Wextra")
 set(CMAKE_CXX_FLAGS_DEBUG_INIT "-g -fsanitize=address -fsanitize=undefined")
 set(CMAKE_CXX_FLAGS_RELEASE_INIT "-O2")
 
+set(CMAKE_AUTORCC ON)
+
 # Add your included directories here
 
 include_directories("include/"
@@ -33,8 +35,7 @@ set(HEADERS "include/autocomplete/enums.h"
         "include/syntax_highlighter.h"
         "include/suggest_label.h"
         "include/file_view.h"
-        "include/autocompletedisplay.h"
-        )
+        "include/autocompletedisplay.h")
 
 # Add your source files here
 set(SOURCES "src/main.cc"
