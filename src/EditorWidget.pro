@@ -12,6 +12,7 @@ INCLUDEPATH += ../include
 INCLUDEPATH += ../include/autocomplete
 
 SOURCES += \
+    autocompletedisplay.cpp \
     editor.cc \
     directory_tree.cc \
     mainwindow.cc \
@@ -24,12 +25,17 @@ HEADERS += \
     ../include/mainwindow.h \
     ../include/directory_tree.h \
     ../include/syntax_highlighter.h \
-    ../include/terminal.h
+    ../include/terminal.h \
+    autocompletedisplay.h
 
 FORMS += \
+    autocompletedisplay.ui \
     directory_tree.ui \
     mainwindow.ui \
     terminal.ui
+
+RESOURCES += \
+    resources
 
 
 # Default rules for deployment.

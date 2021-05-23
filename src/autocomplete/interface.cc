@@ -35,14 +35,20 @@ void LSPHandler::GetResponse(json id, json result) {
   //  std::cerr << "==== INSIDE GetResponse() ====" << std::endl;
   std::string id_str = id.get<std::string>();
 
-  const unsigned MAX_COMPLETION_ITEMS = 10;
+  const unsigned MAX_COMPLETION_ITEMS = 13;
 
   if (id_str == "textDocument/completion") {
     auto is_valid = [&](const std::string& s) {
       assert(s.size() > 0);
       if (s.size() == 0) return false;
       if (s.size() == 1) return true;
-      return !(s[0] == '_' && (s[1] == '_' || (s[1] >= 'A' && s[1] <= 'Z')));
+      bool resp =
+          !(s[0] == '_' && (s[1] == '_' || (s[1] >= 'A' && s[1] <= 'Z')));
+      const std::size_t sz = std::string("std::__").size();
+      if (s.size() >= sz) {
+        resp &= std::string(s.begin(), std::next(s.begin(), sz)) != "std::__";
+      }
+      return resp;
     };
 
     constexpr char stop_symbols[] = {'<', '(', '$', ' ', '{'};
@@ -57,7 +63,9 @@ void LSPHandler::GetResponse(json id, json result) {
                       }));
       resp.push_back(s);
     }
-    // if (resp.size() > MAX_COMPLETION_ITEMS) resp.clear();
+    std::sort(resp.begin(), resp.end());
+    resp.erase(std::unique(resp.begin(), resp.end()), resp.end());
+    if (resp.size() > MAX_COMPLETION_ITEMS) resp.clear();
     emit DoneCompletion(resp);
   } else if (id_str == "textDocument/publishDiagnostics") {
     std::cerr << "PUBLISH DIAGNOSTICS!!!!!\n";

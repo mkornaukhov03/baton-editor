@@ -1,5 +1,6 @@
 #ifndef Editor_H
 #define Editor_H
+#include <QCompleter>
 #include <QMap>
 #include <QPlainTextEdit>
 #include <QPointer>
@@ -20,6 +21,8 @@ class QAction;
 class QMenu;
 QT_END_NAMESPACE
 class LineNumberArea;
+// class SyntaxStyle;
+// class StyleSyntaxHighlighter;
 
 class Editor : public QPlainTextEdit {
   Q_OBJECT
@@ -30,47 +33,51 @@ class Editor : public QPlainTextEdit {
   void lineNumberAreaPaintEvent(QPaintEvent *event);
   int lineNumberAreaWidth();
   QString curFile;
-  int curIndent;
+  std::size_t curIndent;
   bool newLine;
+  // std::size_t blockCount = 0;
+  void setCompleter(QCompleter *c);
+  QCompleter *completer() const;
 
   virtual ~Editor() {}
 
  protected:
   void resizeEvent(QResizeEvent *event) override;
-  void keyPressEvent(QKeyEvent *e) override {
-    QPlainTextEdit::keyPressEvent(e);
-    if (newLine && e->key() == Qt::Key_Space) {
-      //      std::cerr << '\n' << "Space +1" << '\n';
-      curIndent += 1;
-    }
-    if (newLine && e->key() == Qt::Key_Tab) {
-      //      std::cerr << '\n' << "Tab +1" << '\n';
-      curIndent += 4;
-    }
-    if (e->key() == Qt::Key_Return || e->key() == Qt::Key_Enter) {
-      //      std::cerr << '\n';
-      //      std::cerr << "indent = " << curIndent << '\n';
-      newLine = true;
-      for (int i = 0; i < curIndent; i++) {
-        insertPlainText(" ");
-      }
-    } else if (e->key() != Qt::Key_Space && e->key() != Qt::Key_Tab &&
-               e->key() != Qt::Key_Enter && e->key() != Qt::Key_Return) {
-      newLine = false;
-    }
-  }
+  void keyPressEvent(QKeyEvent *e) override;
+  void focusInEvent(QFocusEvent *e) override;
 
  signals:
   void changeCursor(int new_line, int new_col);
   void changeContent(const std::string &new_cont);
+  void transferCompletion(const std::string &compl_item);
  private slots:
   void updateLineNumberAreaWidth(int newBlockCount);
   void highlightCurrentLine();
   void updateLineNumberArea(const QRect &rect, int dy);
+  void resolveCompletion(const std::string &compl_item);
+  void insertCompletion(const QString &completion);
 
  private:
   Highlighter *highlighter;
   QWidget *lineNumberArea;
+  QCompleter *c = nullptr;
+  QString textUnderCursor() const;
+  int getIndentationSpaces() const;
+  bool m_autoIndentation = true;
+  bool m_autoParentheses = true;
+  bool m_replaceTab = true;
+
+  //  StyleSyntaxHighlighter *m_highlighter;
+  //  SyntaxStyle *m_syntaxStyle;
+  QString m_tabReplace = "    ";
+  QChar charUnderCursor(int offset = 0) const;
+  QString wordUnderCursor() const;
+  bool procCompleterStart(QKeyEvent *e);
+  void procCompleterFinish(QKeyEvent *e);
+  void highlightParenthesis(QList<QTextEdit::ExtraSelection> *extraSelection);
+  void updateExtraSelection();
+  //  void setSyntaxStyle(SyntaxStyle *style);
+  //  void updateStyle();
 };
 
 class LineNumberArea : public QWidget {

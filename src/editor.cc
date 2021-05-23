@@ -1,20 +1,27 @@
 #include "editor.h"
 
+#include <QAbstractItemView>
 #include <QFont>
 #include <QPainter>
 #include <QRegularExpression>
+#include <QScrollBar>
 #include <QSyntaxHighlighter>
 #include <QTextBlock>
 #include <QTextCharFormat>
 #include <QTextDocument>
+#include <QTextDocumentFragment>
 
 #include "syntax_highlighter.h"
+
+static QVector<QPair<QString, QString>> parentheses = {
+    {"(", ")"}, {"{", "}"}, {"[", "]"}, {"\"", "\""}, {"'", "'"}};
 
 Editor::Editor(QWidget *parent)
     : QPlainTextEdit(parent),
       highlighter(new Highlighter(this->document())),
       curIndent(0),
-      newLine(true) {
+      newLine(true),
+      m_autoIndentation(true) {
   lineNumberArea = new LineNumberArea(this);
 
   connect(this, &Editor::blockCountChanged, this,
@@ -29,7 +36,12 @@ Editor::Editor(QWidget *parent)
   });
   connect(this, &Editor::textChanged, this, [&]() {
     emit changeContent(this->toPlainText().toUtf8().toStdString());
+
+    connect(this, &QPlainTextEdit::cursorPositionChanged, this,
+            &Editor::updateExtraSelection);
   });
+
+  connect(this, &Editor::transferCompletion, this, &Editor::resolveCompletion);
 
   updateLineNumberAreaWidth(0);
   highlightCurrentLine();
@@ -41,6 +53,42 @@ Editor::Editor(QWidget *parent)
 
   //  QTextDocument *document = this->document();
   //  highlighter = new Highlighter(document);
+}
+
+void Editor::resolveCompletion(const std::string &compl_item) {
+  std::cerr << "SELECTION:\n"
+            << this->textCursor().selection().toPlainText().toStdString()
+            << std::endl;
+
+  auto cursor = this->textCursor();
+  cursor.movePosition(QTextCursor::PreviousWord, QTextCursor::KeepAnchor);
+  cursor.removeSelectedText();
+  cursor.insertText(QString::fromStdString(compl_item));
+  cursor.clearSelection();
+  this->setTextCursor(cursor);
+
+  //  this->textCursor().insertText(QString::fromStdString(compl_item));
+  //  this->textCursor().movePosition(QTextCursor::NextWord);
+
+  //  this->textCursor().endEditBlock();
+  //  this->undo();
+
+  //  this->textCursor().insertText("ZHOPA");
+
+  //  auto curs = this->textCursor();
+  //  curs.movePosition(QTextCursor::StartOfWord, QTextCursor::KeepAnchor);
+
+  //  std::cerr << "AFTER RESOLVE:\n"
+  //            << this->toPlainText().toStdString() << std::endl;
+  //  this->setTextCursor(curs);
+
+  //  this->textCursor().removeSelectedText();
+  //  this->textCursor().clearSelection();
+  //  this->setFocus();
+  //  emit cursorPositionChanged();
+  //  emit changeContent(this->toPlainText().toStdString());
+  //  textCursor().clearSelection();
+  //  setFocus();
 }
 
 int Editor::lineNumberAreaWidth() {
@@ -83,7 +131,7 @@ void Editor::highlightCurrentLine() {
   if (!isReadOnly()) {
     QTextEdit::ExtraSelection selection;
 
-    QColor lineColor = QColor(173, 216, 230);
+    QColor lineColor = QColor(96, 100, 36, 50);
     selection.format.setBackground(lineColor);
     selection.format.setProperty(QTextFormat::FullWidthSelection, true);
     selection.cursor = textCursor();
@@ -92,6 +140,251 @@ void Editor::highlightCurrentLine() {
   }
 
   setExtraSelections(extraSelections);
+}
+
+QString Editor::wordUnderCursor() const {
+  auto tc = textCursor();
+  tc.select(QTextCursor::WordUnderCursor);
+  return tc.selectedText();
+}
+
+bool Editor::procCompleterStart(QKeyEvent *e) {
+  if (completer() && completer()->popup()->isVisible()) {
+    switch (e->key()) {
+      case Qt::Key_Enter:
+      case Qt::Key_Return:
+      case Qt::Key_Escape:
+      case Qt::Key_Tab:
+      case Qt::Key_Backtab:
+        e->ignore();
+        return true;  // let the completer do default behavior
+      default:
+        break;
+    }
+  }
+
+  // todo: Replace with modifiable QShortcut
+  auto isShortcut =
+      ((e->modifiers() & Qt::ControlModifier) && e->key() == Qt::Key_Space);
+
+  return !(!completer() || !isShortcut);
+}
+
+void Editor::procCompleterFinish(QKeyEvent *e) {
+  auto ctrlOrShift = e->modifiers() & (Qt::ControlModifier | Qt::ShiftModifier);
+
+  if (!completer() || (ctrlOrShift && e->text().isEmpty()) ||
+      e->key() == Qt::Key_Delete) {
+    return;
+  }
+
+  static QString eow(R"(~!@#$%^&*()_+{}|:"<>?,./;'[]\-=)");
+
+  auto isShortcut =
+      ((e->modifiers() & Qt::ControlModifier) && e->key() == Qt::Key_Space);
+  auto completionPrefix = wordUnderCursor();
+
+  if (!isShortcut && (e->text().isEmpty() || completionPrefix.length() < 2 ||
+                      eow.contains(e->text().right(1)))) {
+    completer()->popup()->hide();
+    return;
+  }
+
+  if (completionPrefix != completer()->completionPrefix()) {
+    completer()->setCompletionPrefix(completionPrefix);
+    completer()->popup()->setCurrentIndex(
+        completer()->completionModel()->index(0, 0));
+  }
+
+  auto cursRect = cursorRect();
+  cursRect.setWidth(
+      completer()->popup()->sizeHintForColumn(0) +
+      completer()->popup()->verticalScrollBar()->sizeHint().width());
+  std::cerr << "Completter triggered!!!!!!!!!!!!!!" << std::endl;
+  completer()->complete(cursRect);
+}
+
+void Editor::keyPressEvent(QKeyEvent *e) {
+#if QT_VERSION >= 0x050A00
+  const int defaultIndent =
+      tabStopDistance() / fontMetrics().averageCharWidth();
+#else
+  const int defaultIndent = tabStopWidth() / fontMetrics().averageCharWidth();
+#endif
+
+  auto completerSkip = procCompleterStart(e);
+
+  if (!completerSkip) {
+    if (m_replaceTab && e->key() == Qt::Key_Tab &&
+        e->modifiers() == Qt::NoModifier) {
+      insertPlainText(m_tabReplace);
+      return;
+    }
+
+    // Auto indentation
+    int indentationLevel = getIndentationSpaces();
+
+#if QT_VERSION >= 0x050A00
+    int tabCounts =
+        indentationLevel * fontMetrics().averageCharWidth() / tabStopDistance();
+#else
+    int tabCounts =
+        indentationLevel * fontMetrics().averageCharWidth() / tabStopWidth();
+#endif
+
+    // Have Qt Edior like behaviour, if {|} and enter is pressed indent the two
+    // parenthesis
+    if (m_autoIndentation &&
+        (e->key() == Qt::Key_Return || e->key() == Qt::Key_Enter) &&
+        charUnderCursor() == '}' && charUnderCursor(-1) == '{') {
+      int charsBack = 0;
+      insertPlainText("\n");
+
+      if (m_replaceTab)
+        insertPlainText(QString(indentationLevel + defaultIndent, ' '));
+      else
+        insertPlainText(QString(tabCounts + 1, '\t'));
+
+      insertPlainText("\n");
+      charsBack++;
+
+      if (m_replaceTab) {
+        insertPlainText(QString(indentationLevel, ' '));
+        charsBack += indentationLevel;
+      } else {
+        insertPlainText(QString(tabCounts, '\t'));
+        charsBack += tabCounts;
+      }
+
+      while (charsBack--) moveCursor(QTextCursor::MoveOperation::Left);
+      return;
+    }
+
+    // Shortcut for moving line to left
+    if (m_replaceTab && e->key() == Qt::Key_Backtab) {
+      indentationLevel = std::min(indentationLevel, m_tabReplace.size());
+
+      auto cursor = textCursor();
+
+      cursor.movePosition(QTextCursor::MoveOperation::StartOfLine);
+      cursor.movePosition(QTextCursor::MoveOperation::Right,
+                          QTextCursor::MoveMode::KeepAnchor, indentationLevel);
+
+      cursor.removeSelectedText();
+      return;
+    }
+
+    QPlainTextEdit::keyPressEvent(e);
+
+    if (m_autoIndentation &&
+        (e->key() == Qt::Key_Return || e->key() == Qt::Key_Enter)) {
+      if (m_replaceTab)
+        insertPlainText(QString(indentationLevel, ' '));
+      else
+        insertPlainText(QString(tabCounts, '\t'));
+    }
+
+    if (m_autoParentheses) {
+      for (auto &&el : parentheses) {
+        // Inserting closed brace
+        if (el.first == e->text()) {
+          insertPlainText(el.second);
+          moveCursor(QTextCursor::MoveOperation::Left);
+          break;
+        }
+
+        // If it's close brace - check parentheses
+        if (el.second == e->text()) {
+          auto symbol = charUnderCursor();
+
+          if (symbol == el.second) {
+            textCursor().deletePreviousChar();
+            moveCursor(QTextCursor::MoveOperation::Right);
+          }
+
+          break;
+        }
+      }
+    }
+  }
+
+  procCompleterFinish(e);
+}
+
+void Editor::highlightParenthesis(
+    QList<QTextEdit::ExtraSelection> *extraSelection) {
+  auto currentSymbol = charUnderCursor();
+  auto prevSymbol = charUnderCursor(-1);
+
+  for (auto &pair : parentheses) {
+    int direction;
+
+    QChar counterSymbol;
+    QChar activeSymbol;
+    auto position = textCursor().position();
+
+    if (pair.first == currentSymbol) {
+      direction = 1;
+      counterSymbol = pair.second[0];
+      activeSymbol = currentSymbol;
+    } else if (pair.second == prevSymbol) {
+      direction = -1;
+      counterSymbol = pair.first[0];
+      activeSymbol = prevSymbol;
+      position--;
+    } else {
+      continue;
+    }
+
+    auto counter = 1;
+
+    while (counter != 0 && position > 0 &&
+           position < (document()->characterCount() - 1)) {
+      // Moving position
+      position += direction;
+
+      auto character = document()->characterAt(position);
+      // Checking symbol under position
+      if (character == activeSymbol) {
+        ++counter;
+      } else if (character == counterSymbol) {
+        --counter;
+      }
+    }
+
+    QTextCharFormat format;
+    format.setForeground(QColor("#ff0000"));
+    format.setBackground(QColor("#b4eeb4"));
+
+    // Found
+    if (counter == 0) {
+      QTextEdit::ExtraSelection selection{};
+
+      auto directionEnum = direction < 0 ? QTextCursor::MoveOperation::Left
+                                         : QTextCursor::MoveOperation::Right;
+
+      selection.format = format;
+      selection.cursor = textCursor();
+      selection.cursor.clearSelection();
+      selection.cursor.movePosition(
+          directionEnum, QTextCursor::MoveMode::MoveAnchor,
+          std::abs(textCursor().position() - position));
+
+      selection.cursor.movePosition(QTextCursor::MoveOperation::Right,
+                                    QTextCursor::MoveMode::KeepAnchor, 1);
+
+      extraSelection->append(selection);
+
+      selection.cursor = textCursor();
+      selection.cursor.clearSelection();
+      selection.cursor.movePosition(directionEnum,
+                                    QTextCursor::MoveMode::KeepAnchor, 1);
+
+      extraSelection->append(selection);
+    }
+
+    break;
+  }
 }
 
 void Editor::lineNumberAreaPaintEvent(QPaintEvent *event) {
@@ -117,4 +410,83 @@ void Editor::lineNumberAreaPaintEvent(QPaintEvent *event) {
     bottom = top + qRound(blockBoundingRect(block).height());
     ++blockNumber;
   }
+}
+
+void Editor::setCompleter(QCompleter *completer) {
+  if (c) c->disconnect(this);
+
+  c = completer;
+
+  if (!c) return;
+
+  c->setWidget(this);
+  c->setCompletionMode(QCompleter::PopupCompletion);
+  c->setCaseSensitivity(Qt::CaseInsensitive);
+  QObject::connect(c, QOverload<const QString &>::of(&QCompleter::activated),
+                   this, &Editor::insertCompletion);
+}
+
+QCompleter *Editor::completer() const { return c; }
+
+void Editor::insertCompletion(const QString &completion) {
+  if (c->widget() != this) return;
+  QTextCursor tc = textCursor();
+  int extra = completion.length() - c->completionPrefix().length();
+  tc.movePosition(QTextCursor::Left);
+  tc.movePosition(QTextCursor::EndOfWord);
+  tc.insertText(completion.right(extra));
+  setTextCursor(tc);
+}
+
+QString Editor::textUnderCursor() const {
+  QTextCursor tc = textCursor();
+  tc.select(QTextCursor::WordUnderCursor);
+  return tc.selectedText();
+}
+
+void Editor::focusInEvent(QFocusEvent *e) {
+  if (c) c->setWidget(this);
+  QPlainTextEdit::focusInEvent(e);
+}
+
+int Editor::getIndentationSpaces() const {
+  auto blockText = textCursor().block().text();
+
+  int indentationLevel = 0;
+
+  for (auto i = 0;
+       i < blockText.size() && QString("\t ").contains(blockText[i]); ++i) {
+    if (blockText[i] == ' ') {
+      indentationLevel++;
+    } else {
+#if QT_VERSION >= 0x050A00
+      indentationLevel += tabStopDistance() / fontMetrics().averageCharWidth();
+#else
+      indentationLevel += tabStopWidth() / fontMetrics().averageCharWidth();
+#endif
+    }
+  }
+
+  return indentationLevel;
+}
+
+QChar Editor::charUnderCursor(int offset) const {
+  auto block = textCursor().blockNumber();
+  auto index = textCursor().positionInBlock();
+  auto text = document()->findBlockByNumber(block).text();
+
+  index += offset;
+
+  if (index < 0 || index >= text.size()) {
+    return {};
+  }
+
+  return text[index];
+}
+
+void Editor::updateExtraSelection() {
+  QList<QTextEdit::ExtraSelection> extra;
+  highlightParenthesis(&extra);
+
+  setExtraSelections(extra);
 }

@@ -17941,7 +17941,10 @@ class basic_json
         // at only works for objects
         if (JSON_HEDLEY_LIKELY(is_object()))
         {
-            assert(m_value.object->find(key) != m_value.object->end());
+            //assert(m_value.object->find(key) != m_value.object->end());
+            if (m_value.object->find(key) == m_value.object->end()) {
+                JSON_THROW(type_error::create(305, "Instead of Assert!!!"));
+            }
             return m_value.object->find(key)->second;
         }
 

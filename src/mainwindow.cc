@@ -7,10 +7,12 @@
 #include <QComboBox>
 #include <QDir>
 #include <QLayout>
+#include <QMenuBar>
 #include <QSplitter>
 #include <QString>
 #include <QtWidgets>
 #include <iostream>  // for debugging/logging
+#include <list>
 #include <utility>
 
 #include "directory_tree.h"
@@ -44,21 +46,27 @@ MainWindow::MainWindow(QWidget *parent)
   textEdit->setTabStopWidth(tabStop * metrics->width(' '));
   //  splittedTextEdit->setTabStopWidth(tabStop * metrics.width(' '));
   // Directory_tree *directory_tree = new Directory_tree(this);
+  //  Terminal *terminal = new Terminal;
+  disp = new autocompleteDisplay(nullptr);
+  disp->show();
+  fv = new FileView("kek.cpp", centralWidget());
   // Terminal *terminal = new Terminal;
   // lbl = new Suggest_label(nullptr);
   fv = new FileView("kek.cpp", this);
   createStatusBar();
   createActions();
 
-  connect(textEdit->document(), &QTextDocument::contentsChanged, this,
-          &MainWindow::documentWasModified);
+  (textEdit->document(), &QTextDocument::contentsChanged, this,
+   &MainWindow::documentWasModified);
 
   setCurrentFile(QString(), textEdit);
 
   central_widget = new QWidget();
   grid_layout = new QGridLayout(central_widget);
+
   //  grid_layout->addWidget(lbl, 1, 1, 1, 1);
   grid_layout->addWidget(&directory_tree->tree, 0, 0, 1, 3);
+
   //  grid_layout->addWidget(textEdit, 0, 3);
   //  grid_layout->setColumnStretch(0, 2);
   //  grid_layout->setColumnStretch(3, 7);
@@ -106,6 +114,20 @@ MainWindow::MainWindow(QWidget *parent)
   //      SLOT(display_diagnostics(const std::vector<lsp::DiagnosticsResponse>
   //      &)));
 
+
+
+  QStringList stringList;
+  stringList << "m0"
+             << "m1"
+             << "m2";
+  QStringListModel *model = new QStringListModel(stringList);
+  completer = new QCompleter(model, this);
+  completer->setModelSorting(QCompleter::CaseInsensitivelySortedModel);
+  completer->setCaseSensitivity(Qt::CaseInsensitive);
+  completer->setWrapAround(false);
+  textEdit->setCompleter(completer);
+
+
   connect(textEdit, SIGNAL(changeContent(const std::string &)), fv,
           SLOT(UploadContent(const std::string &)));
   connect(textEdit, SIGNAL(changeCursor(int, int)), fv,
@@ -135,6 +157,9 @@ MainWindow::MainWindow(QWidget *parent)
   //          SIGNAL(DoneDiagnostic(const std::vector<lsp::DiagnosticsResponse>
   //          &)), this, SLOT(display_failure(const
   //          std::vector<lsp::DiagnosticsResponse> &)));
+
+  connect(fv, SIGNAL(DoneCompletion(const std::vector<std::string> &)), this,
+          SLOT(displayAutocompleteOptions(const std::vector<std::string> &)));
 
   textEdit->setFocus();
 }
@@ -286,12 +311,13 @@ bool MainWindow::saveAs() {
 }
 
 void MainWindow::documentWasModified() {
-  setWindowTitle(tr("MainWindow[*]"));
+  setWindowTitle(tr("Baton Editor[*]"));
   setWindowModified(textEdit->document()->isModified());
 }
 
 void MainWindow::createActions() {
   QMenu *fileMenu = menuBar()->addMenu(tr("&File"));
+
   QAction *newAct = new QAction(tr("&New"), this);
   newAct->setShortcuts(QKeySequence::New);
   newAct->setStatusTip(tr("Create a new file"));
@@ -428,7 +454,7 @@ bool MainWindow::saveFile(const QString &fileName, Editor *editArea) {
 
 void MainWindow::setCurrentFile(const QString &fileName, Editor *editArea) {
   editArea->curFile = fileName;
-  setWindowTitle(tr("MainWindow[*]"));
+  setWindowTitle(tr("Baton Editor[*]"));
   editArea->document()->setModified(false);
   setWindowModified(false);
 
@@ -492,6 +518,22 @@ void MainWindow::set_autocomplete_to_label(
     // std::cerr << item << '\n';
   }
   lbl->setText(QString::fromStdString(vec[0]));
+}
+
+void MainWindow::displayAutocompleteOptions(
+    const std::vector<std::string> &vec) {
+  disp->clear();
+  std::cerr << "______AUTOCOMPLETE DISPLAY________" << std::endl;
+  if (vec.size() == 0) return;
+  QStringListModel *model = (QStringListModel *)(completer->model());
+  QStringList stringList;
+
+  for (const auto &item : vec) {
+    std::cerr << item << '\n';
+    disp->appendText(item);
+    stringList << QString::fromStdString(item);
+  }
+  model->setStringList(stringList);
 }
 
 // void MainWindow::display_diagnostics(
