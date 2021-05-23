@@ -30,7 +30,7 @@ class Highlighter : public QSyntaxHighlighter {
   QRegularExpression commentEndExpression;
 
   QTextCharFormat keywordFormat;
-  QTextCharFormat classFormat;
+  //  QTextCharFormat classFormat;
   QTextCharFormat singleLineCommentFormat;
   QTextCharFormat multiLineCommentFormat;
   QTextCharFormat quotationFormat;

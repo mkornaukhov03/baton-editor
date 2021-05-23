@@ -1,5 +1,7 @@
 #include "directory_tree.h"
 
+#include <stdlib.h>
+
 #include <QCommandLineParser>
 #include <QScreen>
 #include <QScroller>
@@ -13,8 +15,9 @@
 Directory_tree::Directory_tree(QWidget *parent)
     : QWidget(parent), ui(new Ui::Directory_tree) {
   ui->setupUi(this);
-  QFile file(
-      "/home/mdmalofeev/programm/final_project/baton-editor/src/config.txt");
+  std::string user_name = getenv("USER");
+  std::string config_path = "/home/" + user_name + "/.batonrc";
+  QFile file(QString::fromStdString(config_path));
   if (file.exists() &&
       file.open(QIODevice::ReadOnly | QIODevice::WriteOnly | QIODevice::Text)) {
     QTextStream in(&file);
