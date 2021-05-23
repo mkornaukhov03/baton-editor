@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <QAbstractItemModel>
 #include <QGridLayout>
 #include <QSplitter>
 #include <QTimer>
@@ -14,6 +15,7 @@
 #include <vector>
 
 #include "autocomplete/interface.h"
+#include "autocompletedisplay.h"
 #include "directory_tree.h"
 #include "editor.h"
 #include "file_view.h"
@@ -26,6 +28,9 @@ class QMenu;
 class QPlainTextEdit;
 class QSessionManager;
 class QComboBox;
+
+class QSyntaxStyle;
+class QStyleSyntaxHighlighter;
 
 class Ui_MainWindow {
  public:
@@ -101,13 +106,16 @@ class MainWindow : public QMainWindow {
   QGridLayout *grid_layout;
   QSplitter *splitter;
   Terminal *terminal;
-  Directory_tree *directory_tree;
+  Directory_tree directory_tree;
   bool splitted;
   // setting up autocomplete below
   lsp::LSPHandler *lsp_handler;
   QTimer *timer;
   Suggest_label *lbl;
   FileView *fv = nullptr;
+  autocompleteDisplay *disp;
+  QAbstractItemModel *model;
+  QCompleter *completer = nullptr;
   FileView *fv_split = nullptr;
   QPlainTextEdit *display_failure_log;
   QFont *font;
@@ -116,6 +124,7 @@ class MainWindow : public QMainWindow {
   void update_autocomplete();
   void set_autocomplete_to_label(const std::vector<std::string> &);
   //  void display_diagnostics(const std::vector<lsp::DiagnosticsResponse> &);
+  void displayAutocompleteOptions(const std::vector<std::string> &);
   void display_failure(const std::vector<lsp::DiagnosticsResponse> &);
 };
 #endif  // MAINWINDOW_H
