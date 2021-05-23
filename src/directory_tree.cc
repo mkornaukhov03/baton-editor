@@ -52,4 +52,11 @@ Directory_tree::Directory_tree(QWidget *parent)
   ui->treeView->setModel(&model);
 }
 
+void Directory_tree::set_root_path() {
+  model.setRootPath(dir_name);
+  tree.setModel(&model);
+  QModelIndex rootIndex = model.index(dir_name);
+  tree.setRootIndex(rootIndex);
+}
+
 Directory_tree::~Directory_tree() { delete ui; }
