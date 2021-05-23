@@ -61,5 +61,5 @@ void Directory_tree::set_root_path() {
   QModelIndex rootIndex = model.index(dir_name);
   tree.setRootIndex(rootIndex);
 }
-
+//
 Directory_tree::~Directory_tree() { delete ui; }
