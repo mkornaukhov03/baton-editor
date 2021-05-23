@@ -61,7 +61,6 @@ MainWindow::MainWindow(QWidget *parent)
   createStatusBar();
   central_widget = new QWidget();
   grid_layout = new QGridLayout(central_widget);
-  //  grid_layout->addWidget(lbl, 1, 1, 1, 1);
   grid_layout->addWidget(&directory_tree.tree, 0, 0, 1, 3);
   //  grid_layout->addWidget(textEdit, 0, 3);
   //  grid_layout->setColumnStretch(0, 2);
