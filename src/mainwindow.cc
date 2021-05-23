@@ -47,7 +47,7 @@ MainWindow::MainWindow(QWidget *parent)
   // Directory_tree *directory_tree = new Directory_tree(this);
   //  Terminal *terminal = new Terminal;
   disp = new autocompleteDisplay(nullptr);
-  disp->show();
+  //  disp->show();
   fv = new FileView("kek.cpp", centralWidget());
   // Terminal *terminal = new Terminal;
   // lbl = new Suggest_label(nullptr);
@@ -261,9 +261,23 @@ void MainWindow::textSize(const QString &p) {
 
 void MainWindow::mergeFormatOnWordOrSelection(const QTextCharFormat &format) {
   QTextCursor cursor = textEdit->textCursor();
-  if (!cursor.hasSelection()) cursor.select(QTextCursor::WordUnderCursor);
+  textEdit->selectAll();
+  //  if (!cursor.hasSelection()) cursor.select(QTextCursor::WordUnderCursor);
   cursor.mergeCharFormat(format);
   textEdit->mergeCurrentCharFormat(format);
+  cursor.movePosition(QTextCursor::End);
+  textEdit->setTextCursor(cursor);
+
+  if (splittedTextEdit) {
+    QTextCursor splitCursor = splittedTextEdit->textCursor();
+    splittedTextEdit->selectAll();
+    //      if (!cursor.hasSelection())
+    //      cursor.select(QTextCursor::WordUnderCursor);
+    splitCursor.mergeCharFormat(format);
+    splittedTextEdit->mergeCurrentCharFormat(format);
+    splitCursor.movePosition(QTextCursor::End);
+    splittedTextEdit->setTextCursor(splitCursor);
+  }
 }
 
 bool MainWindow::saveAs() {
@@ -505,7 +519,8 @@ void MainWindow::displayAutocompleteOptions(
   disp->clear();
   std::cerr << "______AUTOCOMPLETE DISPLAY________" << std::endl;
   if (vec.size() == 0) return;
-  QStringListModel *model = (QStringListModel *)(completer->model());
+  QStringListModel *model =
+      reinterpret_cast<QStringListModel *>(completer->model());
   QStringList stringList;
 
   for (const auto &item : vec) {
