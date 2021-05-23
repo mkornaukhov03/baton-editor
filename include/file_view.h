@@ -15,7 +15,7 @@ class FileView : public QWidget {
  public:
   explicit FileView(const std::string& filename, QWidget* parent = nullptr);
   virtual ~FileView();
-
+  void SetValidity(bool);
  signals:
   void DoneCompletion(const std::vector<std::string>&);
   void DoneDiagnostic(const std::vector<lsp::DiagnosticsResponse>&);
@@ -35,6 +35,7 @@ class FileView : public QWidget {
   int carriage_line_;
   int carriage_col_;
   bool completion_required_;
+  bool valid_cpp_;
 };
 
 #endif  // FILE_VIEW_H

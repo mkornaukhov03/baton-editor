@@ -12,6 +12,7 @@
 #include <QString>
 #include <QtWidgets>
 #include <iostream>  // for debugging/logging
+#include <iostream>
 #include <list>
 #include <utility>
 
@@ -179,6 +180,9 @@ void MainWindow::newFile() {
 void MainWindow::open() {
   if (maybeSave()) {
     QString fileName = QFileDialog::getOpenFileName(this);
+
+    //    if (.contains(QRegExp(".h|.c|.hpp|.cpp|.cc"))) {
+    //    }
     if (!fileName.isEmpty()) loadFile(fileName);
   }
 }
@@ -255,7 +259,8 @@ void MainWindow::split() {
         SLOT(display_failure(const std::vector<lsp::DiagnosticsResponse> &)));
     delete fv_split;
     splitted = false;
-    // std::swap(textEdit, splittedTextEdit);
+    //    std::swap(textEdit, splittedTextEdit);
+    //    std::swap(fv, fv_split);
     delete splitter->widget(1);
   }
 }
@@ -404,6 +409,16 @@ bool MainWindow::maybeSave() {
 }
 
 void MainWindow::loadFile(const QString &fileName) {
+  static QString good_suf[] = {".h", ".c", ".cpp", ".hpp", ".cc"};
+  if (std::none_of(
+          std::begin(good_suf), std::end(good_suf),
+          [&fileName](const auto &str) { return fileName.contains(str); })) {
+    std::cerr << "CONTAINS BAD SUFFIX" << std::endl;
+    fv->SetValidity(false);
+  } else {
+    fv->SetValidity(true);
+  }
+
   QFile file(fileName);
   if (!file.open(QFile::ReadOnly | QFile::Text)) {
     QMessageBox::warning(
@@ -423,6 +438,7 @@ void MainWindow::loadFile(const QString &fileName) {
 
   setCurrentFile(fileName, textEdit);
   statusBar()->showMessage(tr("File loaded"), 2000);
+  std::cerr << "FILENAME = " << fileName.toStdString() << std::endl;
 }
 
 void MainWindow::tree_clicked(const QModelIndex &index) {
