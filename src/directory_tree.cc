@@ -31,9 +31,10 @@ Directory_tree::Directory_tree(QWidget *parent)
     QModelIndex rootIndex = model.index(root);
     tree.setRootIndex(rootIndex);
   } else {
-    model.setRootPath("");
+    std::string root_path = "/home/" + user_name + "/";
+    model.setRootPath(QString::fromStdString(root_path));
     tree.setModel(&model);
-    QModelIndex rootIndex = model.index("/");
+    QModelIndex rootIndex = model.index(QString::fromStdString(root_path));
     tree.setRootIndex(rootIndex);
   }
   //  model.setRootPath("/home/mdmalofeev/programm/labs-mmalofeev");
@@ -47,6 +48,9 @@ Directory_tree::Directory_tree(QWidget *parent)
   const QSize availableSize = tree.screen()->availableGeometry().size();
   tree.resize(availableSize / 2);
   tree.setColumnWidth(0, tree.width() / 3);
+  tree.setColumnHidden(1, true);
+  tree.setColumnHidden(2, true);
+  tree.setColumnHidden(3, true);
   // Make it flickable on touchscreens
   QScroller::grabGesture(&tree, QScroller::TouchGesture);
   ui->treeView->setModel(&model);
@@ -58,5 +62,5 @@ void Directory_tree::set_root_path() {
   QModelIndex rootIndex = model.index(dir_name);
   tree.setRootIndex(rootIndex);
 }
-
+//
 Directory_tree::~Directory_tree() { delete ui; }

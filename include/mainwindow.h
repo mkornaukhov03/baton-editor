@@ -106,7 +106,7 @@ class MainWindow : public QMainWindow {
   QGridLayout *grid_layout;
   QSplitter *splitter;
   Terminal *terminal;
-  Directory_tree *directory_tree;
+  Directory_tree directory_tree;
   bool splitted;
   // setting up autocomplete below
   lsp::LSPHandler *lsp_handler;
