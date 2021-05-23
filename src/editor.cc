@@ -312,7 +312,7 @@ void Editor::keyPressEvent(QKeyEvent *e) {
 }
 
 void Editor::highlightParenthesis(
-    QList<QTextEdit::ExtraSelection> &extraSelection) {
+    QList<QTextEdit::ExtraSelection> *extraSelection) {
   auto currentSymbol = charUnderCursor();
   auto prevSymbol = charUnderCursor(-1);
 
@@ -373,14 +373,14 @@ void Editor::highlightParenthesis(
       selection.cursor.movePosition(QTextCursor::MoveOperation::Right,
                                     QTextCursor::MoveMode::KeepAnchor, 1);
 
-      extraSelection.append(selection);
+      extraSelection->append(selection);
 
       selection.cursor = textCursor();
       selection.cursor.clearSelection();
       selection.cursor.movePosition(directionEnum,
                                     QTextCursor::MoveMode::KeepAnchor, 1);
 
-      extraSelection.append(selection);
+      extraSelection->append(selection);
     }
 
     break;

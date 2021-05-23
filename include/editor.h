@@ -21,8 +21,8 @@ class QAction;
 class QMenu;
 QT_END_NAMESPACE
 class LineNumberArea;
-class SyntaxStyle;
-class StyleSyntaxHighlighter;
+// class SyntaxStyle;
+// class StyleSyntaxHighlighter;
 
 class Editor : public QPlainTextEdit {
   Q_OBJECT
@@ -67,17 +67,17 @@ class Editor : public QPlainTextEdit {
   bool m_autoParentheses = true;
   bool m_replaceTab = true;
 
-  StyleSyntaxHighlighter *m_highlighter;
-  SyntaxStyle *m_syntaxStyle;
+  //  StyleSyntaxHighlighter *m_highlighter;
+  //  SyntaxStyle *m_syntaxStyle;
   QString m_tabReplace = "    ";
   QChar charUnderCursor(int offset = 0) const;
   QString wordUnderCursor() const;
   bool procCompleterStart(QKeyEvent *e);
   void procCompleterFinish(QKeyEvent *e);
-  void highlightParenthesis(QList<QTextEdit::ExtraSelection> &extraSelection);
+  void highlightParenthesis(QList<QTextEdit::ExtraSelection> *extraSelection);
   void updateExtraSelection();
-  void setSyntaxStyle(SyntaxStyle *style);
-  void updateStyle();
+  //  void setSyntaxStyle(SyntaxStyle *style);
+  //  void updateStyle();
 };
 
 class LineNumberArea : public QWidget {
