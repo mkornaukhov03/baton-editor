@@ -111,7 +111,7 @@ class MainWindow : public QMainWindow {
   // setting up autocomplete below
   lsp::LSPHandler *lsp_handler;
   QTimer *timer;
-  Suggest_label *lbl;
+  //  Suggest_label *lbl;
   FileView *fv = nullptr;
   autocompleteDisplay *disp;
   QAbstractItemModel *model;

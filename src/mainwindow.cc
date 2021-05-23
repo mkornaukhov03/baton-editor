@@ -28,7 +28,7 @@ MainWindow::MainWindow(QWidget *parent)
       terminal(new Terminal),
       directory_tree(new Directory_tree),
       splitted(false),
-      lbl(new Suggest_label),
+      //      lbl(new Suggest_label),
       display_failure_log(new QPlainTextEdit),
       font(new QFont) {
   ui->setupUi(this);
@@ -49,7 +49,7 @@ MainWindow::MainWindow(QWidget *parent)
   //  Terminal *terminal = new Terminal;
   disp = new autocompleteDisplay(nullptr);
   //  disp->show();
-  fv = new FileView("kek.cpp", centralWidget());
+  //  fv = new FileView("kek.cpp", centralWidget());
   // Terminal *terminal = new Terminal;
   // lbl = new Suggest_label(nullptr);
   fv = new FileView("kek.cpp", this);
@@ -114,8 +114,6 @@ MainWindow::MainWindow(QWidget *parent)
   //      SLOT(display_diagnostics(const std::vector<lsp::DiagnosticsResponse>
   //      &)));
 
-
-
   QStringList stringList;
   stringList << "m0"
              << "m1"
@@ -126,7 +124,6 @@ MainWindow::MainWindow(QWidget *parent)
   completer->setCaseSensitivity(Qt::CaseInsensitive);
   completer->setWrapAround(false);
   textEdit->setCompleter(completer);
-
 
   connect(textEdit, SIGNAL(changeContent(const std::string &)), fv,
           SLOT(UploadContent(const std::string &)));
@@ -380,7 +377,7 @@ void MainWindow::createActions() {
   splitAct->setStatusTip("Split right");
   connect(splitAct, &QAction::triggered, this, &MainWindow::split);
   tb->addAction(splitAct);
-  tb->addWidget(lbl);
+  //  tb->addWidget(lbl);
 }
 
 MainWindow::~MainWindow() {
@@ -531,7 +528,7 @@ void MainWindow::set_autocomplete_to_label(
   for (const auto &item : vec) {
     // std::cerr << item << '\n';
   }
-  lbl->setText(QString::fromStdString(vec[0]));
+  //  /*lbl*/->setText(QString::fromStdString(vec[0]));
 }
 
 void MainWindow::displayAutocompleteOptions(
