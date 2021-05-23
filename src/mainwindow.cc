@@ -12,7 +12,6 @@
 #include <QString>
 #include <QtWidgets>
 #include <iostream>  // for debugging/logging
-#include <iostream>
 #include <list>
 #include <utility>
 
