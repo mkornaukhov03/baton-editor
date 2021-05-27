@@ -36,7 +36,8 @@ MainWindow::MainWindow(QWidget *parent)
 
   textEdit->setFont(*font);
   metrics = new QFontMetrics(*font);
-  textEdit->setTabStopWidth(tabStop * metrics->width(' '));
+  //  textEdit->setTabStopWidth(tabStop * metrics->width(' '));
+  textEdit->setTabStopDistance(tabStop * metrics->horizontalAdvance(' '));
   disp = new autocompleteDisplay(nullptr);
   fv = new FileView("kek.cpp", this);
   createStatusBar();
