@@ -45,7 +45,6 @@ Editor::Editor(std::size_t fontSize, QWidget *parent)
   connect(this, &Editor::transferCompletion, this, &Editor::resolveCompletion);
 
   updateLineNumberAreaWidth(0);
-  //  highlightCurrentLine();
   QFont font;
   font.setFamily("Courier");
   font.setFixedPitch(true);
@@ -114,7 +113,6 @@ void Editor::highlightCurrentLine(
     selection.cursor.clearSelection();
     extraSelection->append(selection);
   }
-  std::cerr << "Current line highlighted" << std::endl;
 }
 
 QString Editor::wordUnderCursor() const {
