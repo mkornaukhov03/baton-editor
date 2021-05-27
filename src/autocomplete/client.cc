@@ -24,44 +24,42 @@ Client::Client(const QString &path, const QStringList &args)
 
 Client::~Client() {
   if (process_) {
-    //    process_->kill();
-    //    delete process_;
+    const int WAITING_TIME = -1;
+    process_->waitForFinished(WAITING_TIME);
   }
 }
 
 void Client::SetConnections() {
-  connect(process_.get(), SIGNAL(errorOccurred(QProcess::ProcessError)), this,
-          SLOT(OnClientError(QProcess::ProcessError)));
-  connect(process_.get(), SIGNAL(readyReadStandardOutput()), this,
-          SLOT(OnClientReadyReadStdout()));
-  connect(process_.get(), SIGNAL(readyReadStandardError()), this,
-          SLOT(OnClientReadyReadStderr()));
-  connect(process_.get(), SIGNAL(finished(int, QProcess::ExitStatus)), this,
-          SLOT(OnClientFinished(int, QProcess::ExitStatus)));
-  // connect(process_.get(), SIGNAL(started()), this, SLOT(OnStarted()));
+  connect(process_.get(), &QProcess::errorOccurred, this,
+          &Client::OnClientError);
+  connect(process_.get(), &QProcess::readyReadStandardOutput, this,
+          &Client::OnClientReadyReadStdout);
+  connect(process_.get(), &QProcess::readyReadStandardError, this,
+          &Client::OnClientReadyReadStderr);
+  connect(process_.get(),
+          QMetaObject::normalizedSignature(
+              SIGNAL(finished(int, QProcess::ExitStatus))),
+          this,
+          QMetaObject::normalizedSignature(
+              SLOT(OnClientFinished(int, QProcess::ExitStatus))));
 }
 
 // private slots
 void Client::OnClientReadyReadStdout() {
-  // FIXME should create new thread and use waitForReadyRead
-
   static std::string buff{};
   static unsigned msg_size = 0;
 
   QByteArray cur_buffer = process_->readAllStandardOutput();
 
-  //  std::cerr << "GOT MSG: " << cur_buffer.toStdString() << std::endl;
   try {
     auto process_message = [&]() {
       json msg = json::parse(buff);
 
-      //    std::cerr << " PROCESS MESSAGE: " << msg << '\n';
       if (msg.contains("id")) {
         if (msg.contains("method")) {
           emit OnRequest(msg["method"].get<std::string>(), msg["params"],
                          msg["id"]);
         } else if (msg.contains("result")) {
-          //        std::cerr << "Emitting OnResponse!\n";
           emit OnResponse(msg["id"], msg["result"]);
         } else if (msg.contains("error")) {
           emit OnError(msg["id"], msg["error"]);
@@ -71,7 +69,6 @@ void Client::OnClientReadyReadStdout() {
           emit OnNotify(msg["method"].get<std::string>(), msg["params"]);
         }
       } else {
-        //      std::cerr << "Nothing emitted!\n";
       }
 
       buff.clear();
@@ -86,7 +83,6 @@ void Client::OnClientReadyReadStdout() {
         process_message();
       }
     } else {  // the start of the message
-              //    std::cerr << "INSIDE the start of the msg" << std::endl;
       int msg_start = cur_buffer.indexOf("\r\n\r\n") +
                       static_cast<int>(std::strlen("\r\n\r\n"));
       int len_start = cur_buffer.indexOf("Content-Length: ") +
@@ -103,7 +99,6 @@ void Client::OnClientReadyReadStdout() {
       }
     }
   } catch (...) {
-    std::cerr << "ASSERT IN JSON FAULT!\n";
   }
 }
 
@@ -140,35 +135,41 @@ Client::RequestType Client::Shutdown() {
 }
 
 Client::RequestType Client::RangeFormatting(DocumentUri uri, Range range) {
-  return SendRequest("textDocument/RangeFormatting",
-                     DocumentRangeFormattingParams{uri, range});
+  return SendRequest(
+      "textDocument/RangeFormatting",
+      DocumentRangeFormattingParams{{std::move(uri)}, std::move(range)});
 }
 
 Client::RequestType Client::FoldingRange(DocumentUri uri) {
-  return SendRequest("textDocument/foldingRange", FoldingRangeParams{uri});
+  return SendRequest("textDocument/foldingRange",
+                     FoldingRangeParams{std::move(uri)});
 }
 
 Client::RequestType Client::SelectionRange(DocumentUri uri,
                                            std::vector<Position> positions) {
-  return SendRequest("textDocument/selectionRange",
-                     SelectionRangeParams{uri, std::move(positions)});
+  return SendRequest(
+      "textDocument/selectionRange",
+      SelectionRangeParams{{std::move(uri)}, std::move(positions)});
 }
 
 Client::RequestType Client::Formatting(DocumentUri uri) {
-  return SendRequest("textDocument/formatting", DocumentFormattingParams{uri});
+  return SendRequest("textDocument/formatting",
+                     DocumentFormattingParams{std::move(uri)});
 }
 
 Client::RequestType Client::CodeAction(DocumentUri uri, Range range,
                                        CodeActionContext context) {
   return SendRequest("textDocument/codeAction",
-                     CodeActionParams{uri, range, std::move(context)});
+                     CodeActionParams{{uri}, range, std::move(context)});
 }
 
 Client::RequestType Client::Completion(DocumentUri uri, Position position,
                                        CompletionContext context) {
-  //                            CompletionParams params;
-  return SendRequest("textDocument/completion",
-                     CompletionParams{uri, position, context});
+  CompletionParams params;
+  params.textDocument.uri = std::move(uri);
+  params.position = std::move(position);
+  params.context = std::move(context);
+  return SendRequest("textDocument/completion", params);
 }
 
 // common notification messages
@@ -194,13 +195,13 @@ void Client::DidChange(DocumentUri uri,
                        bool wantDiagnostics) {
   SendNotification(
       "textDocument/didChange",
-      DidChangeTextDocumentParams{uri, std::move(changes), wantDiagnostics});
+      DidChangeTextDocumentParams{{uri}, std::move(changes), wantDiagnostics});
 }
 
 // general notificator and requester
 
 void Client::SendNotification(std::string method, json json_doc) {
-  NotifyImpl(method, std::move(json_doc));
+  NotifyImpl(std::move(method), std::move(json_doc));
 }
 
 Client::RequestType Client::SendRequest(std::string method, json json_doc) {
@@ -209,14 +210,13 @@ Client::RequestType Client::SendRequest(std::string method, json json_doc) {
 }
 
 // private helpers
-void Client::WriteToServer(std::string dump) {
+void Client::WriteToServer(const std::string &dump) {
   send_to_server_buffer_.push_back(
       "Content-Length: " + std::to_string(dump.length()) + "\r\n");
   send_to_server_buffer_.push_back("\r\n");
   send_to_server_buffer_.push_back(std::move(dump));
-  //     assert(process_-> state() == QProcess::Running);
   if (process_ != nullptr && process_->state() == QProcess::Running) {
-    for (auto row : send_to_server_buffer_) {
+    for (const auto &row : send_to_server_buffer_) {
       process_->write(row.c_str());
     }
     send_to_server_buffer_.clear();
@@ -232,8 +232,10 @@ void Client::NotifyImpl(std::string method, json params) {
 
 void Client::RequestImpl(std::string method, json params, RequestType type) {
   // in json request, id is type of desirable request
-  json request = {
-      {"jsonrpc", "2.0"}, {"id", type}, {"method", method}, {"params", params}};
+  json request = {{"jsonrpc", "2.0"},
+                  {"id", std::move(type)},
+                  {"method", std::move(method)},
+                  {"params", std::move(params)}};
   WriteToServer(request.dump());
 }
 

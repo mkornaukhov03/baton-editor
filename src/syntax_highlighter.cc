@@ -8,8 +8,8 @@
 #include <string>
 
 namespace {
-// http://alienryderflex.com/hsp.html
-bool isLight(int r, int g, int b) {  // in hex
+// http://alienryderflex.com/hsp.html <-- here is explanation of constants
+bool isLight(int r, int g, int b) {
   double brightness = std::sqrt(0.299 * r * r + 0.587 * g * g + 0.114 * b * b);
   return brightness > (255.0 / 2);
 }
@@ -19,19 +19,24 @@ bool isLight(int r, int g, int b) {  // in hex
 Highlighter::Highlighter(QTextDocument *parent) : QSyntaxHighlighter(parent) {
   HighlightingRule rule;
 
-  QColor color = QPalette().color(QPalette::Window); /*name().toStdString();*/
+  QColor color = QPalette().color(QPalette::Window);
   int r, g, b;
   color.getRgb(&r, &g, &b);
   bool is_light = isLight(r, g, b);
 
-  QColor keywordColor = is_light ? Qt::darkBlue : QColor("#63ceff");
-  QColor classColor = is_light ? Qt::darkMagenta : QColor("");
-  QColor commentColor = is_light ? Qt::red : QColor("#ff4646");
-  QColor quotationColor = is_light ? Qt::darkGreen : QColor("#76ff3d");
-  QColor functionColor = is_light ? Qt::blue : QColor("#625df3");
-  QColor returnColor = is_light ? Qt::darkMagenta : QColor("#ffa602");
-  QColor condCycleColor = is_light ? Qt::magenta : QColor("#ff6df6");
-  QColor streamColor = is_light ? Qt::darkGreen : QColor("#f4bbff");
+  QColor keywordColor =
+      is_light ? Qt::darkBlue : QColor(99, 206, 255);              // light blue
+  QColor commentColor = is_light ? Qt::red : QColor(255, 70, 70);  // bright red
+  QColor quotationColor =
+      is_light ? Qt::darkGreen : QColor(118, 255, 61);  // bright green
+  QColor functionColor =
+      is_light ? Qt::blue : QColor(98, 93, 243);  // bright blue
+  QColor returnColor =
+      is_light ? Qt::darkMagenta : QColor(255, 166, 2);  // orange
+  QColor condCycleColor =
+      is_light ? Qt::magenta : QColor(255, 109, 246);  // bright pink
+  QColor streamColor =
+      is_light ? Qt::darkGreen : QColor(244, 187, 255);  // very bright pink
 
   keywordFormat.setForeground(keywordColor);
   keywordFormat.setFontWeight(QFont::Bold);
@@ -99,7 +104,6 @@ Highlighter::Highlighter(QTextDocument *parent) : QSyntaxHighlighter(parent) {
     highlightingRules.append(rule);
   }
 
-  //  functionFormat.setFontItalic(true);
   functionFormat.setForeground(functionColor);
   functionFormat.setFontWeight(QFont::Bold);
   rule.pattern = QRegularExpression(QStringLiteral("\\b[A-Za-z0-9_]+(?=\\()"));

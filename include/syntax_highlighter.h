@@ -13,7 +13,7 @@ class Highlighter : public QSyntaxHighlighter {
   Q_OBJECT
 
  public:
-  explicit Highlighter(QTextDocument *parent = 0);
+  explicit Highlighter(QTextDocument *parent = nullptr);
   virtual ~Highlighter() {}
 
  protected:
@@ -30,7 +30,6 @@ class Highlighter : public QSyntaxHighlighter {
   QRegularExpression commentEndExpression;
 
   QTextCharFormat keywordFormat;
-  //  QTextCharFormat classFormat;
   QTextCharFormat singleLineCommentFormat;
   QTextCharFormat multiLineCommentFormat;
   QTextCharFormat quotationFormat;

@@ -5,6 +5,7 @@
 #include <iterator>
 
 #include "editor.h"
+#include "handler.h"
 
 FileView::FileView(const std::string& filename, QWidget* parent)
     : QWidget(parent),
@@ -14,18 +15,15 @@ FileView::FileView(const std::string& filename, QWidget* parent)
       carriage_col_(0),
       completion_required_(false),
       valid_cpp_(true) {
-  connect(&handler_, SIGNAL(DoneCompletion(const std::vector<std::string>&)),
-          this, SLOT(GetCompletion(const std::vector<std::string>&)));
+  connect(&handler_, &lsp::LSPHandler::DoneCompletion, this,
+          &FileView::GetCompletion);
 
-  connect(&handler_,
-          SIGNAL(DoneDiagnostic(const std::vector<lsp::DiagnosticsResponse>&)),
-          this,
-          SLOT(GetDiagnostic(const std::vector<lsp::DiagnosticsResponse>&)));
+  connect(&handler_, &lsp::LSPHandler::DoneDiagnostic, this,
+          &FileView::GetDiagnostic);
 }
 FileView::~FileView() {}
 
 void FileView::GetCompletion(const std::vector<std::string>& compls) {
-  std::cerr << "\nINSIDE GET COMPLETION!!!!!!!!!!!" << std::endl;
   emit DoneCompletion(compls);
 }
 void FileView::GetDiagnostic(
@@ -51,7 +49,7 @@ void FileView::ChangeCursor(int new_line, int new_col) {
   }
   carriage_line_ = new_line;
   carriage_col_ = new_col;
-  [[maybe_unused]] bool cond = true;  // TODO: check the next symbol
+  [[maybe_unused]] bool cond = true;
 
   // searching for next charachter after cursor
   auto it = content_.begin();
@@ -69,18 +67,8 @@ void FileView::ChangeCursor(int new_line, int new_col) {
                    next_char) != std::end(allowable_for_completion);
 
   completion_required_ = cond;
-  std::cerr << "COMPLETION REQUIRED: " << std::boolalpha << completion_required_
-            << std::endl
-            << content_ << std::endl;
+
   if (completion_required_) {
     handler_.RequestCompletion(carriage_line_, carriage_col_);
   }
-}
-
-// not ready
-void FileView::Update() {
-  //  handler_.FileChanged(content_);
-  //  if (completion_required_) {
-  //    handler_.RequestCompletion(carriage_line_, carriage_col_);
-  //  }
 }

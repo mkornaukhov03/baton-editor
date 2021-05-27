@@ -1,6 +1,6 @@
 #include "mainwindow.h"
 
-#include <interface.h>
+#include <handler.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -19,15 +19,19 @@
 #include "editor.h"
 #include "syntax_highlighter.h"
 #include "terminal.h"
+namespace {
 const int tabStop = 4;
+struct WidgetPlacer {
+  int row, col, row_span, col_span;
+};
+}  // namespace
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
       ui(new Ui::MainWindow),
       textEdit(new Editor),
-      //      splittedTextEdit(new Editor),
       terminal(new Terminal),
       splitted(false),
-      //      lbl(new Suggest_label),
       display_failure_log(new QPlainTextEdit),
       font(new QFont) {
   ui->setupUi(this);
@@ -37,81 +41,54 @@ MainWindow::MainWindow(QWidget *parent)
   font->setPointSize(11);
 
   textEdit->setFont(*font);
-  //  splittedTextEdit->setFont(font);
-
-  // 4 characters
-
   metrics = new QFontMetrics(*font);
-  textEdit->setTabStopWidth(tabStop * metrics->width(' '));
-  //  splittedTextEdit->setTabStopWidth(tabStop * metrics.width(' '));
-  // Directory_tree *directory_tree = new Directory_tree(this);
-  //  Terminal *terminal = new Terminal;
+  textEdit->setTabStopDistance(tabStop * metrics->horizontalAdvance(' '));
   disp = new autocompleteDisplay(nullptr);
-  //  disp->show();
-  //  fv = new FileView("kek.cpp", centralWidget());
-  // Terminal *terminal = new Terminal;
-  // lbl = new Suggest_label(nullptr);
   fv = new FileView("kek.cpp", this);
+
   createStatusBar();
   createActions();
 
-  (textEdit->document(), &QTextDocument::contentsChanged, this,
-   &MainWindow::documentWasModified);
+  connect(textEdit->document(), &QTextDocument::contentsChanged, this,
+          &MainWindow::documentWasModified);
 
   setCurrentFile(QString(), textEdit);
 
   central_widget = new QWidget();
   grid_layout = new QGridLayout(central_widget);
 
-  //  grid_layout->addWidget(lbl, 1, 1, 1, 1);
-  grid_layout->addWidget(&directory_tree.tree, 0, 0, 1, 2);
-  //  grid_layout->addWidget(textEdit, 0, 3);
-  //  grid_layout->setColumnStretch(0, 2);
-  //  grid_layout->setColumnStretch(3, 7);
-  grid_layout->addWidget(display_failure_log, 1, 6, 3, 7);
-  grid_layout->addWidget(terminal, 1, 0, 3, 6);
-  grid_layout->setRowStretch(0, 4);
-  grid_layout->setRowStretch(1, 1);
-  // central_widget->setLayout(grid_layout);
-  // setCentralWidget(central_widget);
+  WidgetPlacer dir_tr = {0, 0, 1, 2};
+  WidgetPlacer disp = {1, 6, 3, 7};
+  WidgetPlacer term = {1, 0, 3, 6};
+  grid_layout->addWidget(&directory_tree.tree, dir_tr.row, dir_tr.col,
+                         dir_tr.row_span, dir_tr.col_span);
+  grid_layout->addWidget(display_failure_log, disp.row, disp.col, disp.row_span,
+                         disp.col_span);
+  grid_layout->addWidget(terminal, term.row, term.col, term.row_span,
+                         term.col_span);
+
+  std::vector<int> stretch_for_col = {4, 1};
+  for (std::size_t i = 0; i < stretch_for_col.size(); ++i)
+    grid_layout->setRowStretch(i, stretch_for_col[i]);
 
   splitter = new QSplitter(centralWidget());
-  // splitter->addWidget(&directory_tree.tree);
   splitter->addWidget(textEdit);
-  splitter->setStretchFactor(0, 0);
-  splitter->setStretchFactor(1, 10);
-  grid_layout->addWidget(splitter, 0, 2, 1, 11);
+  stretch_for_col = {0, 10};
+  for (std::size_t i = 0; i < stretch_for_col.size(); ++i)
+    splitter->setStretchFactor(i, stretch_for_col[i]);
+
+  WidgetPlacer splt = {0, 2, 1, 11};
+  grid_layout->addWidget(splitter, splt.row, splt.col, splt.row_span,
+                         splt.col_span);
   central_widget->setLayout(grid_layout);
   setCentralWidget(central_widget);
-  //  setCentralWidget(splitter);
-  connect(textEdit, SIGNAL(cursorPositionChanged()), this,
-          SLOT(showCursorPosition()));
-  //  connect(splittedTextEdit, SIGNAL(cursorPositionChanged()), this,
-  //          SLOT(showCursorPositionOnSplitted()));
-  connect(&directory_tree.tree, SIGNAL(clicked(QModelIndex)), this,
-          SLOT(tree_clicked(const QModelIndex &)));
-  display_failure_log->setReadOnly(1);
-  // for autocompletion
-  //  lsp_handler =
-  //      new lsp::LSPHandler(QDir::currentPath().toStdString(), "kek.cpp", "");
-  //  timer = new QTimer(this);
-  //  connect(timer, SIGNAL(timeout()), this, SLOT(update_autocomplete()));
 
-  //  const int TIMER_PERIOD = 300;
+  connect(textEdit, &Editor::cursorPositionChanged, this,
+          &MainWindow::showCursorPosition);
+  connect(&directory_tree.tree, &QTreeView::clicked, this,
+          &MainWindow::tree_clicked);
 
-  //  timer->start(TIMER_PERIOD);
-  //  connect(lsp_handler, SIGNAL(DoneCompletion(const std::vector<std::string>
-  //  &)),
-  //          this,
-  //          SLOT(set_autocomplete_to_label(const std::vector<std::string>
-  //          &)));
-  //  connect(
-  //      lsp_handler,
-  //      SIGNAL(DoneDiagnostic(const std::vector<lsp::DiagnosticsResponse> &)),
-  //      this,
-  //      SLOT(display_diagnostics(const std::vector<lsp::DiagnosticsResponse>
-  //      &)));
-
+  display_failure_log->setReadOnly(true);
   QStringList stringList;
   stringList << "m0"
              << "m1"
@@ -123,39 +100,16 @@ MainWindow::MainWindow(QWidget *parent)
   completer->setWrapAround(false);
   textEdit->setCompleter(completer);
 
-  connect(textEdit, SIGNAL(changeContent(const std::string &)), fv,
-          SLOT(UploadContent(const std::string &)));
-  connect(textEdit, SIGNAL(changeCursor(int, int)), fv,
-          SLOT(ChangeCursor(int, int)));
-  connect(fv, SIGNAL(DoneCompletion(const std::vector<std::string> &)), this,
-          SLOT(set_autocomplete_to_label(const std::vector<std::string> &)));
-  //  connect(
-  //      fv, SIGNAL(DoneDiagnostic(const std::vector<lsp::DiagnosticsResponse>
-  //      &)), this, SLOT(display_diagnotics(const
-  //      std::vector<lsp::DiagnosticsResponse> &)));
-  connect(fv,
-          SIGNAL(DoneDiagnostic(const std::vector<lsp::DiagnosticsResponse> &)),
-          this,
-          SLOT(display_failure(const std::vector<lsp::DiagnosticsResponse> &)));
+  connect(textEdit, &Editor::changeContent, fv, &FileView::UploadContent);
 
-  //  fv_split = new FileView("lol.cpp", this);
-  //  connect(splittedTextEdit, SIGNAL(changeContent(const std::string &)),
-  //          fv_split, SLOT(UploadContent(const std::string &)));
-  //  connect(splittedTextEdit, SIGNAL(changeCursor(int, int)), fv_split,
-  //          SLOT(ChangeCursor(int, int)));
-  //  connect(fv_split, SIGNAL(DoneCompletion(const std::vector<std::string>
-  //  &)),
-  //          this,
-  //          SLOT(set_autocomplete_to_label(const std::vector<std::string>
-  //          &)));
-  //  connect(fv_split,
-  //          SIGNAL(DoneDiagnostic(const std::vector<lsp::DiagnosticsResponse>
-  //          &)), this, SLOT(display_failure(const
-  //          std::vector<lsp::DiagnosticsResponse> &)));
+  connect(textEdit, &Editor::changeCursor, fv, &FileView::ChangeCursor);
 
-  connect(fv, SIGNAL(DoneCompletion(const std::vector<std::string> &)), this,
-          SLOT(displayAutocompleteOptions(const std::vector<std::string> &)));
+  connect(fv, &FileView::DoneDiagnostic, this, &MainWindow::display_failure);
 
+  connect(fv, &FileView::DoneCompletion, this,
+          &MainWindow::displayAutocompleteOptions);
+
+  this->setWindowState(Qt::WindowMaximized);
   textEdit->setFocus();
 }
 
@@ -177,9 +131,6 @@ void MainWindow::newFile() {
 void MainWindow::open() {
   if (maybeSave()) {
     QString fileName = QFileDialog::getOpenFileName(this);
-
-    //    if (.contains(QRegExp(".h|.c|.hpp|.cpp|.cc"))) {
-    //    }
     if (!fileName.isEmpty()) loadFile(fileName);
   }
 }
@@ -223,45 +174,43 @@ void MainWindow::split() {
     splittedTextEdit = new Editor(textEdit->fontSize);
     splittedTextEdit->setCompleter(completer);
     splitter->addWidget(splittedTextEdit);
-    splitter->setStretchFactor(2, 1);
+
+    const int IND = 2;
+    const int STRETCH_FACTOR = 1;
+    splitter->setStretchFactor(IND, STRETCH_FACTOR);
     fv_split = new FileView("lol.cpp", this);
-    connect(splittedTextEdit, SIGNAL(changeContent(const std::string &)),
-            fv_split, SLOT(UploadContent(const std::string &)));
-    connect(splittedTextEdit, SIGNAL(changeCursor(int, int)), fv_split,
-            SLOT(ChangeCursor(int, int)));
-    connect(fv_split, SIGNAL(DoneCompletion(const std::vector<std::string> &)),
-            this,
-            SLOT(set_autocomplete_to_label(const std::vector<std::string> &)));
-    connect(fv_split, SIGNAL(DoneCompletion(const std::vector<std::string> &)),
-            this,
-            SLOT(displayAutocompleteOptions(const std::vector<std::string> &)));
-    connect(
-        fv_split,
-        SIGNAL(DoneDiagnostic(const std::vector<lsp::DiagnosticsResponse> &)),
-        this,
-        SLOT(display_failure(const std::vector<lsp::DiagnosticsResponse> &)));
-    splittedTextEdit->setTabStopWidth(tabStop * metrics->width(' '));
-    connect(splittedTextEdit, SIGNAL(cursorPositionChanged()), this,
-            SLOT(showCursorPositionOnSplitted()));
+
+    connect(splittedTextEdit, &Editor::changeContent, fv_split,
+            &FileView::UploadContent);
+
+    connect(splittedTextEdit, &Editor::changeCursor, fv_split,
+            &FileView::ChangeCursor);
+
+    connect(fv_split, &FileView::DoneCompletion, this,
+            &MainWindow::displayAutocompleteOptions);
+
+    connect(fv_split, &FileView::DoneDiagnostic, this,
+            &MainWindow::display_failure);
+
+    splittedTextEdit->setTabStopDistance(tabStop *
+                                         metrics->horizontalAdvance(' '));
+
+    connect(splittedTextEdit, &Editor::cursorPositionChanged, this,
+            &MainWindow::showCursorPositionOnSplitted);
+
     splittedTextEdit->setFont(*font);
   } else {
-    disconnect(splittedTextEdit, SIGNAL(changeContent(const std::string &)),
-               fv_split, SLOT(UploadContent(const std::string &)));
-    disconnect(splittedTextEdit, SIGNAL(changeCursor(int, int)), fv_split,
-               SLOT(ChangeCursor(int, int)));
-    disconnect(
-        fv_split, SIGNAL(DoneCompletion(const std::vector<std::string> &)),
-        this,
-        SLOT(set_autocomplete_to_label(const std::vector<std::string> &)));
-    disconnect(
-        fv_split,
-        SIGNAL(DoneDiagnostic(const std::vector<lsp::DiagnosticsResponse> &)),
-        this,
-        SLOT(display_failure(const std::vector<lsp::DiagnosticsResponse> &)));
+    disconnect(splittedTextEdit, &Editor::changeContent, fv_split,
+               &FileView::UploadContent);
+
+    disconnect(splittedTextEdit, &Editor::changeCursor, fv_split,
+               &FileView::ChangeCursor);
+
+    disconnect(fv_split, &FileView::DoneDiagnostic, this,
+               &MainWindow::display_failure);
+
     delete fv_split;
     splitted = false;
-    //    std::swap(textEdit, splittedTextEdit);
-    //    std::swap(fv, fv_split);
     delete splitter->widget(1);
   }
 }
@@ -284,7 +233,6 @@ void MainWindow::textSize(const QString &p) {
 void MainWindow::mergeFormatOnWordOrSelection(const QTextCharFormat &format) {
   QTextCursor cursor = textEdit->textCursor();
   textEdit->selectAll();
-  //  if (!cursor.hasSelection())
   cursor.select(QTextCursor::WordUnderCursor);
   cursor.mergeCharFormat(format);
   textEdit->mergeCurrentCharFormat(format);
@@ -295,8 +243,6 @@ void MainWindow::mergeFormatOnWordOrSelection(const QTextCharFormat &format) {
     QTextCursor splitCursor = splittedTextEdit->textCursor();
     splittedTextEdit->repaint();
     splittedTextEdit->selectAll();
-    //      if (!cursor.hasSelection())
-    //      cursor.select(QTextCursor::WordUnderCursor);
     splitCursor.mergeCharFormat(format);
     splittedTextEdit->mergeCurrentCharFormat(format);
     splitCursor.movePosition(QTextCursor::End);
@@ -364,8 +310,6 @@ void MainWindow::createActions() {
       tr("&Set root directory..."), this, &MainWindow::choose_directory);
   set_root_directory->setStatusTip(
       tr("Choose the directory which will be shown in directory tree"));
-  //    connect(set_root_directory, &QAction::triggered, this,
-  //            &MainWindow::choose_directory);
 
   tb = addToolBar(tr("Format Actions"));
   tb->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
@@ -391,13 +335,9 @@ void MainWindow::createActions() {
   splitAct->setStatusTip("Split right");
   connect(splitAct, &QAction::triggered, this, &MainWindow::split);
   tb->addAction(splitAct);
-  //  tb->addWidget(lbl);
 }
 
-MainWindow::~MainWindow() {
-  delete ui;
-  //  delete lsp_handler;
-}
+MainWindow::~MainWindow() { delete ui; }
 
 bool MainWindow::maybeSave() {
   if (!textEdit->document()->isModified()) return true;
@@ -422,7 +362,6 @@ void MainWindow::loadFile(const QString &fileName) {
   if (std::none_of(
           std::begin(good_suf), std::end(good_suf),
           [&fileName](const auto &str) { return fileName.contains(str); })) {
-    std::cerr << "CONTAINS BAD SUFFIX" << std::endl;
     fv->SetValidity(false);
   } else {
     fv->SetValidity(true);
@@ -446,8 +385,8 @@ void MainWindow::loadFile(const QString &fileName) {
 #endif
 
   setCurrentFile(fileName, textEdit);
-  statusBar()->showMessage(tr("File loaded"), 2000);
-  std::cerr << "FILENAME = " << fileName.toStdString() << std::endl;
+  const int TIME_OUT_MS = 2000;
+  statusBar()->showMessage(tr("File loaded"), TIME_OUT_MS);
 }
 
 void MainWindow::tree_clicked(const QModelIndex &index) {
@@ -524,64 +463,20 @@ void MainWindow::showCursorPositionOnSplitted() {
   statusBar()->showMessage(QString("Line %1  Column %2").arg(line).arg(column));
 }
 
-void MainWindow::update_autocomplete() {
-  //  static int cur_line = 0;
-  //  static int cur_col = 0;
-
-  //  static std::string content = "";
-  //  //  textEdit->setReadOnly(true);
-
-  //  if (content != textEdit->toPlainText().toUtf8().toStdString()) {
-  //    content = textEdit->toPlainText().toUtf8().toStdString();
-  //    lsp_handler->FileChanged(content);
-  //  }
-  //  if (cur_line != textEdit->textCursor().blockNumber() ||
-  //      cur_col != textEdit->textCursor().columnNumber()) {
-  //    cur_line = textEdit->textCursor().blockNumber();
-  //    cur_col = textEdit->textCursor().columnNumber();
-  //    lsp_handler->RequestCompletion(cur_line, cur_col);
-  //  }
-
-  //  textEdit->setReadOnly(false);
-}
-
-void MainWindow::set_autocomplete_to_label(
-    const std::vector<std::string> &vec) {
-  // only first
-  // std::cerr << "***** INSIDE SET AUTO COMPLETE TO LABEL ***** " << std::endl;
-  if (vec.size() == 0) return;
-  for (const auto &item : vec) {
-    // std::cerr << item << '\n';
-  }
-  //  /*lbl*/->setText(QString::fromStdString(vec[0]));
-}
-
 void MainWindow::displayAutocompleteOptions(
     const std::vector<std::string> &vec) {
   disp->clear();
-  std::cerr << "______AUTOCOMPLETE DISPLAY________" << std::endl;
   if (vec.size() == 0) return;
   QStringListModel *model =
       reinterpret_cast<QStringListModel *>(completer->model());
   QStringList stringList;
 
   for (const auto &item : vec) {
-    std::cerr << item << '\n';
     disp->appendText(item);
     stringList << QString::fromStdString(item);
   }
   model->setStringList(stringList);
 }
-
-// void MainWindow::display_diagnostics(
-//    const std::vector<lsp::DiagnosticsResponse> &resp) {
-//  std::cerr << "New diagnostics:\n";
-//  for (auto &[ctgry, msg, _] : resp) {
-//    std::cerr << "category: " << ctgry << '\n';
-//    std::cerr << "message: " << msg << std::endl;
-//  }
-//  std::cerr << "-----" << std::endl;
-//}
 
 void MainWindow::display_failure(
     const std::vector<lsp::DiagnosticsResponse> &resp) {

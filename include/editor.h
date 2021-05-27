@@ -22,14 +22,13 @@ class QAction;
 class QMenu;
 QT_END_NAMESPACE
 class LineNumberArea;
-// class SyntaxStyle;
-// class StyleSyntaxHighlighter;
 
 class Editor : public QPlainTextEdit {
   Q_OBJECT
 
  public:
-  explicit Editor(std::size_t fontSize = 11, QWidget *parent = nullptr);
+  explicit Editor(std::size_t fontSize = DEFAULT_FONT_SIZE,
+                  QWidget *parent = nullptr);
 
   void lineNumberAreaPaintEvent(QPaintEvent *event);
   int lineNumberAreaWidth();
@@ -37,7 +36,6 @@ class Editor : public QPlainTextEdit {
   std::size_t curIndent;
   bool newLine;
   std::size_t fontSize;
-  // std::size_t blockCount = 0;
   void setCompleter(QCompleter *c);
   QCompleter *completer() const;
 
@@ -51,35 +49,29 @@ class Editor : public QPlainTextEdit {
  signals:
   void changeCursor(int new_line, int new_col);
   void changeContent(const std::string &new_cont);
-  void transferCompletion(const std::string &compl_item);
  private slots:
   void updateLineNumberAreaWidth(int newBlockCount);
-  void highlightCurrentLine();
+  void highlightCurrentLine(QList<QTextEdit::ExtraSelection> *extraSelection);
   void updateLineNumberArea(const QRect &rect, int dy);
-  void resolveCompletion(const std::string &compl_item);
   void insertCompletion(const QString &completion);
 
  private:
   Highlighter *highlighter;
   QWidget *lineNumberArea;
   QCompleter *c = nullptr;
+
   QString textUnderCursor() const;
   int getIndentationSpaces() const;
-  bool m_autoIndentation = true;
-  bool m_autoParentheses = true;
-  bool m_replaceTab = true;
 
-  //  StyleSyntaxHighlighter *m_highlighter;
-  //  SyntaxStyle *m_syntaxStyle;
-  QString m_tabReplace = "    ";
+  QString tab_replace_ = "    ";
   QChar charUnderCursor(int offset = 0) const;
   QString wordUnderCursor() const;
   bool procCompleterStart(QKeyEvent *e);
   void procCompleterFinish(QKeyEvent *e);
   void highlightParenthesis(QList<QTextEdit::ExtraSelection> *extraSelection);
   void updateExtraSelection();
-  //  void setSyntaxStyle(SyntaxStyle *style);
-  //  void updateStyle();
+
+  static constexpr int DEFAULT_FONT_SIZE = 11;
 };
 
 class LineNumberArea : public QWidget {
@@ -87,7 +79,8 @@ class LineNumberArea : public QWidget {
   explicit LineNumberArea(Editor *editor) : QWidget(editor), editor(editor) {}
 
   QSize sizeHint() const override {
-    return QSize(editor->lineNumberAreaWidth(), 0);
+    const int HEIGHT = 0;
+    return QSize(editor->lineNumberAreaWidth(), HEIGHT);
   }
 
  protected:
