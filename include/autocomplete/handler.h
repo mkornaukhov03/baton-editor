@@ -40,10 +40,7 @@ class LSPHandler final : public QObject {
   void GetError(json, json) {}
   void GetServerError(QProcess::ProcessError) {}
   void GetServerFinished(int, QProcess::ExitStatus) {}
-  void GetStderrOutput(const std::string &s) {
-    //    std::cerr << "Inside LSPHandler::GetStderrrOutput\n";
-    //    std::cerr << s << std::endl;
-  }
+  void GetStderrOutput(const std::string &) {}
 
   // from user
   void RequestCompletion(std::size_t, std::size_t);

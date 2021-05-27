@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "editor.h"
-#include "interface.h"
+#include "handler.h"
 #include "lsp_basic.h"
 
 class FileView : public QWidget {
@@ -15,7 +15,7 @@ class FileView : public QWidget {
  public:
   explicit FileView(const std::string& filename, QWidget* parent = nullptr);
   virtual ~FileView();
-
+  void SetValidity(bool);
  signals:
   void DoneCompletion(const std::vector<std::string>&);
   void DoneDiagnostic(const std::vector<lsp::DiagnosticsResponse>&);
@@ -28,13 +28,12 @@ class FileView : public QWidget {
   void GetDiagnostic(const std::vector<lsp::DiagnosticsResponse>&);
 
  private:
-  void Update();
-
   lsp::LSPHandler handler_;
   std::string content_;
   int carriage_line_;
   int carriage_col_;
   bool completion_required_;
+  bool valid_cpp_;
 };
 
 #endif  // FILE_VIEW_H

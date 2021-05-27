@@ -1,4 +1,4 @@
-#include "interface.h"
+#include "handler.h"
 
 #include <json_serializers.h>
 
@@ -32,7 +32,6 @@ void LSPHandler::set_connections() {
 }
 
 void LSPHandler::GetResponse(json id, json result) {
-  //  std::cerr << "==== INSIDE GetResponse() ====" << std::endl;
   std::string id_str = id.get<std::string>();
 
   const unsigned MAX_COMPLETION_ITEMS = 13;
@@ -67,24 +66,19 @@ void LSPHandler::GetResponse(json id, json result) {
     resp.erase(std::unique(resp.begin(), resp.end()), resp.end());
     if (resp.size() > MAX_COMPLETION_ITEMS) resp.clear();
     emit DoneCompletion(resp);
-  } else if (id_str == "textDocument/publishDiagnostics") {
-    std::cerr << "PUBLISH DIAGNOSTICS!!!!!\n";
   } else {
-    std::cerr << "NOT COMPLETION!!\n" << result << std::endl;
+    std::cerr << "NOT COMPLETION!\n" << result << std::endl;
   }
 }
 
 void LSPHandler::GetNotify(const std::string& id, json result) {
   if (id == "textDocument/publishDiagnostics") {
-    //    std::cerr << "Vector of diagnostics" << std::endl;
-    //    std::cerr << "Notify result: " << result["diagnostics"] << std::endl;
     std::vector<lsp::DiagnosticsResponse> resp;
     for (const auto& item : result["diagnostics"]) {
       Range rng;
       from_json(item["range"], rng);
       resp.emplace_back(
           lsp::DiagnosticsResponse{item["category"], item["message"], rng});
-      //      std::cerr << kek << std::endl;
     }
     emit DoneDiagnostic(resp);
   } else {
@@ -93,8 +87,6 @@ void LSPHandler::GetNotify(const std::string& id, json result) {
 }
 
 void LSPHandler::RequestCompletion(std::size_t line, std::size_t col) {
-  std::cerr << "Root: " << root_ << '\n';
-  std::cerr << "File: " << file_ << '\n';
   client_.Completion("file:///" + file_, Position{line, col});
 }
 
