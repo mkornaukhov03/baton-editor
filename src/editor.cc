@@ -113,7 +113,7 @@ void Editor::highlightCurrentLine(
   if (!isReadOnly()) {
     QTextEdit::ExtraSelection selection;
 
-    QColor lineColor = QColor(96, 100, 36, 50);
+    QColor lineColor = QColor(96, 100, 36, 50);  // transparent yellow
     selection.format.setBackground(lineColor);
     selection.format.setProperty(QTextFormat::FullWidthSelection, true);
     selection.cursor = textCursor();
