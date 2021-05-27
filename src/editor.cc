@@ -29,8 +29,6 @@ Editor::Editor(std::size_t fontSize, QWidget *parent)
   connect(this, &Editor::blockCountChanged, this,
           &Editor::updateLineNumberAreaWidth);
   connect(this, &Editor::updateRequest, this, &Editor::updateLineNumberArea);
-  connect(this, &Editor::cursorPositionChanged, this,
-          &Editor::highlightCurrentLine);
 
   connect(this, &Editor::cursorPositionChanged, this, [&]() {
     emit changeCursor(this->textCursor().blockNumber(),
@@ -41,12 +39,13 @@ Editor::Editor(std::size_t fontSize, QWidget *parent)
 
     connect(this, &QPlainTextEdit::cursorPositionChanged, this,
             &Editor::updateExtraSelection);
+    updateExtraSelection();
   });
 
   connect(this, &Editor::transferCompletion, this, &Editor::resolveCompletion);
 
   updateLineNumberAreaWidth(0);
-  highlightCurrentLine();
+  //  highlightCurrentLine();
   QFont font;
   font.setFamily("Courier");
   font.setFixedPitch(true);
@@ -103,9 +102,8 @@ void Editor::resizeEvent(QResizeEvent *e) {
       QRect(cr.left(), cr.top(), lineNumberAreaWidth(), cr.height()));
 }
 
-void Editor::highlightCurrentLine() {
-  QList<QTextEdit::ExtraSelection> extraSelections;
-
+void Editor::highlightCurrentLine(
+    QList<QTextEdit::ExtraSelection> *extraSelection) {
   if (!isReadOnly()) {
     QTextEdit::ExtraSelection selection;
 
@@ -114,10 +112,8 @@ void Editor::highlightCurrentLine() {
     selection.format.setProperty(QTextFormat::FullWidthSelection, true);
     selection.cursor = textCursor();
     selection.cursor.clearSelection();
-    extraSelections.append(selection);
+    extraSelection->append(selection);
   }
-
-  setExtraSelections(extraSelections);
   std::cerr << "Current line highlighted" << std::endl;
 }
 
@@ -470,6 +466,6 @@ QChar Editor::charUnderCursor(int offset) const {
 void Editor::updateExtraSelection() {
   QList<QTextEdit::ExtraSelection> extra;
   highlightParenthesis(&extra);
-
+  highlightCurrentLine(&extra);
   setExtraSelections(extra);
 }

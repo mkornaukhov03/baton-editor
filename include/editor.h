@@ -51,7 +51,7 @@ class Editor : public QPlainTextEdit {
   void transferCompletion(const std::string &compl_item);
  private slots:
   void updateLineNumberAreaWidth(int newBlockCount);
-  void highlightCurrentLine();
+  void highlightCurrentLine(QList<QTextEdit::ExtraSelection> *extraSelection);
   void updateLineNumberArea(const QRect &rect, int dy);
   void resolveCompletion(const std::string &compl_item);
   void insertCompletion(const QString &completion);
