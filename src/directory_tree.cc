@@ -37,11 +37,7 @@ Directory_tree::Directory_tree(QWidget *parent)
     QModelIndex rootIndex = model.index(QString::fromStdString(root_path));
     tree.setRootIndex(rootIndex);
   }
-  //  model.setRootPath("/home/mdmalofeev/programm/labs-mmalofeev");
-  //  tree.setModel(&model);
-  //  QModelIndex rootIndex =
-  //      model.index("/home/mdmalofeev/programm/labs-mmalofeev/");
-  //  tree.setRootIndex(rootIndex);
+
   tree.setAnimated(false);
   tree.setIndentation(20);
   tree.setSortingEnabled(true);

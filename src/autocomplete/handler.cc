@@ -15,20 +15,20 @@ LSPHandler::LSPHandler(const std::string& root, const std::string& file_name,
   set_connections();
 }
 void LSPHandler::set_connections() {
-  connect(&client_, SIGNAL(OnNotify(const std::string&, json)), this,
-          SLOT(GetNotify(const std::string&, json)));
-  connect(&client_, SIGNAL(OnResponse(json, json)), this,
-          SLOT(GetResponse(json, json)));
-  connect(&client_, SIGNAL(OnRequest(const std::string&, json, json)), this,
-          SLOT(GetRequest(const std::string&, json, json)));
-  connect(&client_, SIGNAL(OnError(json, json)), this,
-          SLOT(GetError(json, json)));
-  connect(&client_, SIGNAL(OnServerError(QProcess::ProcessError)), this,
-          SLOT(GetServerError(QProcess::ProcessError)));
-  connect(&client_, SIGNAL(OnServerFinished(int, QProcess::ExitStatus)), this,
-          SLOT(GetServerFinished(int, QProcess::ExitStatus)));
-  connect(&client_, SIGNAL(NewStderr(const std::string&)), this,
-          SLOT(GetStderrOutput(const std::string&)));
+  connect(&client_, &Client::OnNotify, this, &LSPHandler::GetNotify);
+
+  connect(&client_, &Client::OnResponse, this, &LSPHandler::GetResponse);
+
+  connect(&client_, &Client::OnRequest, this, &LSPHandler::GetRequest);
+
+  connect(&client_, &Client::OnError, this, &LSPHandler::GetError);
+
+  connect(&client_, &Client::OnServerError, this, &LSPHandler::GetServerError);
+
+  connect(&client_, &Client::OnServerFinished, this,
+          &LSPHandler::GetServerFinished);
+
+  connect(&client_, &Client::NewStderr, this, &LSPHandler::GetStderrOutput);
 }
 
 void LSPHandler::GetResponse(json id, json result) {
