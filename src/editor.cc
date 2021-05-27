@@ -46,7 +46,6 @@ Editor::Editor(std::size_t fontSize, QWidget *parent)
   });
 
   updateExtraSelection();
-  connect(this, &Editor::transferCompletion, this, &Editor::resolveCompletion);
   connect(this, &QPlainTextEdit::cursorPositionChanged, this,
           &Editor::updateExtraSelection);
   updateLineNumberAreaWidth(0);
@@ -56,15 +55,6 @@ Editor::Editor(std::size_t fontSize, QWidget *parent)
   font.setFixedPitch(true);
   font.setPointSize(fontSize);
   setFont(font);
-}
-
-void Editor::resolveCompletion(const std::string &compl_item) {
-  auto cursor = this->textCursor();
-  cursor.movePosition(QTextCursor::PreviousWord, QTextCursor::KeepAnchor);
-  cursor.removeSelectedText();
-  cursor.insertText(QString::fromStdString(compl_item));
-  cursor.clearSelection();
-  this->setTextCursor(cursor);
 }
 
 int Editor::lineNumberAreaWidth() {
