@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "editor.h"
-#include "interface.h"
+#include "handler.h"
 #include "lsp_basic.h"
 
 class FileView : public QWidget {
@@ -28,8 +28,6 @@ class FileView : public QWidget {
   void GetDiagnostic(const std::vector<lsp::DiagnosticsResponse>&);
 
  private:
-  void Update();
-
   lsp::LSPHandler handler_;
   std::string content_;
   int carriage_line_;
