@@ -172,7 +172,20 @@ void MainWindow::split() {
   if (!splitted) {
     splitted = true;
     splittedTextEdit = new Editor(textEdit->fontSize);
-    splittedTextEdit->setCompleter(completer);
+
+    QStringList stringList;
+    stringList << "m0"
+               << "m1"
+               << "m2";
+    QStringListModel *model = new QStringListModel(stringList);
+    splittedCompleter = new QCompleter(model, this);
+    splittedCompleter->setModelSorting(
+        QCompleter::CaseInsensitivelySortedModel);
+    splittedCompleter->setCaseSensitivity(Qt::CaseInsensitive);
+    splittedCompleter->setWrapAround(false);
+
+    splittedTextEdit->setCompleter(splittedCompleter);
+
     splitter->addWidget(splittedTextEdit);
 
     const int IND = 2;
