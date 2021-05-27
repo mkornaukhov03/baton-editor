@@ -78,7 +78,6 @@ void Client::OnClientReadyReadStdout() {
         process_message();
       }
     } else {  // the start of the message
-
       int msg_start = cur_buffer.indexOf("\r\n\r\n") +
                       static_cast<int>(std::strlen("\r\n\r\n"));
       int len_start = cur_buffer.indexOf("Content-Length: ") +
