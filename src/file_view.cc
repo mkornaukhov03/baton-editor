@@ -38,6 +38,7 @@ void FileView::UploadContent(const std::string& new_content) {
   if (!valid_cpp_) {
     return;
   }
+  std::cerr << new_content << std::endl;
   content_ = new_content;
   if (content_.back() != '\n') {
     content_ += '\n';
@@ -51,7 +52,7 @@ void FileView::ChangeCursor(int new_line, int new_col) {
   }
   carriage_line_ = new_line;
   carriage_col_ = new_col;
-  [[maybe_unused]] bool cond = true;  // TODO: check the next symbol
+  [[maybe_unused]] bool cond = true;
 
   // searching for next charachter after cursor
   auto it = content_.begin();
@@ -75,12 +76,4 @@ void FileView::ChangeCursor(int new_line, int new_col) {
   if (completion_required_) {
     handler_.RequestCompletion(carriage_line_, carriage_col_);
   }
-}
-
-// not ready
-void FileView::Update() {
-  //  handler_.FileChanged(content_);
-  //  if (completion_required_) {
-  //    handler_.RequestCompletion(carriage_line_, carriage_col_);
-  //  }
 }

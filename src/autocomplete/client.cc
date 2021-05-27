@@ -24,8 +24,7 @@ Client::Client(const QString &path, const QStringList &args)
 
 Client::~Client() {
   if (process_) {
-    //    process_->kill();
-    //    delete process_;
+    process_->waitForFinished(-1);
   }
 }
 
@@ -38,30 +37,24 @@ void Client::SetConnections() {
           SLOT(OnClientReadyReadStderr()));
   connect(process_.get(), SIGNAL(finished(int, QProcess::ExitStatus)), this,
           SLOT(OnClientFinished(int, QProcess::ExitStatus)));
-  // connect(process_.get(), SIGNAL(started()), this, SLOT(OnStarted()));
 }
 
 // private slots
 void Client::OnClientReadyReadStdout() {
-  // FIXME should create new thread and use waitForReadyRead
-
   static std::string buff{};
   static unsigned msg_size = 0;
 
   QByteArray cur_buffer = process_->readAllStandardOutput();
 
-  //  std::cerr << "GOT MSG: " << cur_buffer.toStdString() << std::endl;
   try {
     auto process_message = [&]() {
       json msg = json::parse(buff);
 
-      //    std::cerr << " PROCESS MESSAGE: " << msg << '\n';
       if (msg.contains("id")) {
         if (msg.contains("method")) {
           emit OnRequest(msg["method"].get<std::string>(), msg["params"],
                          msg["id"]);
         } else if (msg.contains("result")) {
-          //        std::cerr << "Emitting OnResponse!\n";
           emit OnResponse(msg["id"], msg["result"]);
         } else if (msg.contains("error")) {
           emit OnError(msg["id"], msg["error"]);
@@ -71,7 +64,6 @@ void Client::OnClientReadyReadStdout() {
           emit OnNotify(msg["method"].get<std::string>(), msg["params"]);
         }
       } else {
-        //      std::cerr << "Nothing emitted!\n";
       }
 
       buff.clear();
@@ -86,7 +78,7 @@ void Client::OnClientReadyReadStdout() {
         process_message();
       }
     } else {  // the start of the message
-              //    std::cerr << "INSIDE the start of the msg" << std::endl;
+
       int msg_start = cur_buffer.indexOf("\r\n\r\n") +
                       static_cast<int>(std::strlen("\r\n\r\n"));
       int len_start = cur_buffer.indexOf("Content-Length: ") +
@@ -214,7 +206,6 @@ void Client::WriteToServer(std::string dump) {
       "Content-Length: " + std::to_string(dump.length()) + "\r\n");
   send_to_server_buffer_.push_back("\r\n");
   send_to_server_buffer_.push_back(std::move(dump));
-  //     assert(process_-> state() == QProcess::Running);
   if (process_ != nullptr && process_->state() == QProcess::Running) {
     for (auto row : send_to_server_buffer_) {
       process_->write(row.c_str());
