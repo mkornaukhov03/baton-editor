@@ -144,6 +144,7 @@ void Editor::highlightCurrentLine() {
   }
 
   setExtraSelections(extraSelections);
+  std::cerr << "Current line highlighted" << std::endl;
 }
 
 QString Editor::wordUnderCursor() const {
@@ -395,7 +396,6 @@ void Editor::lineNumberAreaPaintEvent(QPaintEvent *event) {
   QPainter painter(lineNumberArea);
   painter.fillRect(event->rect(), Qt::lightGray);
 
-  std::cerr << "PaintEvent called" << '\n';
   QFont fnt = painter.font();
   fnt.setPointSize(fontSize);
   painter.setFont(fnt);

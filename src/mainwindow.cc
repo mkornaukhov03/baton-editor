@@ -53,6 +53,7 @@ MainWindow::MainWindow(QWidget *parent)
   // Terminal *terminal = new Terminal;
   // lbl = new Suggest_label(nullptr);
   fv = new FileView("kek.cpp", this);
+
   createStatusBar();
   createActions();
 
@@ -157,7 +158,7 @@ MainWindow::MainWindow(QWidget *parent)
 
   connect(fv, SIGNAL(DoneCompletion(const std::vector<std::string> &)), this,
           SLOT(displayAutocompleteOptions(const std::vector<std::string> &)));
-
+  this->setWindowState(Qt::WindowMaximized);
   textEdit->setFocus();
 }
 
