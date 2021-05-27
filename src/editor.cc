@@ -52,9 +52,6 @@ Editor::Editor(std::size_t fontSize, QWidget *parent)
   font.setFixedPitch(true);
   font.setPointSize(fontSize);
   setFont(font);
-
-  //  QTextDocument *document = this->document();
-  //  highlighter = new Highlighter(document);
 }
 
 void Editor::resolveCompletion(const std::string &compl_item) {
@@ -68,29 +65,6 @@ void Editor::resolveCompletion(const std::string &compl_item) {
   cursor.insertText(QString::fromStdString(compl_item));
   cursor.clearSelection();
   this->setTextCursor(cursor);
-
-  //  this->textCursor().insertText(QString::fromStdString(compl_item));
-  //  this->textCursor().movePosition(QTextCursor::NextWord);
-
-  //  this->textCursor().endEditBlock();
-  //  this->undo();
-
-  //  this->textCursor().insertText("ZHOPA");
-
-  //  auto curs = this->textCursor();
-  //  curs.movePosition(QTextCursor::StartOfWord, QTextCursor::KeepAnchor);
-
-  //  std::cerr << "AFTER RESOLVE:\n"
-  //            << this->toPlainText().toStdString() << std::endl;
-  //  this->setTextCursor(curs);
-
-  //  this->textCursor().removeSelectedText();
-  //  this->textCursor().clearSelection();
-  //  this->setFocus();
-  //  emit cursorPositionChanged();
-  //  emit changeContent(this->toPlainText().toStdString());
-  //  textCursor().clearSelection();
-  //  setFocus();
 }
 
 int Editor::lineNumberAreaWidth() {
@@ -168,7 +142,6 @@ bool Editor::procCompleterStart(QKeyEvent *e) {
     }
   }
 
-  // todo: Replace with modifiable QShortcut
   auto isShortcut =
       ((e->modifiers() & Qt::ControlModifier) && e->key() == Qt::Key_Space);
 
