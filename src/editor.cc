@@ -43,29 +43,18 @@ Editor::Editor(std::size_t fontSize, QWidget *parent)
   });
   connect(this, &Editor::textChanged, this, [&]() {
     emit changeContent(this->toPlainText().toUtf8().toStdString());
-
-    connect(this, &QPlainTextEdit::cursorPositionChanged, this,
-            &Editor::updateExtraSelection);
-    updateExtraSelection();
   });
 
-  connect(this, &Editor::transferCompletion, this, &Editor::resolveCompletion);
-
+  updateExtraSelection();
+  connect(this, &QPlainTextEdit::cursorPositionChanged, this,
+          &Editor::updateExtraSelection);
   updateLineNumberAreaWidth(0);
+
   QFont font;
   font.setFamily("Courier");
   font.setFixedPitch(true);
   font.setPointSize(fontSize);
   setFont(font);
-}
-
-void Editor::resolveCompletion(const std::string &compl_item) {
-  auto cursor = this->textCursor();
-  cursor.movePosition(QTextCursor::PreviousWord, QTextCursor::KeepAnchor);
-  cursor.removeSelectedText();
-  cursor.insertText(QString::fromStdString(compl_item));
-  cursor.clearSelection();
-  this->setTextCursor(cursor);
 }
 
 int Editor::lineNumberAreaWidth() {
@@ -114,7 +103,7 @@ void Editor::highlightCurrentLine(
   if (!isReadOnly()) {
     QTextEdit::ExtraSelection selection;
 
-    QColor lineColor = QColor(96, 100, 36, 50);
+    QColor lineColor = QColor(96, 100, 36, 50);  // transparent yellow
     selection.format.setBackground(lineColor);
     selection.format.setProperty(QTextFormat::FullWidthSelection, true);
     selection.cursor = textCursor();

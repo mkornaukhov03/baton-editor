@@ -3,7 +3,7 @@
 Baton is a code editor for C++ programming language \
 Design document: https://bit.ly/3alkddH
 
-###Features:
+### Features:
 * C++ source code highlighting
 * C++ auto-completion: dynamic completion options displaying and quick insertion 
 * Document navigation: current line and column display
@@ -16,7 +16,7 @@ Design document: https://bit.ly/3alkddH
 root directory can also be changed
 * Hotkeys for basic operations
 
-##Requirements:
+## Requirements:
 * Qt 5.15
 * Clangd
 
