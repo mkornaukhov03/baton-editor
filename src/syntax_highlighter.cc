@@ -37,127 +37,67 @@ Highlighter::Highlighter(QTextDocument *parent) : QSyntaxHighlighter(parent) {
   keywordFormat.setFontWeight(QFont::Bold);
 
   const QString keywordPatterns[] = {
-      QStringLiteral("\\bchar\\b"),
-      QStringLiteral("\\bclass\\b"),
-      QStringLiteral("\\bconst\\b"),
-      QStringLiteral("\\bdouble\\b"),
-      QStringLiteral("\\benum\\b"),
-      QStringLiteral("\\bexplicit\\b"),
-      QStringLiteral("\\bfriend\\b"),
-      QStringLiteral("\\binline\\b"),
-      QStringLiteral("\\bint\\b"),
-      QStringLiteral("\\blong\\b"),
-      QStringLiteral("\\bnamespace\\b"),
-      QStringLiteral("\\boperator\\b"),
-      QStringLiteral("\\bprivate\\b"),
-      QStringLiteral("\\bprotected\\b"),
-      QStringLiteral("\\bpublic\\b"),
-      QStringLiteral("\\bshort\\b"),
-      QStringLiteral("\\bsignals\\b"),
-      QStringLiteral("\\bsigned\\b"),
-      QStringLiteral("\\bslots\\b"),
-      QStringLiteral("\\bstatic\\b"),
-      QStringLiteral("\\bstruct\\b"),
-      QStringLiteral("\\btemplate\\b"),
-      QStringLiteral("\\btypedef\\b"),
-      QStringLiteral("\\btypename\\b"),
-      QStringLiteral("\\bunion\\b"),
-      QStringLiteral("\\bunsigned\\b"),
-      QStringLiteral("\\bvirtual\\b"),
-      QStringLiteral("\\bvoid\\b"),
-      QStringLiteral("\\bvolatile\\b"),
-      QStringLiteral("\\bbool\\b"),
-      QStringLiteral("\\busing\\b"),
-      QStringLiteral("\\bstring\\b"),
-      QStringLiteral("\\bvector\\b"),
-      QStringLiteral("\\bstd::vector\\b"),
+      QStringLiteral("\\bchar\\b"), QStringLiteral("\\bclass\\b"),
+      QStringLiteral("\\bconst\\b"), QStringLiteral("\\bdouble\\b"),
+      QStringLiteral("\\benum\\b"), QStringLiteral("\\bexplicit\\b"),
+      QStringLiteral("\\bfriend\\b"), QStringLiteral("\\binline\\b"),
+      QStringLiteral("\\bint\\b"), QStringLiteral("\\blong\\b"),
+      QStringLiteral("\\bnamespace\\b"), QStringLiteral("\\boperator\\b"),
+      QStringLiteral("\\bprivate\\b"), QStringLiteral("\\bprotected\\b"),
+      QStringLiteral("\\bpublic\\b"), QStringLiteral("\\bshort\\b"),
+      QStringLiteral("\\bsignals\\b"), QStringLiteral("\\bsigned\\b"),
+      QStringLiteral("\\bslots\\b"), QStringLiteral("\\bstatic\\b"),
+      QStringLiteral("\\bstruct\\b"), QStringLiteral("\\btemplate\\b"),
+      QStringLiteral("\\btypedef\\b"), QStringLiteral("\\btypename\\b"),
+      QStringLiteral("\\bunion\\b"), QStringLiteral("\\bunsigned\\b"),
+      QStringLiteral("\\bvirtual\\b"), QStringLiteral("\\bvoid\\b"),
+      QStringLiteral("\\bvolatile\\b"), QStringLiteral("\\bbool\\b"),
+      QStringLiteral("\\busing\\b"), QStringLiteral("\\bstring\\b"),
+      QStringLiteral("\\bvector\\b"), QStringLiteral("\\bstd::vector\\b"),
       QStringLiteral("\\bstd::string\\b"),
       QStringLiteral("\\bunordered_map\\b"),
-      QStringLiteral("\\bstd::unordered_map\\b"),
-      QStringLiteral("\\bstack\\b"),
-      QStringLiteral("\\bstd::stack\\b"),
-      QStringLiteral("\\bmap\\b"),
-      QStringLiteral("\\bstd::map\\b"),
-      QStringLiteral("\\blist\\b"),
-      QStringLiteral("\\bstd::list\\b"),
-      QStringLiteral("\\bpriority_queue\\b"),
+      QStringLiteral("\\bstd::unordered_map\\b"), QStringLiteral("\\bstack\\b"),
+      QStringLiteral("\\bstd::stack\\b"), QStringLiteral("\\bmap\\b"),
+      QStringLiteral("\\bstd::map\\b"), QStringLiteral("\\blist\\b"),
+      QStringLiteral("\\bstd::list\\b"), QStringLiteral("\\bpriority_queue\\b"),
       QStringLiteral("\\bstd::priority_queue\\b"),
-      QStringLiteral("\\bqueue\\b"),
-      QStringLiteral("\\bstd::queue\\b"),
-      QStringLiteral("\\bdeque\\b"),
-      QStringLiteral("\\bstd::deque\\b"),
-      QStringLiteral("\\bint32_t\\b"),
-      QStringLiteral("\\bfunction\\b"),
-      QStringLiteral("\\bstd::function\\b"),
-      QStringLiteral("\\bfloat\\b"),
-      QStringLiteral("\\buint32_t\\b"),
-      QStringLiteral("\\bint64_t\\b"),
-      QStringLiteral("\\buint64_t\\b"),
-      QStringLiteral("\\bint16_t\\b"),
-      QStringLiteral("\\buint16_t\\b"),
-      QStringLiteral("\\bint8_t\\b"),
-      QStringLiteral("\\buint8_t\\b"),
-      QStringLiteral("\\bchar32_t\\b"),
-      QStringLiteral("\\bchar16_t\\b"),
-      QStringLiteral("\\breturn\\b"),
-      QStringLiteral("\\bif\\b"),
-      QStringLiteral("\\belse\\b"),
-      QStringLiteral("\\binclude\\b"),
-      QStringLiteral("\\bfor\\b"),
-      QStringLiteral("\\bcwhile\\b"),
-      QStringLiteral("\\bswitch\\b"),
-      QStringLiteral("\\bcase\\b"),
+      QStringLiteral("\\bqueue\\b"), QStringLiteral("\\bstd::queue\\b"),
+      QStringLiteral("\\bdeque\\b"), QStringLiteral("\\bstd::deque\\b"),
+      QStringLiteral("\\bint32_t\\b"), QStringLiteral("\\bfunction\\b"),
+      QStringLiteral("\\bstd::function\\b"), QStringLiteral("\\bfloat\\b"),
+      QStringLiteral("\\buint32_t\\b"), QStringLiteral("\\bint64_t\\b"),
+      QStringLiteral("\\buint64_t\\b"), QStringLiteral("\\bint16_t\\b"),
+      QStringLiteral("\\buint16_t\\b"), QStringLiteral("\\bint8_t\\b"),
+      QStringLiteral("\\buint8_t\\b"), QStringLiteral("\\bchar32_t\\b"),
+      QStringLiteral("\\bchar16_t\\b"), QStringLiteral("\\breturn\\b"),
+      //      QStringLiteral("\\bif\\b"), QStringLiteral("\\belse\\b"),
+      //      QStringLiteral("\\binclude\\b"),
+      //      QStringLiteral("\\bfor\\b"), QStringLiteral("\\bcwhile\\b"),
+      //      QStringLiteral("\\bswitch\\b"), QStringLiteral("\\bcase\\b"),
       QStringLiteral("\\bstd::stringstream\\b"),
-      QStringLiteral("\\bstringstream\\b"),
-      QStringLiteral("\\bstd::cerr\\b"),
-      QStringLiteral("\\bcerr\\b"),
-      QStringLiteral("\\bcout\\b"),
-      QStringLiteral("\\bstd::cout\\b"),
-      QStringLiteral("\\bcin\\b"),
-      QStringLiteral("\\bstd::cin\\b"),
-      QStringLiteral("\\bifstream\\b"),
-      QStringLiteral("\\bstd::ifstream\\b"),
-      QStringLiteral("\\bistream\\b"),
-      QStringLiteral("\\bstd::istream\\b"),
-      QStringLiteral("\\bostream\\b"),
-      QStringLiteral("\\bofstream\\b"),
-      QStringLiteral("\\bstd::ostream\\b"),
-      QStringLiteral("\\bstd::ofstream\\b"),
-      QStringLiteral("\\bprintf\\b"),
-      QStringLiteral("\\bscanf\\b"),
-      QStringLiteral("\\bfprintf\\b"),
-      QStringLiteral("\\bfscanf\\b"),
-      QStringLiteral("\\bset\\b"),
-      QStringLiteral("\\bstd::set\\b"),
-      QStringLiteral("\\bstd::pair\\b"),
-      QStringLiteral("\\bpair\\b"),
-      QStringLiteral("\\bunordered_set\\b"),
+      QStringLiteral("\\bstringstream\\b"), QStringLiteral("\\bstd::cerr\\b"),
+      QStringLiteral("\\bcerr\\b"), QStringLiteral("\\bcout\\b"),
+      QStringLiteral("\\bstd::cout\\b"), QStringLiteral("\\bcin\\b"),
+      QStringLiteral("\\bstd::cin\\b"), QStringLiteral("\\bifstream\\b"),
+      QStringLiteral("\\bstd::ifstream\\b"), QStringLiteral("\\bistream\\b"),
+      QStringLiteral("\\bstd::istream\\b"), QStringLiteral("\\bostream\\b"),
+      QStringLiteral("\\bofstream\\b"), QStringLiteral("\\bstd::ostream\\b"),
+      QStringLiteral("\\bstd::ofstream\\b"), QStringLiteral("\\bprintf\\b"),
+      QStringLiteral("\\bscanf\\b"), QStringLiteral("\\bfprintf\\b"),
+      QStringLiteral("\\bfscanf\\b"), QStringLiteral("\\bset\\b"),
+      QStringLiteral("\\bstd::set\\b"), QStringLiteral("\\bstd::pair\\b"),
+      QStringLiteral("\\bpair\\b"), QStringLiteral("\\bunordered_set\\b"),
       QStringLiteral("\\bstd::unordered_set\\b"),
-      QStringLiteral("\\bbitset\\b"),
-      QStringLiteral("\\bstd::bitset\\b"),
-      QStringLiteral("\\btrue\\b"),
-      QStringLiteral("\\bfalse\\b"),
-      QStringLiteral("\\bauto\\b"),
-      QStringLiteral("\\bdecltype\\b"),
-      QStringLiteral("\\btemplate\\b"),
-      QStringLiteral("\\bsizeof...\\b"),
-      QStringLiteral("\\bsize\\b")};
+      QStringLiteral("\\bbitset\\b"), QStringLiteral("\\bstd::bitset\\b"),
+      QStringLiteral("\\btrue\\b"), QStringLiteral("\\bfalse\\b"),
+      QStringLiteral("\\bauto\\b"), QStringLiteral("\\bdecltype\\b"),
+      QStringLiteral("\\btemplate\\b"), QStringLiteral("\\bsizeof\\b"),
+      QStringLiteral("\\bsize\\b"), QStringLiteral("\\b.*::")};
   for (const QString &pattern : keywordPatterns) {
     rule.pattern = QRegularExpression(pattern);
     rule.format = keywordFormat;
     highlightingRules.append(rule);
   }
-
-  singleLineCommentFormat.setForeground(commentColor);
-  rule.pattern = QRegularExpression(QStringLiteral("//[^\n]*"));
-  rule.format = singleLineCommentFormat;
-  highlightingRules.append(rule);
-
-  multiLineCommentFormat.setForeground(commentColor);
-  quotationFormat.setForeground(quotationColor);
-  rule.pattern = QRegularExpression(QStringLiteral("\".*\""));
-  rule.format = quotationFormat;
-  highlightingRules.append(rule);
 
   //  functionFormat.setFontItalic(true);
   functionFormat.setForeground(functionColor);
@@ -184,6 +124,26 @@ Highlighter::Highlighter(QTextDocument *parent) : QSyntaxHighlighter(parent) {
   rule.format = conditionalCyclesFormat;
   highlightingRules.append(rule);
 
+  includeFormat.setForeground(streamColor);
+  rule.pattern = QRegularExpression(QStringLiteral("#include"));
+  rule.format = includeFormat;
+  highlightingRules.append(rule);
+
+  defineFormat.setForeground(streamColor);
+  rule.pattern = QRegularExpression(QStringLiteral("#define"));
+  rule.format = defineFormat;
+  highlightingRules.append(rule);
+
+  numberFormat.setForeground(functionColor);
+  rule.pattern = QRegularExpression(QStringLiteral("\\b[0-9]*\\b"));
+  rule.format = numberFormat;
+  highlightingRules.append(rule);
+
+  triangleBracketsFormat.setForeground(streamColor);
+  rule.pattern = QRegularExpression(QStringLiteral("<.*>"));
+  rule.format = triangleBracketsFormat;
+  highlightingRules.append(rule);
+
   streamFormat.setForeground(streamColor);
   streamFormat.setFontWeight(QFont::Bold);
   rule.pattern = QRegularExpression(QStringLiteral(
@@ -191,6 +151,17 @@ Highlighter::Highlighter(QTextDocument *parent) : QSyntaxHighlighter(parent) {
       "std::cin|ifstream|std::ifstream|istream|std::istream|ostream|std::"
       "ostream|ofstream|std::ofstream|printf|scanf|fprintf|fscanf)\\b"));
   rule.format = streamFormat;
+  highlightingRules.append(rule);
+
+  singleLineCommentFormat.setForeground(commentColor);
+  rule.pattern = QRegularExpression(QStringLiteral("//[^\n]*"));
+  rule.format = singleLineCommentFormat;
+  highlightingRules.append(rule);
+
+  multiLineCommentFormat.setForeground(commentColor);
+  quotationFormat.setForeground(quotationColor);
+  rule.pattern = QRegularExpression(QStringLiteral("\".*\""));
+  rule.format = quotationFormat;
   highlightingRules.append(rule);
 
   commentStartExpression = QRegularExpression(QStringLiteral("/\\*"));
