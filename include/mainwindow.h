@@ -112,6 +112,7 @@ class MainWindow : public QMainWindow {
   autocompleteDisplay *disp;
   QAbstractItemModel *model;
   QCompleter *completer = nullptr;
+  QCompleter *splittedCompleter = nullptr;
   FileView *fv_split = nullptr;
   QPlainTextEdit *display_failure_log;
   QFont *font;
