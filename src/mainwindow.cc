@@ -45,6 +45,7 @@ MainWindow::MainWindow(QWidget *parent)
   textEdit->setTabStopDistance(tabStop * metrics->horizontalAdvance(' '));
   disp = new autocompleteDisplay(nullptr);
   fv = new FileView("kek.cpp", this);
+
   createStatusBar();
   createActions();
 
@@ -55,6 +56,7 @@ MainWindow::MainWindow(QWidget *parent)
 
   central_widget = new QWidget();
   grid_layout = new QGridLayout(central_widget);
+
 
   WidgetPlacer dir_tr = {0, 0, 1, 2};
   WidgetPlacer disp = {1, 6, 3, 7};
@@ -102,6 +104,7 @@ MainWindow::MainWindow(QWidget *parent)
   connect(textEdit, &Editor::changeContent, fv, &FileView::UploadContent);
 
   connect(textEdit, &Editor::changeCursor, fv, &FileView::ChangeCursor);
+
 
   connect(fv, &FileView::DoneDiagnostic, this, &MainWindow::display_failure);
 
