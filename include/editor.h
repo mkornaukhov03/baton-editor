@@ -23,10 +23,6 @@ class QMenu;
 QT_END_NAMESPACE
 class LineNumberArea;
 
-namespace {
-constexpr std::size_t DEFAULT_FONT_SIZE = 11;
-}
-
 class Editor : public QPlainTextEdit {
   Q_OBJECT
 
@@ -76,6 +72,8 @@ class Editor : public QPlainTextEdit {
   void procCompleterFinish(QKeyEvent *e);
   void highlightParenthesis(QList<QTextEdit::ExtraSelection> *extraSelection);
   void updateExtraSelection();
+
+  static constexpr int DEFAULT_FONT_SIZE = 11;
 };
 
 class LineNumberArea : public QWidget {
