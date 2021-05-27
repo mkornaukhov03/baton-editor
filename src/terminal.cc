@@ -9,7 +9,7 @@ Terminal::Terminal(QWidget *parent) : QWidget(parent), ui(new Ui::Terminal) {
   p.setColor(QPalette::Text, Qt::green);
   setPalette(p);
   process = new QProcess;
-  process->start("bash");
+  process->start("bash", {}, QIODevice::ReadWrite);
   process->waitForStarted();
   connect(process, SIGNAL(readyReadStandardOutput()), this,
           SLOT(readStandardOutput()));

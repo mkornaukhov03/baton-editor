@@ -198,7 +198,7 @@ void Editor::keyPressEvent(QKeyEvent *e) {
 
   if (!completerSkip) {
     if (e->key() == Qt::Key_Tab && e->modifiers() == Qt::NoModifier) {
-      insertPlainText(m_tabReplace);
+      insertPlainText(tab_replace_);
       return;
     }
 
@@ -226,7 +226,7 @@ void Editor::keyPressEvent(QKeyEvent *e) {
 
     // Shortcut for moving line to left
     if (e->key() == Qt::Key_Backtab) {
-      indentationLevel = std::min(indentationLevel, m_tabReplace.size());
+      indentationLevel = std::min(indentationLevel, tab_replace_.size());
 
       auto cursor = textCursor();
 

@@ -64,7 +64,7 @@ class Editor : public QPlainTextEdit {
   QString textUnderCursor() const;
   int getIndentationSpaces() const;
 
-  QString m_tabReplace = "    ";
+  QString tab_replace_ = "    ";
   QChar charUnderCursor(int offset = 0) const;
   QString wordUnderCursor() const;
   bool procCompleterStart(QKeyEvent *e);
