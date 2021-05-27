@@ -39,14 +39,17 @@ Directory_tree::Directory_tree(QWidget *parent)
   }
 
   tree.setAnimated(false);
-  tree.setIndentation(20);
+
+  const int DEFAULT_IDENT = 20;
+  tree.setIndentation(DEFAULT_IDENT);
   tree.setSortingEnabled(true);
   const QSize availableSize = tree.screen()->availableGeometry().size();
   tree.resize(availableSize / 2);
   tree.setColumnWidth(0, tree.width() / 3);
-  tree.setColumnHidden(1, true);
-  tree.setColumnHidden(2, true);
-  tree.setColumnHidden(3, true);
+  const int MAX_COLUMN = 3;
+  for (int i = 1; i <= MAX_COLUMN; ++i) {
+    tree.setColumnHidden(i, true);
+  }
   // Make it flickable on touchscreens
   QScroller::grabGesture(&tree, QScroller::TouchGesture);
   ui->treeView->setModel(&model);
