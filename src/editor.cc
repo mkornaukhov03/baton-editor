@@ -82,20 +82,27 @@ int Editor::lineNumberAreaWidth() {
     ++digits;
   }
 
-  int space = 3 + fontMetrics().horizontalAdvance(QLatin1Char('9')) * digits;
+  const int INITIAL_WIDTH = 3;
+  int space = INITIAL_WIDTH +
+              fontMetrics().horizontalAdvance(QLatin1Char('9')) * digits;
 
   return space;
 }
 
 void Editor::updateLineNumberAreaWidth(int) {
-  setViewportMargins(lineNumberAreaWidth(), 0, 0, 0);
+  const int LEFT = 0;
+  const int RIGHT = 0;
+  const int BOTTOM = 0;
+  setViewportMargins(lineNumberAreaWidth(), LEFT, RIGHT, BOTTOM);
 }
 
 void Editor::updateLineNumberArea(const QRect &rect, int dy) {
+  const int DX = 0;
   if (dy)
-    lineNumberArea->scroll(0, dy);
+    lineNumberArea->scroll(DX, dy);
   else
-    lineNumberArea->update(0, rect.y(), lineNumberArea->width(), rect.height());
+    lineNumberArea->update(DX, rect.y(), lineNumberArea->width(),
+                           rect.height());
 
   if (rect.contains(viewport()->rect())) updateLineNumberAreaWidth(0);
 }
@@ -172,10 +179,13 @@ void Editor::procCompleterFinish(QKeyEvent *e) {
     return;
   }
 
+  const int ROW = 0;
+  const int COL = 0;
+
   if (completionPrefix != completer()->completionPrefix()) {
     completer()->setCompletionPrefix(completionPrefix);
     completer()->popup()->setCurrentIndex(
-        completer()->completionModel()->index(0, 0));
+        completer()->completionModel()->index(ROW, COL));
   }
 
   auto cursRect = cursorRect();
@@ -187,12 +197,8 @@ void Editor::procCompleterFinish(QKeyEvent *e) {
 }
 
 void Editor::keyPressEvent(QKeyEvent *e) {
-#if QT_VERSION >= 0x050A00
   const int defaultIndent =
       tabStopDistance() / fontMetrics().averageCharWidth();
-#else
-  const int defaultIndent = tabStopWidth() / fontMetrics().averageCharWidth();
-#endif
 
   auto completerSkip = procCompleterStart(e);
 
@@ -281,12 +287,14 @@ void Editor::highlightParenthesis(
     QChar activeSymbol;
     auto position = textCursor().position();
 
+    constexpr int RIGHT = 1;
+    constexpr int LEFT = -1;
     if (pair.first == currentSymbol) {
-      direction = 1;
+      direction = RIGHT;
       counterSymbol = pair.second[0];
       activeSymbol = currentSymbol;
     } else if (pair.second == prevSymbol) {
-      direction = -1;
+      direction = LEFT;
       counterSymbol = pair.first[0];
       activeSymbol = prevSymbol;
       position--;
@@ -330,15 +338,18 @@ void Editor::highlightParenthesis(
           directionEnum, QTextCursor::MoveMode::MoveAnchor,
           std::abs(textCursor().position() - position));
 
+      constexpr int MOVE_TIMES = 1;
+
       selection.cursor.movePosition(QTextCursor::MoveOperation::Right,
-                                    QTextCursor::MoveMode::KeepAnchor, 1);
+                                    QTextCursor::MoveMode::KeepAnchor,
+                                    MOVE_TIMES);
 
       extraSelection->append(selection);
 
       selection.cursor = textCursor();
       selection.cursor.clearSelection();
-      selection.cursor.movePosition(directionEnum,
-                                    QTextCursor::MoveMode::KeepAnchor, 1);
+      selection.cursor.movePosition(
+          directionEnum, QTextCursor::MoveMode::KeepAnchor, MOVE_TIMES);
 
       extraSelection->append(selection);
     }

@@ -24,7 +24,8 @@ Client::Client(const QString &path, const QStringList &args)
 
 Client::~Client() {
   if (process_) {
-    process_->waitForFinished(-1);
+    const int WAITING_TIME = -1;
+    process_->waitForFinished(WAITING_TIME);
   }
 }
 
@@ -35,8 +36,12 @@ void Client::SetConnections() {
           &Client::OnClientReadyReadStdout);
   connect(process_.get(), &QProcess::readyReadStandardError, this,
           &Client::OnClientReadyReadStderr);
-  connect(process_.get(), SIGNAL(finished(int, QProcess::ExitStatus)), this,
-          SLOT(OnClientFinished(int, QProcess::ExitStatus)));
+  connect(process_.get(),
+          QMetaObject::normalizedSignature(
+              SIGNAL(finished(int, QProcess::ExitStatus))),
+          this,
+          QMetaObject::normalizedSignature(
+              SLOT(OnClientFinished(int, QProcess::ExitStatus))));
 }
 
 // private slots

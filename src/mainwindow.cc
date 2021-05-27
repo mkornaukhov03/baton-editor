@@ -19,7 +19,13 @@
 #include "editor.h"
 #include "syntax_highlighter.h"
 #include "terminal.h"
+namespace {
 const int tabStop = 4;
+struct WidgetPlacer {
+  int row, col, row_span, col_span;
+};
+}  // namespace
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
       ui(new Ui::MainWindow),
@@ -50,17 +56,29 @@ MainWindow::MainWindow(QWidget *parent)
   central_widget = new QWidget();
   grid_layout = new QGridLayout(central_widget);
 
-  grid_layout->addWidget(&directory_tree.tree, 0, 0, 1, 2);
-  grid_layout->addWidget(display_failure_log, 1, 6, 3, 7);
-  grid_layout->addWidget(terminal, 1, 0, 3, 6);
-  grid_layout->setRowStretch(0, 4);
-  grid_layout->setRowStretch(1, 1);
+  WidgetPlacer dir_tr = {0, 0, 1, 2};
+  WidgetPlacer disp = {1, 6, 3, 7};
+  WidgetPlacer term = {1, 0, 3, 6};
+  grid_layout->addWidget(&directory_tree.tree, dir_tr.row, dir_tr.col,
+                         dir_tr.row_span, dir_tr.col_span);
+  grid_layout->addWidget(display_failure_log, disp.row, disp.col, disp.row_span,
+                         disp.col_span);
+  grid_layout->addWidget(terminal, term.row, term.col, term.row_span,
+                         term.col_span);
+
+  std::vector<int> stretch_for_col = {4, 1};
+  for (std::size_t i = 0; i < stretch_for_col.size(); ++i)
+    grid_layout->setRowStretch(i, stretch_for_col[i]);
 
   splitter = new QSplitter(centralWidget());
   splitter->addWidget(textEdit);
-  splitter->setStretchFactor(0, 0);
-  splitter->setStretchFactor(1, 10);
-  grid_layout->addWidget(splitter, 0, 2, 1, 11);
+  stretch_for_col = {0, 10};
+  for (std::size_t i = 0; i < stretch_for_col.size(); ++i)
+    splitter->setStretchFactor(i, stretch_for_col[i]);
+
+  WidgetPlacer splt = {0, 2, 1, 11};
+  grid_layout->addWidget(splitter, splt.row, splt.col, splt.row_span,
+                         splt.col_span);
   central_widget->setLayout(grid_layout);
   setCentralWidget(central_widget);
 
@@ -154,7 +172,10 @@ void MainWindow::split() {
     splittedTextEdit = new Editor(textEdit->fontSize);
     splittedTextEdit->setCompleter(completer);
     splitter->addWidget(splittedTextEdit);
-    splitter->setStretchFactor(2, 1);
+
+    const int IND = 2;
+    const int STRETCH_FACTOR = 1;
+    splitter->setStretchFactor(IND, STRETCH_FACTOR);
     fv_split = new FileView("lol.cpp", this);
 
     connect(splittedTextEdit, &Editor::changeContent, fv_split,
@@ -363,7 +384,8 @@ void MainWindow::loadFile(const QString &fileName) {
 #endif
 
   setCurrentFile(fileName, textEdit);
-  statusBar()->showMessage(tr("File loaded"), 2000);
+  const int TIME_OUT_MS = 2000;
+  statusBar()->showMessage(tr("File loaded"), TIME_OUT_MS);
   std::cerr << "FILENAME = " << fileName.toStdString() << std::endl;
 }
 

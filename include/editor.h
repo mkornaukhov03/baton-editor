@@ -23,11 +23,16 @@ class QMenu;
 QT_END_NAMESPACE
 class LineNumberArea;
 
+namespace {
+constexpr std::size_t DEFAULT_FONT_SIZE = 11;
+}
+
 class Editor : public QPlainTextEdit {
   Q_OBJECT
 
  public:
-  explicit Editor(std::size_t fontSize = 11, QWidget *parent = nullptr);
+  explicit Editor(std::size_t fontSize = DEFAULT_FONT_SIZE,
+                  QWidget *parent = nullptr);
 
   void lineNumberAreaPaintEvent(QPaintEvent *event);
   int lineNumberAreaWidth();
@@ -78,7 +83,8 @@ class LineNumberArea : public QWidget {
   explicit LineNumberArea(Editor *editor) : QWidget(editor), editor(editor) {}
 
   QSize sizeHint() const override {
-    return QSize(editor->lineNumberAreaWidth(), 0);
+    const int HEIGHT = 0;
+    return QSize(editor->lineNumberAreaWidth(), HEIGHT);
   }
 
  protected:

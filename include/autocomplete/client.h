@@ -14,7 +14,7 @@
 #include "string_view"
 
 namespace lsp {
-class Client : public QObject {
+class Client final : public QObject {
   Q_OBJECT
 
   using RequestType = std::string;
