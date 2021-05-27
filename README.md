@@ -19,5 +19,5 @@ root directory can also be changed
 ## Requirements:
 * Qt 5.15
 * Clangd
-
+* Ubuntu 20.04 or later
 ##
