@@ -24,7 +24,8 @@ Client::Client(const QString &path, const QStringList &args)
 
 Client::~Client() {
   if (process_) {
-    process_->kill();
+    //    process_->kill();
+    //    delete process_;
   }
 }
 

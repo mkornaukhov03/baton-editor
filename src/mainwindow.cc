@@ -26,9 +26,8 @@ MainWindow::MainWindow(QWidget *parent)
       textEdit(new Editor),
       //      splittedTextEdit(new Editor),
       terminal(new Terminal),
-      //      directory_tree(new Directory_tree),
       splitted(false),
-      lbl(new Suggest_label),
+      //      lbl(new Suggest_label),
       display_failure_log(new QPlainTextEdit),
       font(new QFont) {
   ui->setupUi(this);
@@ -49,7 +48,7 @@ MainWindow::MainWindow(QWidget *parent)
   //  Terminal *terminal = new Terminal;
   disp = new autocompleteDisplay(nullptr);
   //  disp->show();
-  fv = new FileView("kek.cpp", centralWidget());
+  //  fv = new FileView("kek.cpp", centralWidget());
   // Terminal *terminal = new Terminal;
   // lbl = new Suggest_label(nullptr);
   fv = new FileView("kek.cpp", this);
@@ -66,8 +65,7 @@ MainWindow::MainWindow(QWidget *parent)
   grid_layout = new QGridLayout(central_widget);
 
   //  grid_layout->addWidget(lbl, 1, 1, 1, 1);
-  grid_layout->addWidget(&directory_tree.tree, 0, 0, 1, 3);
-
+  grid_layout->addWidget(&directory_tree.tree, 0, 0, 1, 2);
   //  grid_layout->addWidget(textEdit, 0, 3);
   //  grid_layout->setColumnStretch(0, 2);
   //  grid_layout->setColumnStretch(3, 7);
@@ -83,7 +81,7 @@ MainWindow::MainWindow(QWidget *parent)
   splitter->addWidget(textEdit);
   splitter->setStretchFactor(0, 0);
   splitter->setStretchFactor(1, 10);
-  grid_layout->addWidget(splitter, 0, 3, 1, 10);
+  grid_layout->addWidget(splitter, 0, 2, 1, 11);
   central_widget->setLayout(grid_layout);
   setCentralWidget(central_widget);
   //  setCentralWidget(splitter);
@@ -180,6 +178,9 @@ void MainWindow::newFile() {
 void MainWindow::open() {
   if (maybeSave()) {
     QString fileName = QFileDialog::getOpenFileName(this);
+
+    //    if (.contains(QRegExp(".h|.c|.hpp|.cpp|.cc"))) {
+    //    }
     if (!fileName.isEmpty()) loadFile(fileName);
   }
 }
@@ -260,7 +261,8 @@ void MainWindow::split() {
         SLOT(display_failure(const std::vector<lsp::DiagnosticsResponse> &)));
     delete fv_split;
     splitted = false;
-    // std::swap(textEdit, splittedTextEdit);
+    //    std::swap(textEdit, splittedTextEdit);
+    //    std::swap(fv, fv_split);
     delete splitter->widget(1);
   }
 }
@@ -390,7 +392,7 @@ void MainWindow::createActions() {
   splitAct->setStatusTip("Split right");
   connect(splitAct, &QAction::triggered, this, &MainWindow::split);
   tb->addAction(splitAct);
-  tb->addWidget(lbl);
+  //  tb->addWidget(lbl);
 }
 
 MainWindow::~MainWindow() {
@@ -417,6 +419,16 @@ bool MainWindow::maybeSave() {
 }
 
 void MainWindow::loadFile(const QString &fileName) {
+  static QString good_suf[] = {".h", ".c", ".cpp", ".hpp", ".cc"};
+  if (std::none_of(
+          std::begin(good_suf), std::end(good_suf),
+          [&fileName](const auto &str) { return fileName.contains(str); })) {
+    std::cerr << "CONTAINS BAD SUFFIX" << std::endl;
+    fv->SetValidity(false);
+  } else {
+    fv->SetValidity(true);
+  }
+
   QFile file(fileName);
   if (!file.open(QFile::ReadOnly | QFile::Text)) {
     QMessageBox::warning(
@@ -436,6 +448,7 @@ void MainWindow::loadFile(const QString &fileName) {
 
   setCurrentFile(fileName, textEdit);
   statusBar()->showMessage(tr("File loaded"), 2000);
+  std::cerr << "FILENAME = " << fileName.toStdString() << std::endl;
 }
 
 void MainWindow::tree_clicked(const QModelIndex &index) {
@@ -541,7 +554,7 @@ void MainWindow::set_autocomplete_to_label(
   for (const auto &item : vec) {
     // std::cerr << item << '\n';
   }
-  lbl->setText(QString::fromStdString(vec[0]));
+  //  /*lbl*/->setText(QString::fromStdString(vec[0]));
 }
 
 void MainWindow::displayAutocompleteOptions(
