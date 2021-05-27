@@ -37,8 +37,6 @@ void Client::SetConnections() {
           &Client::OnClientReadyReadStderr);
   connect(process_.get(), SIGNAL(finished(int, QProcess::ExitStatus)), this,
           SLOT(OnClientFinished(int, QProcess::ExitStatus)));
-  //  connect(process_.get(), &QProcess::finished, this,
-  //  &Client::OnClientFinished);
 }
 
 // private slots
