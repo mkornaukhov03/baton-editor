@@ -99,7 +99,6 @@ void Client::OnClientReadyReadStdout() {
       }
     }
   } catch (...) {
-    std::cerr << "ASSERT IN JSON FAULT!\n";
   }
 }
 

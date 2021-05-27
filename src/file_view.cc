@@ -36,7 +36,6 @@ void FileView::UploadContent(const std::string& new_content) {
   if (!valid_cpp_) {
     return;
   }
-  std::cerr << new_content << std::endl;
   content_ = new_content;
   if (content_.back() != '\n') {
     content_ += '\n';
@@ -68,9 +67,7 @@ void FileView::ChangeCursor(int new_line, int new_col) {
                    next_char) != std::end(allowable_for_completion);
 
   completion_required_ = cond;
-  std::cerr << "COMPLETION REQUIRED: " << std::boolalpha << completion_required_
-            << std::endl
-            << content_ << std::endl;
+
   if (completion_required_) {
     handler_.RequestCompletion(carriage_line_, carriage_col_);
   }

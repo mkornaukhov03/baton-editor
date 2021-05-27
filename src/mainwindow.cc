@@ -57,7 +57,6 @@ MainWindow::MainWindow(QWidget *parent)
   central_widget = new QWidget();
   grid_layout = new QGridLayout(central_widget);
 
-
   WidgetPlacer dir_tr = {0, 0, 1, 2};
   WidgetPlacer disp = {1, 6, 3, 7};
   WidgetPlacer term = {1, 0, 3, 6};
@@ -105,12 +104,12 @@ MainWindow::MainWindow(QWidget *parent)
 
   connect(textEdit, &Editor::changeCursor, fv, &FileView::ChangeCursor);
 
-
   connect(fv, &FileView::DoneDiagnostic, this, &MainWindow::display_failure);
 
   connect(fv, &FileView::DoneCompletion, this,
           &MainWindow::displayAutocompleteOptions);
 
+  this->setWindowState(Qt::WindowMaximized);
   textEdit->setFocus();
 }
 
@@ -363,7 +362,6 @@ void MainWindow::loadFile(const QString &fileName) {
   if (std::none_of(
           std::begin(good_suf), std::end(good_suf),
           [&fileName](const auto &str) { return fileName.contains(str); })) {
-    std::cerr << "CONTAINS BAD SUFFIX" << std::endl;
     fv->SetValidity(false);
   } else {
     fv->SetValidity(true);
@@ -389,7 +387,6 @@ void MainWindow::loadFile(const QString &fileName) {
   setCurrentFile(fileName, textEdit);
   const int TIME_OUT_MS = 2000;
   statusBar()->showMessage(tr("File loaded"), TIME_OUT_MS);
-  std::cerr << "FILENAME = " << fileName.toStdString() << std::endl;
 }
 
 void MainWindow::tree_clicked(const QModelIndex &index) {
@@ -469,14 +466,12 @@ void MainWindow::showCursorPositionOnSplitted() {
 void MainWindow::displayAutocompleteOptions(
     const std::vector<std::string> &vec) {
   disp->clear();
-  std::cerr << "______AUTOCOMPLETE DISPLAY________" << std::endl;
   if (vec.size() == 0) return;
   QStringListModel *model =
       reinterpret_cast<QStringListModel *>(completer->model());
   QStringList stringList;
 
   for (const auto &item : vec) {
-    std::cerr << item << '\n';
     disp->appendText(item);
     stringList << QString::fromStdString(item);
   }
