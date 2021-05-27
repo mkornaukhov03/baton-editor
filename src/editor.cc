@@ -43,15 +43,14 @@ Editor::Editor(std::size_t fontSize, QWidget *parent)
   });
   connect(this, &Editor::textChanged, this, [&]() {
     emit changeContent(this->toPlainText().toUtf8().toStdString());
-
-    connect(this, &QPlainTextEdit::cursorPositionChanged, this,
-            &Editor::updateExtraSelection);
-    updateExtraSelection();
   });
 
+  updateExtraSelection();
   connect(this, &Editor::transferCompletion, this, &Editor::resolveCompletion);
-
+  connect(this, &QPlainTextEdit::cursorPositionChanged, this,
+          &Editor::updateExtraSelection);
   updateLineNumberAreaWidth(0);
+
   QFont font;
   font.setFamily("Courier");
   font.setFixedPitch(true);
