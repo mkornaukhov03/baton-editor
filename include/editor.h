@@ -60,11 +60,9 @@ class Editor : public QPlainTextEdit {
   Highlighter *highlighter;
   QWidget *lineNumberArea;
   QCompleter *c = nullptr;
+
   QString textUnderCursor() const;
   int getIndentationSpaces() const;
-  bool m_autoIndentation = true;
-  bool m_autoParentheses = true;
-  bool m_replaceTab = true;
 
   QString m_tabReplace = "    ";
   QChar charUnderCursor(int offset = 0) const;
