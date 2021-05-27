@@ -38,6 +38,10 @@ class Highlighter : public QSyntaxHighlighter {
   QTextCharFormat conditionalStatementsFormat;
   QTextCharFormat conditionalCyclesFormat;
   QTextCharFormat streamFormat;
+  QTextCharFormat includeFormat;
+  QTextCharFormat triangleBracketsFormat;
+  QTextCharFormat numberFormat;
+  QTextCharFormat defineFormat;
 };
 
 #endif  // SYNTAX_HIGHLIGHTER_H
