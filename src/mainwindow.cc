@@ -174,7 +174,8 @@ void MainWindow::split() {
         SIGNAL(DoneDiagnostic(const std::vector<lsp::DiagnosticsResponse> &)),
         this,
         SLOT(display_failure(const std::vector<lsp::DiagnosticsResponse> &)));
-    splittedTextEdit->setTabStopWidth(tabStop * metrics->width(' '));
+    splittedTextEdit->setTabStopDistance(tabStop *
+                                         metrics->horizontalAdvance(' '));
     connect(splittedTextEdit, SIGNAL(cursorPositionChanged()), this,
             SLOT(showCursorPositionOnSplitted()));
     splittedTextEdit->setFont(*font);

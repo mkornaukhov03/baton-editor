@@ -19,13 +19,12 @@ bool isLight(int r, int g, int b) {  // in hex
 Highlighter::Highlighter(QTextDocument *parent) : QSyntaxHighlighter(parent) {
   HighlightingRule rule;
 
-  QColor color = QPalette().color(QPalette::Window); /*name().toStdString();*/
+  QColor color = QPalette().color(QPalette::Window);
   int r, g, b;
   color.getRgb(&r, &g, &b);
   bool is_light = isLight(r, g, b);
 
   QColor keywordColor = is_light ? Qt::darkBlue : QColor("#63ceff");
-  QColor classColor = is_light ? Qt::darkMagenta : QColor("");
   QColor commentColor = is_light ? Qt::red : QColor("#ff4646");
   QColor quotationColor = is_light ? Qt::darkGreen : QColor("#76ff3d");
   QColor functionColor = is_light ? Qt::blue : QColor("#625df3");
