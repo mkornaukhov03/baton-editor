@@ -60,10 +60,6 @@ Editor::Editor(std::size_t fontSize, QWidget *parent)
 }
 
 void Editor::resolveCompletion(const std::string &compl_item) {
-  std::cerr << "SELECTION:\n"
-            << this->textCursor().selection().toPlainText().toStdString()
-            << std::endl;
-
   auto cursor = this->textCursor();
   cursor.movePosition(QTextCursor::PreviousWord, QTextCursor::KeepAnchor);
   cursor.removeSelectedText();
@@ -79,8 +75,6 @@ int Editor::lineNumberAreaWidth() {
     max /= 10;
     ++digits;
   }
-  std::cerr << "FONT METRIX: "
-            << fontMetrics().horizontalAdvance(QLatin1Char('9')) << '\n';
 
   const int INITIAL_WIDTH = 3;
   int space = INITIAL_WIDTH +
@@ -189,7 +183,6 @@ void Editor::procCompleterFinish(QKeyEvent *e) {
   cursRect.setWidth(
       completer()->popup()->sizeHintForColumn(0) +
       completer()->popup()->verticalScrollBar()->sizeHint().width());
-  std::cerr << "Completter triggered!!!!!!!!!!!!!!" << std::endl;
   completer()->complete(cursRect);
 }
 

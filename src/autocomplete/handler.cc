@@ -67,7 +67,7 @@ void LSPHandler::GetResponse(json id, json result) {
     if (resp.size() > MAX_COMPLETION_ITEMS) resp.clear();
     emit DoneCompletion(resp);
   } else {
-    std::cerr << "NOT COMPLETION!\n" << result << std::endl;
+    std::cerr << "Response from server: not a completion\n" << std::endl;
   }
 }
 
@@ -82,7 +82,7 @@ void LSPHandler::GetNotify(const std::string& id, json result) {
     }
     emit DoneDiagnostic(resp);
   } else {
-    std::cerr << "Notification from server: not a diagnostics!\n";
+    std::cerr << "Notification from server: not a diagnostics\n";
   }
 }
 
