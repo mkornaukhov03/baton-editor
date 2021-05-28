@@ -109,7 +109,6 @@ class MainWindow : public QMainWindow {
   lsp::LSPHandler *lsp_handler;
   QTimer *timer;
   FileView *fv = nullptr;
-  autocompleteDisplay *disp;
   QAbstractItemModel *model;
   QCompleter *completer = nullptr;
   QCompleter *splittedCompleter = nullptr;
