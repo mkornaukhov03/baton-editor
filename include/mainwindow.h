@@ -4,6 +4,8 @@
 #include <QAbstractItemModel>
 #include <QGridLayout>
 #include <QSplitter>
+#include <QTableView>
+#include <QTableWidget>
 #include <QTimer>
 #include <QtCore/QVariant>
 #include <QtWidgets/QApplication>
@@ -14,12 +16,11 @@
 #include <string>
 #include <vector>
 
-#include "autocomplete/interface.h"
+#include "autocomplete/handler.h"
 #include "autocompletedisplay.h"
 #include "directory_tree.h"
 #include "editor.h"
 #include "file_view.h"
-#include "suggest_label.h"
 #include "terminal.h"
 
 QT_BEGIN_NAMESPACE
@@ -60,7 +61,6 @@ class MainWindow : public QMainWindow {
   Q_OBJECT
 
  public:
-  //  MainWindow();
   explicit MainWindow(QWidget *parent = nullptr);
 
   void loadFile(const QString &fileName);
@@ -84,6 +84,7 @@ class MainWindow : public QMainWindow {
   void showCursorPosition();
   void showCursorPositionOnSplitted();
   void tree_clicked(const QModelIndex &index);
+  //  void switch_to_failure(const std::vector<lsp::DiagnosticsResponse> &resp);
 
  private:
   Ui::MainWindow *ui;
@@ -108,22 +109,18 @@ class MainWindow : public QMainWindow {
   Terminal *terminal;
   Directory_tree directory_tree;
   bool splitted;
-  // setting up autocomplete below
   lsp::LSPHandler *lsp_handler;
   QTimer *timer;
-  //  Suggest_label *lbl;
   FileView *fv = nullptr;
   autocompleteDisplay *disp;
   QAbstractItemModel *model;
   QCompleter *completer = nullptr;
   FileView *fv_split = nullptr;
+  // QTableWidget *display_failure_log;
   QPlainTextEdit *display_failure_log;
   QFont *font;
   QFontMetrics *metrics;
  private slots:
-  void update_autocomplete();
-  void set_autocomplete_to_label(const std::vector<std::string> &);
-  //  void display_diagnostics(const std::vector<lsp::DiagnosticsResponse> &);
   void displayAutocompleteOptions(const std::vector<std::string> &);
   void display_failure(const std::vector<lsp::DiagnosticsResponse> &);
 };
