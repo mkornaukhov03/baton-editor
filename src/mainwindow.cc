@@ -24,7 +24,7 @@ const int tabStop = 4;
 struct WidgetPlacer {
   int row, col, row_span, col_span;
 };
-void number_to_string(int number, std::string &failure_log) {
+std::string number_to_string(int number, std::string failure_log) {
   if (number % 10 == 1 && number % 100 != 11) {
     failure_log += "st";
   } else if (number % 10 == 2 && number % 100 != 12) {
@@ -34,6 +34,7 @@ void number_to_string(int number, std::string &failure_log) {
   } else {
     failure_log += "th";
   }
+  return failure_log;
 }
 }  // namespace
 
@@ -513,10 +514,10 @@ void MainWindow::display_failure(
     failure_log += msg;
     failure_log += " in the ";
     failure_log += std::to_string(range.start.line + 1);
-    number_to_string(range.start.line + 1, failure_log);
+    failure_log = number_to_string(range.start.line + 1, failure_log);
     failure_log += " line, ";
     failure_log += std::to_string(range.start.character + 1);
-    number_to_string(range.start.character + 1, failure_log);
+    failure_log = number_to_string(range.start.character + 1, failure_log);
     failure_log += " column\n";
   }
   display_failure_log->setPlainText(

@@ -16,7 +16,8 @@ Directory_tree::Directory_tree(QWidget *parent)
     : QWidget(parent), ui(new Ui::Directory_tree) {
   ui->setupUi(this);
   std::string user_name = getenv("USER");
-  std::string config_path = "/home/" + user_name + "/.batonrc";
+  const std::string CONFIG_FILE_NAME = ".batonrc";
+  std::string config_path = "/home/" + user_name + "/" + CONFIG_FILE_NAME;
   QFile file(QString::fromStdString(config_path));
   if (file.exists() &&
       file.open(QIODevice::ReadOnly | QIODevice::WriteOnly | QIODevice::Text)) {
@@ -37,15 +38,10 @@ Directory_tree::Directory_tree(QWidget *parent)
     QModelIndex rootIndex = model.index(QString::fromStdString(root_path));
     tree.setRootIndex(rootIndex);
   }
-
-  tree.setAnimated(false);
-
-  const int DEFAULT_IDENT = 20;
-  tree.setIndentation(DEFAULT_IDENT);
+  tree.setAnimated(true);
+  const int DEFAULT_INDENT = 20;
+  tree.setIndentation(DEFAULT_INDENT);
   tree.setSortingEnabled(true);
-  const QSize availableSize = tree.screen()->availableGeometry().size();
-  tree.resize(availableSize / 2);
-  tree.setColumnWidth(0, tree.width() / 3);
   const int MAX_COLUMN = 3;
   for (int i = 1; i <= MAX_COLUMN; ++i) {
     tree.setColumnHidden(i, true);
