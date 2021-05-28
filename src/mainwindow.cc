@@ -1,6 +1,5 @@
 #include "mainwindow.h"
 
-#include <handler.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -17,6 +16,7 @@
 
 #include "directory_tree.h"
 #include "editor.h"
+#include "handler.h"
 #include "syntax_highlighter.h"
 #include "terminal.h"
 namespace {
@@ -55,7 +55,7 @@ MainWindow::MainWindow(QWidget *parent)
   textEdit->setFont(*font);
   metrics = new QFontMetrics(*font);
   textEdit->setTabStopDistance(tabStop * metrics->horizontalAdvance(' '));
-  fv = new FileView("kek.cpp", this);
+  fv = new FileView("kek.cpp");
 
   createStatusBar();
   createActions();
@@ -202,7 +202,7 @@ void MainWindow::split() {
     const int IND = 2;
     const int STRETCH_FACTOR = 1;
     splitter->setStretchFactor(IND, STRETCH_FACTOR);
-    fv_split = new FileView("lol.cpp", this);
+    fv_split = new FileView("lol.cpp");
 
     connect(splittedTextEdit, &Editor::changeContent, fv_split,
             &FileView::UploadContent);
@@ -234,6 +234,7 @@ void MainWindow::split() {
                &MainWindow::display_failure);
 
     delete fv_split;
+    fv_split = nullptr;
     splitted = false;
     delete splitter->widget(1);
   }
@@ -361,7 +362,13 @@ void MainWindow::createActions() {
   tb->addAction(splitAct);
 }
 
-MainWindow::~MainWindow() { delete ui; }
+MainWindow::~MainWindow() {
+  delete ui;
+  delete fv;
+  delete fv_split;
+  delete terminal;
+  delete font;
+}
 
 bool MainWindow::maybeSave() {
   if (!textEdit->document()->isModified()) return true;
