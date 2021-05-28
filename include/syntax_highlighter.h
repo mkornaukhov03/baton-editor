@@ -25,7 +25,7 @@ class Highlighter : public QSyntaxHighlighter {
     QTextCharFormat format;
   };
   QVector<HighlightingRule> highlightingRules;
-
+  HighlightingRule rule;
   QRegularExpression commentStartExpression;
   QRegularExpression commentEndExpression;
 
@@ -42,6 +42,8 @@ class Highlighter : public QSyntaxHighlighter {
   QTextCharFormat triangleBracketsFormat;
   QTextCharFormat numberFormat;
   QTextCharFormat defineFormat;
+  void addRule(QTextCharFormat &format, QColor foreground, int font,
+               QRegularExpression pattern);
 };
 
 #endif  // SYNTAX_HIGHLIGHTER_H
