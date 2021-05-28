@@ -47,3 +47,4 @@ Design document: https://bit.ly/3alkddH
 ## Examples
 ![alt text](https://github.com/mkornaukhov03/baton-editor/blob/text-editor/images/example.gif "Demonstration")
 
+![alt text](https://github.com/mkornaukhov03/baton-editor/blob/text-editor/images/example-image.jpg "Screenshot")
