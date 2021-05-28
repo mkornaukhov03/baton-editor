@@ -1,6 +1,6 @@
 # Baton-editor
 
-Baton is a code editor for C++ programming language \
+Baton is a code editor for C++ 
 Design document: https://bit.ly/3alkddH
 
 ## Features:
