@@ -35,8 +35,5 @@ int main(int argv, char **args) {
   QApplication app(argv, args);
   MainWindow mainwindow;
   mainwindow.show();
-  mainwindow.resize(1600, 900);
-  //  Terminal term;
-  //  term.show();
   return app.exec();
 }
