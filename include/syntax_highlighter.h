@@ -42,7 +42,7 @@ class Highlighter : public QSyntaxHighlighter {
   QTextCharFormat triangleBracketsFormat;
   QTextCharFormat numberFormat;
   QTextCharFormat defineFormat;
-  void addRule(QTextCharFormat &format, QColor foreground, int font,
+  void addRule(QTextCharFormat *format, QColor foreground, int font,
                QRegularExpression pattern);
 };
 

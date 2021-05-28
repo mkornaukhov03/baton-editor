@@ -154,32 +154,32 @@ Highlighter::Highlighter(QTextDocument *parent) : QSyntaxHighlighter(parent) {
     highlightingRules.append(rule);
   }
   multiLineCommentFormat.setForeground(commentColor);
-  addRule(functionFormat, functionColor, boldFont,
+  addRule(&functionFormat, functionColor, boldFont,
           QRegularExpression(QStringLiteral("\\b[A-Za-z0-9_]+(?=\\()")));
-  addRule(returnFormat, returnColor, normalFont,
+  addRule(&returnFormat, returnColor, normalFont,
           QRegularExpression(QStringLiteral("\\breturn\\b")));
-  addRule(conditionalStatementsFormat, condCycleColor, boldFont,
+  addRule(&conditionalStatementsFormat, condCycleColor, boldFont,
           QRegularExpression(QStringLiteral("\\b(if|else)\\b")));
-  addRule(conditionalCyclesFormat, condCycleColor, boldFont,
+  addRule(&conditionalCyclesFormat, condCycleColor, boldFont,
           QRegularExpression(QStringLiteral("\\b(while|for|switch|case)\\b")));
-  addRule(includeFormat, streamColor, normalFont,
+  addRule(&includeFormat, streamColor, normalFont,
           QRegularExpression(QStringLiteral("#include")));
-  addRule(defineFormat, streamColor, normalFont,
+  addRule(&defineFormat, streamColor, normalFont,
           QRegularExpression(QStringLiteral("#define")));
-  addRule(numberFormat, functionColor, normalFont,
+  addRule(&numberFormat, functionColor, normalFont,
           QRegularExpression(QStringLiteral("\\b[0-9]*\\b")));
-  addRule(triangleBracketsFormat, streamColor, normalFont,
+  addRule(&triangleBracketsFormat, streamColor, normalFont,
           QRegularExpression(QStringLiteral("<.*>")));
   addRule(
-      streamFormat, streamColor, boldFont,
+      &streamFormat, streamColor, boldFont,
       QRegularExpression(QStringLiteral(
           "\\b(std::stringstream|stringstream|std::cerr|std::cout|cerr|cout|"
           "cin|"
           "std::cin|ifstream|std::ifstream|istream|std::istream|ostream|std::"
           "ostream|ofstream|std::ofstream|printf|scanf|fprintf|fscanf)\\b")));
-  addRule(singleLineCommentFormat, commentColor, normalFont,
+  addRule(&singleLineCommentFormat, commentColor, normalFont,
           QRegularExpression(QStringLiteral("//[^\n]*")));
-  addRule(quotationFormat, quotationColor, normalFont,
+  addRule(&quotationFormat, quotationColor, normalFont,
           QRegularExpression(QStringLiteral("\".*\"")));
   commentStartExpression = QRegularExpression(QStringLiteral("/\\*"));
   commentEndExpression = QRegularExpression(QStringLiteral("\\*/"));
@@ -217,11 +217,11 @@ void Highlighter::highlightBlock(const QString &text) {
   }
 }
 
-void Highlighter::addRule(QTextCharFormat &format, QColor foreground, int font,
+void Highlighter::addRule(QTextCharFormat *format, QColor foreground, int font,
                           QRegularExpression pattern) {
-  format.setForeground(foreground);
-  format.setFontWeight(font);
+  format->setForeground(foreground);
+  format->setFontWeight(font);
   rule.pattern = pattern;
-  rule.format = format;
+  rule.format = *format;
   highlightingRules.append(rule);
 }
