@@ -24,6 +24,17 @@ const int tabStop = 4;
 struct WidgetPlacer {
   int row, col, row_span, col_span;
 };
+void number_to_string(int number, std::string &failure_log) {
+  if (number % 10 == 1 && number % 100 != 11) {
+    failure_log += "st";
+  } else if (number % 10 == 2 && number % 100 != 12) {
+    failure_log += "nd";
+  } else if (number % 10 == 3 && number % 100 != 13) {
+    failure_log += "rd";
+  } else {
+    failure_log += "th";
+  }
+}
 }  // namespace
 
 MainWindow::MainWindow(QWidget *parent)
@@ -502,25 +513,11 @@ void MainWindow::display_failure(
     failure_log += msg;
     failure_log += " in the ";
     failure_log += std::to_string(range.start.line + 1);
-    if (range.start.line + 1 == 1) {
-      failure_log += "st line, ";
-    } else if (range.start.line + 1 == 2) {
-      failure_log += "nd line, ";
-    } else if (range.start.line + 1 == 3) {
-      failure_log += "rd line, ";
-    } else {
-      failure_log += "th line, ";
-    }
+    number_to_string(range.start.line + 1, failure_log);
+    failure_log += " line, ";
     failure_log += std::to_string(range.start.character + 1);
-    if (range.start.character + 1 == 1) {
-      failure_log += "st column\n";
-    } else if (range.start.character + 1 == 2) {
-      failure_log += "nd column\n";
-    } else if (range.start.character + 1 == 3) {
-      failure_log += "rd column\n";
-    } else {
-      failure_log += "th column\n";
-    }
+    number_to_string(range.start.character + 1, failure_log);
+    failure_log += " column\n";
   }
   display_failure_log->setPlainText(
       QString::fromStdString(std::string(failure_log)));
