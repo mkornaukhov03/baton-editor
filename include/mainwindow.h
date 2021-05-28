@@ -119,6 +119,7 @@ class MainWindow : public QMainWindow {
   QFontMetrics *metrics;
  private slots:
   void displayAutocompleteOptions(const std::vector<std::string> &);
+  void displayAutocompleteOptionsSplit(const std::vector<std::string> &);
   void display_failure(const std::vector<lsp::DiagnosticsResponse> &);
 };
 #endif  // MAINWINDOW_H
