@@ -14,8 +14,11 @@
 
 #include "syntax_highlighter.h"
 namespace {
+
+using ParenthesesType = QVector<QPair<QString, QString>>;
+
 static const auto &parentheses() {
-  static QVector<QPair<QString, QString>> p = {
+  static ParenthesesType p = {
       {"(", ")"}, {"{", "}"}, {"[", "]"}, {"\"", "\""}, {"'", "'"}};
   return p;
 }

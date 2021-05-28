@@ -49,7 +49,6 @@ void FileView::ChangeCursor(int new_line, int new_col) {
   }
   carriage_line_ = new_line;
   carriage_col_ = new_col;
-  [[maybe_unused]] bool cond = true;
 
   // searching for next charachter after cursor
   auto it = content_.begin();
@@ -62,11 +61,10 @@ void FileView::ChangeCursor(int new_line, int new_col) {
 
   static char allowable_for_completion[] = {'\n', '\0', '\t', ' ', '}', ')'};
 
-  cond = std::find(std::begin(allowable_for_completion),
-                   std::end(allowable_for_completion),
-                   next_char) != std::end(allowable_for_completion);
-
-  completion_required_ = cond;
+  completion_required_ =
+      std::find(std::begin(allowable_for_completion),
+                std::end(allowable_for_completion),
+                next_char) != std::end(allowable_for_completion);
 
   if (completion_required_) {
     handler_.RequestCompletion(carriage_line_, carriage_col_);
