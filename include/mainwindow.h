@@ -15,7 +15,6 @@
 #include <vector>
 
 #include "autocomplete/handler.h"
-#include "autocompletedisplay.h"
 #include "directory_tree.h"
 #include "editor.h"
 #include "file_view.h"
