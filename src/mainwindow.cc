@@ -43,7 +43,6 @@ MainWindow::MainWindow(QWidget *parent)
   textEdit->setFont(*font);
   metrics = new QFontMetrics(*font);
   textEdit->setTabStopDistance(tabStop * metrics->horizontalAdvance(' '));
-  disp = new autocompleteDisplay(nullptr);
   fv = new FileView("kek.cpp", this);
 
   createStatusBar();
@@ -200,7 +199,7 @@ void MainWindow::split() {
             &FileView::ChangeCursor);
 
     connect(fv_split, &FileView::DoneCompletion, this,
-            &MainWindow::displayAutocompleteOptions);
+            &MainWindow::displayAutocompleteOptionsSplit);
 
     connect(fv_split, &FileView::DoneDiagnostic, this,
             &MainWindow::display_failure);
@@ -478,14 +477,25 @@ void MainWindow::showCursorPositionOnSplitted() {
 
 void MainWindow::displayAutocompleteOptions(
     const std::vector<std::string> &vec) {
-  disp->clear();
   if (vec.size() == 0) return;
   QStringListModel *model =
       reinterpret_cast<QStringListModel *>(completer->model());
   QStringList stringList;
 
   for (const auto &item : vec) {
-    disp->appendText(item);
+    stringList << QString::fromStdString(item);
+  }
+  model->setStringList(stringList);
+}
+
+void MainWindow::displayAutocompleteOptionsSplit(
+    const std::vector<std::string> &vec) {
+  if (vec.size() == 0) return;
+  QStringListModel *model =
+      reinterpret_cast<QStringListModel *>(splittedCompleter->model());
+  QStringList stringList;
+
+  for (const auto &item : vec) {
     stringList << QString::fromStdString(item);
   }
   model->setStringList(stringList);

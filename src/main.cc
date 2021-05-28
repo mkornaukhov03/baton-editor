@@ -26,7 +26,6 @@ SOFTWARE.
 #include <QDesktopWidget>
 #include <QStyle>
 
-#include "autocompletedisplay.h"
 #include "editor.h"
 #include "mainwindow.h"
 #include "terminal.h"

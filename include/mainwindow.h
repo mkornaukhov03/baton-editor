@@ -15,7 +15,6 @@
 #include <vector>
 
 #include "autocomplete/handler.h"
-#include "autocompletedisplay.h"
 #include "directory_tree.h"
 #include "editor.h"
 #include "file_view.h"
@@ -109,7 +108,6 @@ class MainWindow : public QMainWindow {
   lsp::LSPHandler *lsp_handler;
   QTimer *timer;
   FileView *fv = nullptr;
-  autocompleteDisplay *disp;
   QAbstractItemModel *model;
   QCompleter *completer = nullptr;
   QCompleter *splittedCompleter = nullptr;
@@ -119,6 +117,7 @@ class MainWindow : public QMainWindow {
   QFontMetrics *metrics;
  private slots:
   void displayAutocompleteOptions(const std::vector<std::string> &);
+  void displayAutocompleteOptionsSplit(const std::vector<std::string> &);
   void display_failure(const std::vector<lsp::DiagnosticsResponse> &);
 };
 #endif  // MAINWINDOW_H
