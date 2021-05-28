@@ -14,6 +14,15 @@ bool isLight(int r, int g, int b) {
   return brightness > (255.0 / 2);
 }
 
+// Custom colors
+
+const auto LIGHT_BLUE = QColor(99, 206, 255);
+const auto BRIGHT_RED = QColor(255, 70, 70);     // bright red;
+const auto BRIGHT_GREEN = QColor(118, 255, 61);  // bright green
+const auto BRIGHT_BLUE = QColor(98, 93, 243);    // bright blue
+const auto ORANGE = QColor(255, 166, 2);         // orange
+const auto BRIGHT_PINK = QColor(255, 109, 246);
+const auto LIGHT_PINK = QColor(244, 187, 255);
 }  // namespace
 
 Highlighter::Highlighter(QTextDocument *parent) : QSyntaxHighlighter(parent) {
@@ -24,19 +33,14 @@ Highlighter::Highlighter(QTextDocument *parent) : QSyntaxHighlighter(parent) {
   color.getRgb(&r, &g, &b);
   bool is_light = isLight(r, g, b);
 
-  QColor keywordColor =
-      is_light ? Qt::darkBlue : QColor(99, 206, 255);              // light blue
-  QColor commentColor = is_light ? Qt::red : QColor(255, 70, 70);  // bright red
-  QColor quotationColor =
-      is_light ? Qt::darkGreen : QColor(118, 255, 61);  // bright green
-  QColor functionColor =
-      is_light ? Qt::blue : QColor(98, 93, 243);  // bright blue
-  QColor returnColor =
-      is_light ? Qt::darkMagenta : QColor(255, 166, 2);  // orange
-  QColor condCycleColor =
-      is_light ? Qt::magenta : QColor(255, 109, 246);  // bright pink
+  QColor keywordColor = is_light ? Qt::darkBlue : LIGHT_BLUE;  // light blue
+  QColor commentColor = is_light ? Qt::red : BRIGHT_RED;
+  QColor quotationColor = is_light ? Qt::darkGreen : BRIGHT_GREEN;
+  QColor functionColor = is_light ? Qt::blue : BRIGHT_BLUE;      // bright blue
+  QColor returnColor = is_light ? Qt::darkMagenta : ORANGE;      // orange
+  QColor condCycleColor = is_light ? Qt::magenta : BRIGHT_PINK;  // bright pink
   QColor streamColor =
-      is_light ? Qt::darkGreen : QColor(244, 187, 255);  // very bright pink
+      is_light ? Qt::darkGreen : LIGHT_PINK;  // very bright pink
 
   keywordFormat.setForeground(keywordColor);
   keywordFormat.setFontWeight(QFont::Bold);
@@ -105,13 +109,6 @@ Highlighter::Highlighter(QTextDocument *parent) : QSyntaxHighlighter(parent) {
       QStringLiteral("\\bchar32_t\\b"),
       QStringLiteral("\\bchar16_t\\b"),
       QStringLiteral("\\breturn\\b"),
-      QStringLiteral("\\bif\\b"),
-      QStringLiteral("\\belse\\b"),
-      QStringLiteral("\\binclude\\b"),
-      QStringLiteral("\\bfor\\b"),
-      QStringLiteral("\\bcwhile\\b"),
-      QStringLiteral("\\bswitch\\b"),
-      QStringLiteral("\\bcase\\b"),
       QStringLiteral("\\bstd::stringstream\\b"),
       QStringLiteral("\\bstringstream\\b"),
       QStringLiteral("\\bstd::cerr\\b"),
@@ -145,24 +142,14 @@ Highlighter::Highlighter(QTextDocument *parent) : QSyntaxHighlighter(parent) {
       QStringLiteral("\\bauto\\b"),
       QStringLiteral("\\bdecltype\\b"),
       QStringLiteral("\\btemplate\\b"),
-      QStringLiteral("\\bsizeof...\\b"),
-      QStringLiteral("\\bsize\\b")};
+      QStringLiteral("\\bsizeof\\b"),
+      QStringLiteral("\\bsize\\b"),
+      QStringLiteral("\\b.*::")};
   for (const QString &pattern : keywordPatterns) {
     rule.pattern = QRegularExpression(pattern);
     rule.format = keywordFormat;
     highlightingRules.append(rule);
   }
-
-  singleLineCommentFormat.setForeground(commentColor);
-  rule.pattern = QRegularExpression(QStringLiteral("//[^\n]*"));
-  rule.format = singleLineCommentFormat;
-  highlightingRules.append(rule);
-
-  multiLineCommentFormat.setForeground(commentColor);
-  quotationFormat.setForeground(quotationColor);
-  rule.pattern = QRegularExpression(QStringLiteral("\".*\""));
-  rule.format = quotationFormat;
-  highlightingRules.append(rule);
 
   functionFormat.setForeground(functionColor);
   functionFormat.setFontWeight(QFont::Bold);
@@ -188,6 +175,26 @@ Highlighter::Highlighter(QTextDocument *parent) : QSyntaxHighlighter(parent) {
   rule.format = conditionalCyclesFormat;
   highlightingRules.append(rule);
 
+  includeFormat.setForeground(streamColor);
+  rule.pattern = QRegularExpression(QStringLiteral("#include"));
+  rule.format = includeFormat;
+  highlightingRules.append(rule);
+
+  defineFormat.setForeground(streamColor);
+  rule.pattern = QRegularExpression(QStringLiteral("#define"));
+  rule.format = defineFormat;
+  highlightingRules.append(rule);
+
+  numberFormat.setForeground(functionColor);
+  rule.pattern = QRegularExpression(QStringLiteral("\\b[0-9]*\\b"));
+  rule.format = numberFormat;
+  highlightingRules.append(rule);
+
+  triangleBracketsFormat.setForeground(streamColor);
+  rule.pattern = QRegularExpression(QStringLiteral("<.*>"));
+  rule.format = triangleBracketsFormat;
+  highlightingRules.append(rule);
+
   streamFormat.setForeground(streamColor);
   streamFormat.setFontWeight(QFont::Bold);
   rule.pattern = QRegularExpression(QStringLiteral(
@@ -195,6 +202,17 @@ Highlighter::Highlighter(QTextDocument *parent) : QSyntaxHighlighter(parent) {
       "std::cin|ifstream|std::ifstream|istream|std::istream|ostream|std::"
       "ostream|ofstream|std::ofstream|printf|scanf|fprintf|fscanf)\\b"));
   rule.format = streamFormat;
+  highlightingRules.append(rule);
+
+  singleLineCommentFormat.setForeground(commentColor);
+  rule.pattern = QRegularExpression(QStringLiteral("//[^\n]*"));
+  rule.format = singleLineCommentFormat;
+  highlightingRules.append(rule);
+
+  multiLineCommentFormat.setForeground(commentColor);
+  quotationFormat.setForeground(quotationColor);
+  rule.pattern = QRegularExpression(QStringLiteral("\".*\""));
+  rule.format = quotationFormat;
   highlightingRules.append(rule);
 
   commentStartExpression = QRegularExpression(QStringLiteral("/\\*"));
