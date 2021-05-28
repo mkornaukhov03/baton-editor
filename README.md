@@ -44,5 +44,6 @@ Design document: https://bit.ly/3alkddH
    ./baton
    ```
    
-## Example
-![alt text](/home/andrey/Downloads/example.gif "Demonstration")
+## Examples
+![alt text](https://github.com/mkornaukhov03/baton-editor/blob/text-editor/images/example.gif "Demonstration")
+
