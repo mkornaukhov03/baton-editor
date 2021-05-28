@@ -8,6 +8,7 @@
 #include <string>
 
 namespace {
+
 // http://alienryderflex.com/hsp.html <-- here is explanation of constants
 bool isLight(int r, int g, int b) {
   double brightness = std::sqrt(0.299 * r * r + 0.587 * g * g + 0.114 * b * b);
@@ -15,7 +16,8 @@ bool isLight(int r, int g, int b) {
 }
 
 // Custom colors
-
+const int boldFont = 75;
+const int normalFont = 50;
 const auto LIGHT_BLUE = QColor(99, 206, 255);
 const auto BRIGHT_RED = QColor(255, 70, 70);     // bright red;
 const auto BRIGHT_GREEN = QColor(118, 255, 61);  // bright green
@@ -23,10 +25,11 @@ const auto BRIGHT_BLUE = QColor(98, 93, 243);    // bright blue
 const auto ORANGE = QColor(255, 166, 2);         // orange
 const auto BRIGHT_PINK = QColor(255, 109, 246);
 const auto LIGHT_PINK = QColor(244, 187, 255);
+
 }  // namespace
 
 Highlighter::Highlighter(QTextDocument *parent) : QSyntaxHighlighter(parent) {
-  HighlightingRule rule;
+  //  HighlightingRule rule;
 
   QColor color = QPalette().color(QPalette::Window);
   int r, g, b;
@@ -150,71 +153,34 @@ Highlighter::Highlighter(QTextDocument *parent) : QSyntaxHighlighter(parent) {
     rule.format = keywordFormat;
     highlightingRules.append(rule);
   }
-
-  functionFormat.setForeground(functionColor);
-  functionFormat.setFontWeight(QFont::Bold);
-  rule.pattern = QRegularExpression(QStringLiteral("\\b[A-Za-z0-9_]+(?=\\()"));
-  rule.format = functionFormat;
-  highlightingRules.append(rule);
-
-  returnFormat.setForeground(returnColor);
-  rule.pattern = QRegularExpression(QStringLiteral("\\breturn\\b"));
-  rule.format = returnFormat;
-  highlightingRules.append(rule);
-
-  conditionalStatementsFormat.setForeground(condCycleColor);
-  conditionalStatementsFormat.setFontWeight(QFont::Bold);
-  rule.pattern = QRegularExpression(QStringLiteral("\\b(if|else)\\b"));
-  rule.format = conditionalStatementsFormat;
-  highlightingRules.append(rule);
-
-  conditionalCyclesFormat.setForeground(condCycleColor);
-  conditionalCyclesFormat.setFontWeight(QFont::Bold);
-  rule.pattern =
-      QRegularExpression(QStringLiteral("\\b(while|for|switch|case)\\b"));
-  rule.format = conditionalCyclesFormat;
-  highlightingRules.append(rule);
-
-  includeFormat.setForeground(streamColor);
-  rule.pattern = QRegularExpression(QStringLiteral("#include"));
-  rule.format = includeFormat;
-  highlightingRules.append(rule);
-
-  defineFormat.setForeground(streamColor);
-  rule.pattern = QRegularExpression(QStringLiteral("#define"));
-  rule.format = defineFormat;
-  highlightingRules.append(rule);
-
-  numberFormat.setForeground(functionColor);
-  rule.pattern = QRegularExpression(QStringLiteral("\\b[0-9]*\\b"));
-  rule.format = numberFormat;
-  highlightingRules.append(rule);
-
-  triangleBracketsFormat.setForeground(streamColor);
-  rule.pattern = QRegularExpression(QStringLiteral("<.*>"));
-  rule.format = triangleBracketsFormat;
-  highlightingRules.append(rule);
-
-  streamFormat.setForeground(streamColor);
-  streamFormat.setFontWeight(QFont::Bold);
-  rule.pattern = QRegularExpression(QStringLiteral(
-      "\\b(std::stringstream|stringstream|std::cerr|std::cout|cerr|cout|cin|"
-      "std::cin|ifstream|std::ifstream|istream|std::istream|ostream|std::"
-      "ostream|ofstream|std::ofstream|printf|scanf|fprintf|fscanf)\\b"));
-  rule.format = streamFormat;
-  highlightingRules.append(rule);
-
-  singleLineCommentFormat.setForeground(commentColor);
-  rule.pattern = QRegularExpression(QStringLiteral("//[^\n]*"));
-  rule.format = singleLineCommentFormat;
-  highlightingRules.append(rule);
-
   multiLineCommentFormat.setForeground(commentColor);
-  quotationFormat.setForeground(quotationColor);
-  rule.pattern = QRegularExpression(QStringLiteral("\".*\""));
-  rule.format = quotationFormat;
-  highlightingRules.append(rule);
-
+  addRule(&functionFormat, functionColor, boldFont,
+          QRegularExpression(QStringLiteral("\\b[A-Za-z0-9_]+(?=\\()")));
+  addRule(&returnFormat, returnColor, normalFont,
+          QRegularExpression(QStringLiteral("\\breturn\\b")));
+  addRule(&conditionalStatementsFormat, condCycleColor, boldFont,
+          QRegularExpression(QStringLiteral("\\b(if|else)\\b")));
+  addRule(&conditionalCyclesFormat, condCycleColor, boldFont,
+          QRegularExpression(QStringLiteral("\\b(while|for|switch|case)\\b")));
+  addRule(&includeFormat, streamColor, normalFont,
+          QRegularExpression(QStringLiteral("#include")));
+  addRule(&defineFormat, streamColor, normalFont,
+          QRegularExpression(QStringLiteral("#define")));
+  addRule(&numberFormat, functionColor, normalFont,
+          QRegularExpression(QStringLiteral("\\b[0-9]*\\b")));
+  addRule(&triangleBracketsFormat, streamColor, normalFont,
+          QRegularExpression(QStringLiteral("<.*>")));
+  addRule(
+      &streamFormat, streamColor, boldFont,
+      QRegularExpression(QStringLiteral(
+          "\\b(std::stringstream|stringstream|std::cerr|std::cout|cerr|cout|"
+          "cin|"
+          "std::cin|ifstream|std::ifstream|istream|std::istream|ostream|std::"
+          "ostream|ofstream|std::ofstream|printf|scanf|fprintf|fscanf)\\b")));
+  addRule(&singleLineCommentFormat, commentColor, normalFont,
+          QRegularExpression(QStringLiteral("//[^\n]*")));
+  addRule(&quotationFormat, quotationColor, normalFont,
+          QRegularExpression(QStringLiteral("\".*\"")));
   commentStartExpression = QRegularExpression(QStringLiteral("/\\*"));
   commentEndExpression = QRegularExpression(QStringLiteral("\\*/"));
 }
@@ -249,4 +215,13 @@ void Highlighter::highlightBlock(const QString &text) {
     startIndex =
         text.indexOf(commentStartExpression, startIndex + commentLength);
   }
+}
+
+void Highlighter::addRule(QTextCharFormat *format, QColor foreground, int font,
+                          QRegularExpression pattern) {
+  format->setForeground(foreground);
+  format->setFontWeight(font);
+  rule.pattern = pattern;
+  rule.format = *format;
+  highlightingRules.append(rule);
 }
