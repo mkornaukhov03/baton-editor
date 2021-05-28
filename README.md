@@ -13,7 +13,7 @@ Design document: https://bit.ly/3alkddH
   completion
 * Command window: make possible to invoke commands within Baton-editor
 * Diagnostic report window: provides diagnostic information to find and fix bugs and misspellings
-* Auto highlighting adjustment: syntax highlighting adjusts system theme coloring
+* Auto highlighting adjustment: syntax highlighting adjusts to system theme coloring
 * User-friendly builtin directory tree: allows developer to view current directory and switch files with few clicks,
   root directory can also be changed in the menu
 * Hotkeys for basic operations
